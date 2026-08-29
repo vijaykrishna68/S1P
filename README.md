@@ -1,0 +1,280 @@
+# Sacrifice One Pizza
+
+A single-page charity website built to demonstrate production-quality frontend
+engineering: a hand-rolled signature SVG/CSS animation, a real multi-step
+donation flow with an explicit state architecture, and accessibility work that
+was verified by testing, not assumed.
+
+The premise: what you'd spend on one pizza (₹300–₹3000) can instead fund
+someone's education, food, or essential needs.
+
+**Live site:** _add the deployed URL here once available_
+
+---
+
+## Problem
+
+Most "donate here" flows are either a single overloaded form, or a payment
+button that hands the donor off to a third-party checkout with no confirmation
+step. For a UPI-based charity site with no payment gateway integration, the
+honest version of this problem is: show the donor exactly how to pay (QR + UPI
+ID), let them pay in their own UPI app, and then collect proof of that payment
+— without ever implying the site can verify a bank transfer it has no access
+to.
+
+## Product
+
+Sacrifice One Pizza is a donation-first landing page: hero → why it matters →
+impact numbers → the donation flow itself → social proof → FAQ. The entire
+page is built around getting a visitor from "interesting idea" to a completed
+UPI donation in under a minute, without guilt-based messaging or poverty
+imagery.
+
+## Key Features
+
+- A custom signature hero animation ("The Gathering Point") — small
+  contributions visually joining a collective whole, built entirely in SVG +
+  CSS keyframes.
+- A 4-step donation flow (amount → payment → confirmation → success) with
+  live amount validation, a client-generated UPI QR code, a full screenshot
+  uploader state machine, and inline form validation.
+- An editorial testimonial crossfade (not a carousel).
+- A keyboard- and screen-reader-tested experience, including focus management
+  across every donation-flow state change.
+- Full `prefers-reduced-motion` support across every animated surface.
+
+## UX Flow
+
+```
+Donate One Pizza
+      ↓
+Enter amount (₹300–₹3000, live-validated)
+      ↓
+Scan QR / copy UPI ID  →  pay in any UPI app
+      ↓
+"I've Paid"
+      ↓
+Confirmation form (name, address, amount paid, payment screenshot)
+      ↓
+Submit
+      ↓
+Success
+```
+
+The site never claims to verify the UPI transaction automatically — the
+uploaded screenshot is explicitly the donor's proof of payment, reviewed by a
+human on the other end (once a real backend exists; see
+[Future Improvements](#future-improvements)).
+
+## Technical Architecture
+
+```
+src/
+  components/
+    layout/        Footer (the page shell itself is App.tsx)
+    navigation/     Header, scroll-aware surface, mobile menu
+    hero/           Hero section + the signature animation
+    mission/        "Why One Pizza Matters"
+    impact/         Impact stats + count-up hook
+    donation/       The donation flow (see below)
+      steps/        One component per step of the flow
+    testimonials/   Editorial crossfade
+    faq/            Accordion
+    ui/             Small reusable primitives (Button, Container, TextLink,
+                     useScrollReveal, useAutoFocus)
+  styles/           Tailwind entry, design tokens, shared entrance utilities
+  App.tsx           Composes every section in page order
+```
+
+**Donation state** is two small, separate reducers rather than one large one:
+
+- `donationReducer` — which of the 4 screens is showing (`amount` → `payment`
+  → `confirmation` → `success`). Changes a handful of times per donation.
+- `confirmationFormReducer` — the confirmation form's own fields, validation
+  errors, and submission status (`idle` → `submitting` → `error`). Changes on
+  every keystroke.
+- `useScreenshotUpload` — a third, independent state machine for the
+  upload lifecycle (`empty` → `uploading` → `uploaded`, with `invalid`/`error`
+  branches), since it doesn't map onto either of the above.
+
+They're split because they change for different reasons at different rates —
+merging them would mean every keystroke in the form re-evaluates step-
+transition logic that has nothing to do with typing. See `CLAUDE.md` for the
+full reasoning.
+
+**Backend boundary:** `src/components/donation/donationService.ts` exports one
+function, `submitDonation(submission): Promise<void>`. That signature is the
+entire contract every component depends on — nothing above it knows the
+current implementation is a mocked delay. See
+[Future Improvements](#future-improvements) for what a real backend behind
+this function would need to accept and return.
+
+## Design Decisions
+
+- **No animation library, anywhere.** Every interaction — including the hero
+  — is CSS keyframes/transitions or a handful of `IntersectionObserver`-driven
+  hooks. The one deliberate exception is `useCountUp`'s single finite
+  `requestAnimationFrame` count, cleaned up on completion.
+- **No preset donation amounts.** The donor types their own amount; the QR
+  code is generated client-side with that exact amount pre-filled into the
+  UPI deep link.
+- **No card grids, no decorative eyebrows/badges/pills.** Visual hierarchy
+  comes from typography, spacing, and one signature animation — not
+  decoration layered on top.
+- **Testimonials and FAQ use the exact content confirmed in the product
+  spec**, with testimonial placeholders clearly flagged as such (see the
+  [Content Checklist](#content-checklist-before-real-launch) below).
+
+## Performance
+
+Production build (see [Deployment](#deployment) for how to reproduce):
+
+| Asset | Raw     | Gzip   |
+| ----- | ------- | ------ |
+| JS    | ~272 KB | ~83 KB |
+| CSS   | ~52 KB  | ~15 KB |
+
+- Hero animation: `transform`/`opacity` only, CSS keyframes, no
+  `requestAnimationFrame`, no canvas, no particle system — 6–11 small SVG
+  shapes total.
+- Only 3 font weights are self-hosted per typeface (Outfit 500/600/700, Plus
+  Jakarta Sans 400/500/600) — each matched to an actual, audited use in the
+  codebase, not imported speculatively.
+- No `window.addEventListener('scroll')` anywhere — every scroll-driven
+  behavior (header surface, section reveals, count-up triggers) uses
+  `IntersectionObserver`.
+- The one place a layout-triggering CSS property was ever used
+  (`grid-template-rows` for the FAQ's height transition) is a deliberate,
+  scoped exception — it's the only known-good CSS technique for animating to
+  an unknown "auto" height, and it's contained to one small subtree.
+
+## Accessibility
+
+This wasn't a final checklist pass — several real bugs were found by testing
+the actual rendered page and DOM state, not by reading the code:
+
+- **Focus was silently lost at every donation-flow step transition.**
+  Clicking "Donate One Pizza," "I've Paid," or submitting the confirmation
+  form removed the clicked button from the DOM; browsers reset focus to
+  `<body>` with no signal to keyboard or screen reader users that anything
+  had happened. Fixed with a `useAutoFocus` hook — each step's heading is
+  focused on mount.
+- **Failed form validation didn't move focus anywhere.** `aria-describedby`
+  associates an error with its field, but doesn't announce anything until
+  that field is _focused_. Fixed by focusing the first invalid field after a
+  failed submit.
+- **Closing the mobile menu via Escape** had the same bug — focus now
+  explicitly returns to the menu's toggle button.
+- **Testimonial navigation used `role="tab"`/`"tablist"`**, which implies
+  arrow-key roving focus between tabs per the ARIA Authoring Practices — a
+  keyboard behavior that was never built. Switched to plain buttons with
+  `aria-current`, an honest match for what's actually implemented.
+- **A real WCAG contrast failure**, found by computing relative luminance
+  directly rather than eyeballing it: the brand red (`#E63946`) on the page's
+  cream background is ≈3.96:1 — under the 4.5:1 AA minimum for normal text.
+  It was quietly failing on every inline validation error message. A darker
+  shade already in the palette (`#C92C3A`, ≈5.1:1) is now used for error text
+  specifically; the original red stays for icons and borders, which only need
+  3:1.
+- **Testimonial dot indicators were 6–24px** — under the 44×44px touch-target
+  minimum. Fixed by separating the small visual pill from a 44px button
+  around it.
+
+`prefers-reduced-motion: reduce` is honored across every animated surface —
+the hero freezes to a hand-chosen static state, testimonial autoplay and
+transitions stop/simplify, the count-up jumps straight to its target, and
+section reveals become immediate. Verified by walking the actual compiled
+stylesheet (including nested `@layer`/`@media` rules), not just the source.
+
+## Tech Stack
+
+- **Vite** — build tool / dev server
+- **React 18 + TypeScript** (strict mode)
+- **Tailwind CSS v4**
+- **`qrcode.react`** — the only UI dependency beyond icons/fonts, generating a
+  real, correctly-encoded UPI QR code client-side
+- **`@phosphor-icons/react`** — icon set
+- **ESLint + Prettier**
+
+No animation library, no state management library, no UI component library.
+
+## Challenges & Solutions
+
+- **The hero's rim-facet animation had a real timing bug**, found only by
+  watching the rendered page, not by inspecting the code or by scrubbing the
+  Web Animations API's `currentTime` (which confirmed the _mechanics_ but
+  completely missed it): a negative `animation-delay` stagger — safe for the
+  orbiting dots, whose resting pose looks identical at any phase — put most of
+  the rim facets in their "already revealed" state on the very first frame,
+  before their dot had ever moved. Fixed by giving each facet its own
+  hardcoded keyframe timed to its dot's real merge moment, all sharing one
+  un-shifted clock instead of a phase-shifted one.
+- **The testimonial crossfade's entrance could get permanently stuck
+  invisible.** The original implementation used a double-`requestAnimationFrame`
+  trick to force a style flush before transitioning — standard, but dependent
+  on an actual paint tick, which real browsers throttle heavily in
+  backgrounded tabs. Replaced with a synchronous forced reflow
+  (`element.offsetHeight`), which commits the intermediate style immediately
+  regardless of whether the page is currently painting.
+- **Three separate, same-shaped focus-management bugs** (donation steps,
+  failed validation, mobile menu) all traced back to one root cause: a
+  focused element disappearing from the DOM drops focus to `<body>` with no
+  signal to assistive technology. Documented as a single pattern rather than
+  three unrelated fixes — see Accessibility above.
+
+## Future Improvements
+
+Honest list — none of this exists yet:
+
+- A real backend accepting the confirmation payload (name, address, amount
+  paid, payment screenshot) and returning a submission ID / success status.
+- Secure, non-public storage for uploaded payment screenshots.
+- An actual donation verification / admin review workflow — today, nothing
+  the site does constitutes verifying a payment.
+- An admin dashboard for reviewing submissions.
+- Real analytics.
+- Recurring/subscription donations.
+- Donor notifications (email/SMS confirmation).
+
+## Running Locally
+
+```bash
+npm install
+npm run dev       # start the dev server
+npm run build     # type-check + production build
+npm run preview   # preview the production build locally
+npm run lint      # ESLint
+npm run format    # Prettier write
+```
+
+Copy `.env.example` to `.env.local` to override the placeholder UPI ID and
+phone number (both are public configuration, not secrets — see
+`src/components/donation/config.ts`).
+
+## Deployment
+
+Deployed as a static build. See `CLAUDE.md` for the exact deployment steps and
+history.
+
+## Content Checklist Before Real Launch
+
+This is a portfolio/demo build. Before this site is used for real donations,
+the following must be replaced — all centralized in
+`src/components/donation/config.ts` (via `.env.local`) and
+`src/components/testimonials/testimonialsData.ts`:
+
+- [ ] Real UPI ID (`VITE_UPI_ID`)
+- [ ] Real contact phone number (`VITE_PHONE_NUMBER`)
+- [ ] Real testimonials — 2 of the 3 shown are placeholders authored to
+      demonstrate the crossfade transition, clearly flagged in
+      `testimonialsData.ts`
+- [ ] Real social media URLs (currently placeholders in `Footer.tsx`)
+- [ ] A real backend behind `donationService.ts` (currently a mock that
+      always succeeds after a simulated delay)
+- [ ] Verified impact numbers (currently the placeholder figures from the
+      product spec, not real totals)
+- [ ] Legal/registration status copy in the FAQ, once confirmed
+
+## Screenshots / Demo
+
+_Pending — see the live deployment link above._
