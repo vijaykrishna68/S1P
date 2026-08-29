@@ -1,0 +1,244 @@
+/*
+ * "The Gathering Point" — signature hero animation.
+ *
+ * A solid center mark (one contribution) sits with several faint outline
+ * marks scattered asymmetrically around it. Every ~4 seconds, exactly one
+ * outline mark travels toward the center and merges — and instead of simply
+ * vanishing, it leaves a short, understated arc ("facet") on the core's rim
+ * at the angle it arrived from. Over one ~20s cycle the rim gradually
+ * gathers up to five faint facets, holds briefly once all have arrived, then
+ * the whole rim breathes out together and the cycle begins again. This is
+ * the "Absorbed Facet" refinement — see CLAUDE.md's hero animation
+ * philosophy for the full rationale and why it was chosen over an outward
+ * ripple or an inner rotating glyph.
+ *
+ * Visual hierarchy is intentional and enforced almost entirely through
+ * opacity: the solid core (fully opaque) is primary, the traveling dot
+ * (0.45 resting opacity) is secondary, and the rim facets (0.32 resting
+ * opacity, thin stroke) are a deliberately subtle tertiary detail. Nothing
+ * here should ever read as a progress meter or a completion badge — the
+ * facets are irregular arc fragments at irregular angles, not a filling
+ * ring or a count of discrete "slots."
+ *
+ * Kept in plain CSS rather than Tailwind utilities: this is a multi-stage
+ * keyframe sequence driven by per-node custom properties (--dx/--dy) and,
+ * for the dots, negative animation-delay for staggering. The facets
+ * deliberately do NOT use the same delay trick — see the comment above the
+ * facet-reveal-N keyframes below for why. This can't be expressed cleanly
+ * in utility classes. See CLAUDE.md §5 (Architecture — Styling).
+ *
+ * transform-box: fill-box is required so scale/translate operate around
+ * each SVG shape's own center rather than the SVG viewport's origin — the
+ * single most non-obvious line in this file.
+ */
+
+.gathering-core,
+.gathering-dot {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.gathering-core {
+  /* This pulse is not decoration on top of the facet effect — it IS the
+     "tactile" response to a contribution arriving. Its 4s period and 40%
+     peak deliberately coincide with the exact instant each dot merges (see
+     gathering-travel's 8% mark, staggered the same way), so every facet's
+     appearance is accompanied by the same barely-perceptible pulse. Changing
+     either animation's timing without checking the other will desync them. */
+  animation: gathering-pulse 4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+.gathering-dot {
+  opacity: var(--rest-opacity, 0.45);
+  animation: gathering-travel 20s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  animation-delay: calc(var(--i, 0) * -4s);
+}
+
+.gathering-facet {
+  opacity: 0;
+  animation-duration: 20s;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  animation-iteration-count: infinite;
+  /* Deliberately NO animation-delay here — see the long comment above the
+     facet-reveal-N keyframes below for why a delay-based stagger (like the
+     dots use) is wrong for facets specifically. */
+}
+
+/*
+ * Each facet gets its OWN keyframe instead of reusing one keyframe with a
+ * staggered (negative) animation-delay the way the dots do. That was the
+ * original — buggy — approach: a negative delay makes an animation act as
+ * though it had already been running before the page loaded, which is
+ * harmless for the dots (their resting pose looks the same at any phase of
+ * the cycle) but wrong for facets, whose only hidden window is the first 8%
+ * of the cycle. Any nonzero phase offset drops most facets straight into
+ * the "already revealed" 92% majority, so they rendered visible on the very
+ * first frame, before their dot had ever moved.
+ *
+ * The fix: every facet runs the SAME un-shifted 20s clock (no delay), and
+ * each one's keyframe hardcodes the exact real-time percentage at which its
+ * own dot merges — computed directly from gathering-travel's existing 20s
+ * cycle, 4s stagger, and 8% merge point (dot timing is the single source of
+ * truth; see GatheringPoint.tsx). Because there's no per-facet phase shift,
+ * every facet also resets to hidden at the same instant (t=20s/0%), in
+ * lockstep with the shared facet-breath fade below — no leftover-visible
+ * artifact after the reset.
+ */
+.gathering-facet[data-facet-index='0'] {
+  animation-name: facet-reveal-0;
+}
+.gathering-facet[data-facet-index='1'] {
+  animation-name: facet-reveal-1;
+}
+.gathering-facet[data-facet-index='2'] {
+  animation-name: facet-reveal-2;
+}
+.gathering-facet[data-facet-index='3'] {
+  animation-name: facet-reveal-3;
+}
+.gathering-facet[data-facet-index='4'] {
+  animation-name: facet-reveal-4;
+}
+
+.gathering-facet-rim {
+  /* Runs on the shared, un-shifted 20s clock (no per-facet delay) so every
+     facet fades out together regardless of when each one individually
+     appeared — the "breath," not a staggered disappearing act. */
+  animation: facet-breath 20s ease-in-out infinite;
+}
+
+@keyframes gathering-pulse {
+  0%,
+  34%,
+  100% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.018);
+  }
+  46% {
+    transform: scale(1);
+  }
+}
+
+@keyframes gathering-travel {
+  0%,
+  100% {
+    opacity: var(--rest-opacity, 0.45);
+    transform: translate(0, 0) scale(1);
+  }
+  8% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) scale(0.2);
+  }
+  10% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) scale(0.2);
+  }
+  18% {
+    opacity: var(--rest-opacity, 0.45);
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+/* Reveal percentages below match gathering-travel exactly: dot i merges at
+   real time (1.6s - i*4s) mod 20s. Index 0 → 1.6s (8%), 1 → 17.6s (88%),
+   2 → 13.6s (68%), 3 → 9.6s (48%), 4 → 5.6s (28%). Each holds at resting
+   opacity from its reveal point through 100% — the shared facet-breath
+   animation on the wrapping <g> is what fades it back out, not this one. */
+@keyframes facet-reveal-0 {
+  0%,
+  7% {
+    opacity: 0;
+  }
+  9%,
+  100% {
+    opacity: var(--facet-opacity, 0.32);
+  }
+}
+
+@keyframes facet-reveal-1 {
+  0%,
+  87% {
+    opacity: 0;
+  }
+  89%,
+  100% {
+    opacity: var(--facet-opacity, 0.32);
+  }
+}
+
+@keyframes facet-reveal-2 {
+  0%,
+  67% {
+    opacity: 0;
+  }
+  69%,
+  100% {
+    opacity: var(--facet-opacity, 0.32);
+  }
+}
+
+@keyframes facet-reveal-3 {
+  0%,
+  47% {
+    opacity: 0;
+  }
+  49%,
+  100% {
+    opacity: var(--facet-opacity, 0.32);
+  }
+}
+
+@keyframes facet-reveal-4 {
+  0%,
+  27% {
+    opacity: 0;
+  }
+  29%,
+  100% {
+    opacity: var(--facet-opacity, 0.32);
+  }
+}
+
+@keyframes facet-breath {
+  /* Holds full until just after the last facet (88% local time, per each
+     facet's own stagger) has had a moment to appear, then the whole rim
+     fades together over ~1.6s and stays empty until the cycle wraps. */
+  0%,
+  90% {
+    opacity: 1;
+  }
+  98% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Reduced motion freezes to an intentionally-designed resting state, not an
+   arbitrary animation frame. Dots sit at their scattered resting position;
+   roughly half the rim facets (chosen in GatheringPoint.tsx) stay visible so
+   the mark reads as "an ongoing collective effort" rather than empty or
+   finished. Nothing animates. */
+@media (prefers-reduced-motion: reduce) {
+  .gathering-core,
+  .gathering-dot,
+  .gathering-facet,
+  .gathering-facet-rim {
+    animation: none;
+  }
+
+  .gathering-dot {
+    opacity: var(--rest-opacity, 0.45);
+  }
+
+  .gathering-facet {
+    opacity: 0;
+  }
+
+  .gathering-facet[data-reduced-visible='true'] {
+    opacity: var(--facet-opacity, 0.32);
+  }
+}
