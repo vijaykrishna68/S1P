@@ -8,7 +8,7 @@ was verified by testing, not assumed.
 The premise: what you'd spend on one pizza (₹300–₹3000) can instead fund
 someone's education, food, or essential needs.
 
-**Live site:** _add the deployed URL here once available_
+**Live site:** https://sacrifice-one-pizza.vercel.app
 
 ---
 
@@ -253,8 +253,16 @@ phone number (both are public configuration, not secrets — see
 
 ## Deployment
 
-Deployed as a static build. See `CLAUDE.md` for the exact deployment steps and
-history.
+Deployed on Vercel as a static build (`npm run build` → `dist/`), auto-detected
+as a Vite project. To redeploy:
+
+```bash
+npx vercel deploy --prod --project sacrifice-one-pizza
+```
+
+`VITE_UPI_ID` and `VITE_PHONE_NUMBER` can be set as Vercel project environment
+variables to override the placeholder values without a code change — see
+`.env.example`.
 
 ## Content Checklist Before Real Launch
 
