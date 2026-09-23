@@ -1,10 +1,10 @@
 import { desc, eq, sql } from 'drizzle-orm'
 import { del } from '@vercel/blob'
-import { db } from '../../db/client'
-import { donations, type donationStatusEnum } from '../../db/schema'
-import { sniffImageType } from './magicBytes'
-import { checkAndIncrementRateLimit, MAX_DONATIONS_PER_HOUR } from './rateLimit'
-import type { CreateDonationInput } from './validation'
+import { db } from '../../db/client.js'
+import { donations, type donationStatusEnum } from '../../db/schema.js'
+import { sniffImageType } from './magicBytes.js'
+import { checkAndIncrementRateLimit, MAX_DONATIONS_PER_HOUR } from './rateLimit.js'
+import type { CreateDonationInput } from './validation.js'
 
 type DonationStatus = (typeof donationStatusEnum.enumValues)[number]
 

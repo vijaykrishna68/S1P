@@ -30,4 +30,4 @@ export function sniffImageType(buffer: Buffer): string | null {
 export {
   ALLOWED_SCREENSHOT_TYPES,
   MAX_SCREENSHOT_BYTES,
-} from '../../shared/screenshotLimits'
+} from '../../shared/screenshotLimits.js'

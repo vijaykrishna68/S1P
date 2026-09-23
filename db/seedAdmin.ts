@@ -1,6 +1,6 @@
-import { hashPassword } from '../api/_lib/password'
-import { db } from './client'
-import { adminUsers } from './schema'
+import { hashPassword } from '../api/_lib/password.js'
+import { db } from './client.js'
+import { adminUsers } from './schema.js'
 
 /**
  * One-off script to create (or rotate the password of) the single admin

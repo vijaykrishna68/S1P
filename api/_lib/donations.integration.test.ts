@@ -4,12 +4,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@vercel/blob', () => ({ del: vi.fn() }))
 
-import { db } from '../../db/client'
-import { resetDatabase } from '../../db/testUtils'
-import { donations } from '../../db/schema'
-import { createDonation } from './donations'
-import { MAX_DONATIONS_PER_HOUR } from './rateLimit'
-import type { CreateDonationInput } from './validation'
+import { db } from '../../db/client.js'
+import { resetDatabase } from '../../db/testUtils.js'
+import { donations } from '../../db/schema.js'
+import { createDonation } from './donations.js'
+import { MAX_DONATIONS_PER_HOUR } from './rateLimit.js'
+import type { CreateDonationInput } from './validation.js'
 
 const PNG_SIGNATURE = Buffer.from([
   0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0, 0, 0, 0, 0,

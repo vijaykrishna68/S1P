@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { MIN_DONATION_AMOUNT, MAX_DONATION_AMOUNT } from '../../shared/donationLimits'
+import { MIN_DONATION_AMOUNT, MAX_DONATION_AMOUNT } from '../../shared/donationLimits.js'
 
 /**
  * Server-side re-validation of exactly the same rule the frontend already

@@ -1,14 +1,14 @@
 import { randomUUID } from 'node:crypto'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { db } from '../../db/client'
-import { resetDatabase } from '../../db/testUtils'
-import { donations } from '../../db/schema'
+import { db } from '../../db/client.js'
+import { resetDatabase } from '../../db/testUtils.js'
+import { donations } from '../../db/schema.js'
 import {
   getDonationById,
   getDonationSummary,
   listDonations,
   updateDonationStatus,
-} from './donations'
+} from './donations.js'
 
 async function insertDonation(overrides: Partial<typeof donations.$inferInsert> = {}) {
   const [row] = await db

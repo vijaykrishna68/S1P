@@ -1,8 +1,8 @@
 import { randomBytes, createHash } from 'node:crypto'
 import { eq } from 'drizzle-orm'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { db } from '../../db/client'
-import { adminSessions, adminUsers } from '../../db/schema'
+import { db } from '../../db/client.js'
+import { adminSessions, adminUsers } from '../../db/schema.js'
 
 const SESSION_COOKIE_NAME = 'admin_session'
 const SESSION_DURATION_MS = 1000 * 60 * 60 * 12 // 12 hours

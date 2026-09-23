@@ -787,6 +787,26 @@ introduce one.
   either existing project; referenced from the root `tsconfig.json` the same way
   the other two already are, so `tsc -b` (already `npm run build`'s first step)
   type-checks the backend for free.
+- **`tsconfig.api.json` uses `module`/`moduleResolution: "nodenext"`, not
+  `"bundler"` (its original Phase 5 setting) — every relative import under
+  `api/`, `db/`, and `shared/` needs an explicit `.js` extension as a result.**
+  Originally set to `bundler` on the reasoning that Vercel "bundles" these
+  functions, so extension-less imports would resolve fine — wrong: the first
+  real Vercel deployment failed with `TS2835` on every one of these imports.
+  Root cause: this project's `package.json` has `"type": "module"`, so Vercel
+  compiles/runs `/api/*.ts` as genuine Node ESM, which — unlike a bundler —
+  does not infer extensions on relative specifiers at all; `bundler` resolution
+  was checking these imports against the wrong runtime model the whole time.
+  `tsc -b` and CI never caught this because `tsc -b` was itself using the same
+  too-lenient `bundler` setting — it was internally consistent with its own
+  wrong assumption, not with what Vercel would actually do. Fixed by switching
+  to `nodenext` (matching Vercel's real behavior) and adding `.js` to every
+  relative import (`shared/screenshotLimits` → `shared/screenshotLimits.js`,
+  etc.) — the extension refers to the eventual compiled output, the standard
+  Node ESM/TS convention, and resolves correctly to the `.ts` source during
+  type-checking. This makes local `tsc -b` and CI agree with Vercel's actual
+  runtime for the first time; before this fix, "passes CI" and "deploys
+  cleanly" were checking two different things without either side knowing it.
 - **Vitest's default test environment is `node`, not `jsdom`** — most of this
   project's tests are pure logic (reducers, validators) or backend code with no
   DOM at all; only two files actually render a component or touch `URL`/`File`
@@ -1190,6 +1210,18 @@ dev`), desktop and mobile. **Before:** desktop Performance 100 /
   (`gh run` id `35870213210`). This is the first genuinely verified pass of
   every integration test written since Phase 6 — see those phases' own
   entries, now updated to match.
+
+  **Merged to `main` and deployed — first real Vercel build failed with a
+  genuine bug CI couldn't have caught.** PR #1 merged (fast-forward, clean).
+  Vercel's build then failed with `TS2835` across every relative import in
+  `api/`, `db/`, and `shared/` — CI's own `tsc -b` had been passing the whole
+  time using a `moduleResolution` setting (`bundler`) that didn't actually
+  match how Vercel compiles these functions as real Node ESM (see the
+  Decision Log entry for the full mechanism). Reproduced the exact failure
+  locally first, fixed the root cause (switched `tsconfig.api.json` to
+  `nodenext`, added `.js` to every relative import — 19 files, 55/56
+  lines), and re-verified typecheck/lint/format/unit tests/build all clean
+  before pushing. This is now the actual, current state of `main`.
 
 ## 11. Portfolio Case-Study Highlights
 

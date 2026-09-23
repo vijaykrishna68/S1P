@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { ZodError } from 'zod'
-import { createDonationSchema, listDonationsQuerySchema } from '../_lib/validation'
-import { createDonation, listDonations, getDonationSummary } from '../_lib/donations'
-import { requireAdmin } from '../_lib/auth'
-import { sendError, sendJson, methodNotAllowed, getClientIp } from '../_lib/http'
+import { createDonationSchema, listDonationsQuerySchema } from '../_lib/validation.js'
+import { createDonation, listDonations, getDonationSummary } from '../_lib/donations.js'
+import { requireAdmin } from '../_lib/auth.js'
+import { sendError, sendJson, methodNotAllowed, getClientIp } from '../_lib/http.js'
 
 async function handleList(req: VercelRequest, res: VercelResponse) {
   const admin = await requireAdmin(req, res)

@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client'
-import { ALLOWED_SCREENSHOT_TYPES, MAX_SCREENSHOT_BYTES } from '../_lib/magicBytes'
-import { sendError, methodNotAllowed } from '../_lib/http'
+import { ALLOWED_SCREENSHOT_TYPES, MAX_SCREENSHOT_BYTES } from '../_lib/magicBytes.js'
+import { sendError, methodNotAllowed } from '../_lib/http.js'
 
 /**
  * Issues a short-lived, constrained client upload token so the browser can

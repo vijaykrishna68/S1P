@@ -1,11 +1,11 @@
 import type { VercelRequest } from '@vercel/node'
 import { eq } from 'drizzle-orm'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { db } from '../../db/client'
-import { resetDatabase } from '../../db/testUtils'
-import { adminSessions, adminUsers } from '../../db/schema'
-import { createSession, getAdminIdentity, invalidateSession } from './auth'
-import { hashPassword } from './password'
+import { db } from '../../db/client.js'
+import { resetDatabase } from '../../db/testUtils.js'
+import { adminSessions, adminUsers } from '../../db/schema.js'
+import { createSession, getAdminIdentity, invalidateSession } from './auth.js'
+import { hashPassword } from './password.js'
 
 function requestWithCookie(token?: string): VercelRequest {
   return { cookies: token ? { admin_session: token } : {} } as unknown as VercelRequest

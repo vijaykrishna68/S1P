@@ -1,16 +1,16 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { eq } from 'drizzle-orm'
 import { ZodError } from 'zod'
-import { db } from '../../db/client'
-import { adminUsers } from '../../db/schema'
-import { loginSchema } from '../_lib/validation'
-import { verifyPassword } from '../_lib/password'
-import { createSession, setSessionCookie } from '../_lib/auth'
+import { db } from '../../db/client.js'
+import { adminUsers } from '../../db/schema.js'
+import { loginSchema } from '../_lib/validation.js'
+import { verifyPassword } from '../_lib/password.js'
+import { createSession, setSessionCookie } from '../_lib/auth.js'
 import {
   checkAndIncrementRateLimit,
   MAX_LOGIN_ATTEMPTS_PER_HOUR,
-} from '../_lib/rateLimit'
-import { sendError, sendJson, methodNotAllowed, getClientIp } from '../_lib/http'
+} from '../_lib/rateLimit.js'
+import { sendError, sendJson, methodNotAllowed, getClientIp } from '../_lib/http.js'
 
 // A precomputed, valid bcrypt hash that no real password will ever match.
 // Compared against on every login attempt for an email that doesn't exist,

@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import { db } from './client'
+import { db } from './client.js'
 
 /**
  * Test-only: truncates every table so each integration test starts from a

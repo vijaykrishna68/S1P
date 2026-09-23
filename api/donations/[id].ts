@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { ZodError } from 'zod'
-import { updateDonationStatusSchema } from '../_lib/validation'
-import { getDonationById, updateDonationStatus } from '../_lib/donations'
-import { requireAdmin } from '../_lib/auth'
-import { sendError, sendJson, methodNotAllowed } from '../_lib/http'
+import { updateDonationStatusSchema } from '../_lib/validation.js'
+import { getDonationById, updateDonationStatus } from '../_lib/donations.js'
+import { requireAdmin } from '../_lib/auth.js'
+import { sendError, sendJson, methodNotAllowed } from '../_lib/http.js'
 
 /** Admin-only donation detail + status transitions — both actions need the
  * same auth guard and the same id, so they share this one file rather than

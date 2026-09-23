@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm'
-import { db } from '../../db/client'
-import { rateLimits } from '../../db/schema'
+import { db } from '../../db/client.js'
+import { rateLimits } from '../../db/schema.js'
 
 /**
  * Threshold for POST /api/donations. Documented and easy to change: this is
