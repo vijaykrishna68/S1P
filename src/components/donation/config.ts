@@ -17,9 +17,11 @@
  * README.md for what must be replaced before this site goes live for real
  * donations.
  */
+import { MIN_DONATION_AMOUNT, MAX_DONATION_AMOUNT } from '../../../shared/donationLimits'
+
 export const DONATION_CONFIG = {
   upiId: import.meta.env.VITE_UPI_ID?.trim() || 'sacrificeonepizza@upi',
   phoneNumber: import.meta.env.VITE_PHONE_NUMBER?.trim() || '+91 00000 00000',
-  minAmount: 300,
-  maxAmount: 3000,
+  minAmount: MIN_DONATION_AMOUNT,
+  maxAmount: MAX_DONATION_AMOUNT,
 } as const

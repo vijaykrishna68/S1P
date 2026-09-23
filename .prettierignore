@@ -1,0 +1,5 @@
+dist
+# Drizzle-generated migration SQL and metadata — tool output, not
+# hand-authored, and reformatting it would make future `drizzle-kit generate`
+# diffs noisy for no benefit.
+db/migrations

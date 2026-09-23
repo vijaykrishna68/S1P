@@ -18,6 +18,13 @@
   --color-charcoal-muted: #6b6b6b;
   --color-red: #e63946;
   --color-red-deep: #c92c3a;
+  /* White text at 15px/600 on --color-red is 4.17:1 — under the 4.5:1 AA
+     minimum for normal-size text (checked via Lighthouse + computed relative
+     luminance, not eyeballed). This darker shade is only for a hover/active
+     state one step past --color-red-deep; --color-red-deep itself is now the
+     resting fill for solid buttons carrying white text — see CLAUDE.md's
+     Decision Log. */
+  --color-red-darkest: #9f232e;
   --color-orange: #ff7a00;
   --color-green: #2ecc71;
 

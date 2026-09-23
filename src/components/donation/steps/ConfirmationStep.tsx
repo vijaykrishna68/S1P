@@ -1,4 +1,4 @@
-import { useReducer, type FormEvent } from 'react'
+import { useReducer, useRef, type FormEvent } from 'react'
 import { CircleNotch } from '@phosphor-icons/react'
 import { Button } from '../../ui/Button'
 import { useAutoFocus } from '../../ui/useAutoFocus'
@@ -36,6 +36,10 @@ export function ConfirmationStep({ initialAmount, onSuccess }: ConfirmationStepP
   const headingRef = useAutoFocus<HTMLHeadingElement>()
   const [form, dispatch] = useReducer(formReducer, initialAmount, createInitialFormState)
   const upload = useScreenshotUpload()
+  // One key per submission attempt, not per HTTP request — reused across
+  // retries so the server can treat a resubmit as a no-op. See
+  // donationService.ts's DonationSubmission.idempotencyKey.
+  const idempotencyKeyRef = useRef<string | null>(null)
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -52,6 +56,8 @@ export function ConfirmationStep({ initialAmount, onSuccess }: ConfirmationStepP
     }
     if (upload.state.status !== 'uploaded') return // guaranteed by validation above
 
+    idempotencyKeyRef.current ??= crypto.randomUUID()
+
     dispatch({ type: 'SUBMIT_STARTED' })
     try {
       await submitDonation({
@@ -59,12 +65,16 @@ export function ConfirmationStep({ initialAmount, onSuccess }: ConfirmationStepP
         address: form.values.address.trim(),
         amountPaid: Number(form.values.amountPaid),
         screenshot: upload.state.file,
+        idempotencyKey: idempotencyKeyRef.current,
       })
       onSuccess()
-    } catch {
+    } catch (err) {
       dispatch({
         type: 'SUBMIT_FAILED',
-        message: "We couldn't submit your confirmation. Please try again.",
+        message:
+          err instanceof Error
+            ? err.message
+            : "We couldn't submit your confirmation. Please try again.",
       })
     }
   }

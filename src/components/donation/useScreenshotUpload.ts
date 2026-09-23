@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { UploadState } from './types'
-
-const ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/webp']
-const MAX_SIZE_BYTES = 8 * 1024 * 1024
+import {
+  ALLOWED_SCREENSHOT_TYPES,
+  MAX_SCREENSHOT_BYTES,
+} from '../../../shared/screenshotLimits'
 
 /**
  * Owns the payment-screenshot upload state machine, separate from the rest
@@ -32,22 +33,29 @@ export function useScreenshotUpload() {
   }, [])
 
   const selectFile = useCallback((file: File) => {
-    if (!ACCEPTED_TYPES.includes(file.type)) {
+    if (!ALLOWED_SCREENSHOT_TYPES.includes(file.type)) {
       setState({ status: 'invalid', message: 'Please upload a PNG, JPG, or WEBP image.' })
       return
     }
-    if (file.size > MAX_SIZE_BYTES) {
+    if (file.size > MAX_SCREENSHOT_BYTES) {
       setState({ status: 'invalid', message: 'Please upload an image under 8MB.' })
       return
+    }
+
+    // Revoked here, synchronously, rather than inside the setTimeout below —
+    // that callback's own setState only ever sees the 'uploading' state this
+    // function is about to set, never the 'uploaded' state being replaced, so
+    // checking `prev.status === 'uploaded'` there could never actually catch
+    // a replace. Found by a test asserting the revoke call, not by reading
+    // this code — see useScreenshotUpload.test.ts and CLAUDE.md.
+    if (stateRef.current.status === 'uploaded') {
+      URL.revokeObjectURL(stateRef.current.previewUrl)
     }
 
     setState({ status: 'uploading', fileName: file.name })
     window.setTimeout(() => {
       const previewUrl = URL.createObjectURL(file)
-      setState((prev) => {
-        if (prev.status === 'uploaded') URL.revokeObjectURL(prev.previewUrl)
-        return { status: 'uploaded', file, fileName: file.name, previewUrl }
-      })
+      setState({ status: 'uploaded', file, fileName: file.name, previewUrl })
     }, 500)
   }, [])
 
