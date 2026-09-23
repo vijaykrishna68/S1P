@@ -896,6 +896,18 @@ jsdom` comment instead of paying jsdom's setup cost on every test file,
   cataloged brand color one step darker. The same bug, freshly introduced in
   Phase 8's own dashboard filter buttons, was caught by grepping for every
   `bg-red` usage rather than assuming Phase 8's code was already clean.
+- **`vitest.integration.config.ts` sets `fileParallelism: false`** — the
+  first real CI run (Phase 10) found 3 of 20 integration tests failing with
+  row counts that were multiples of what each test itself inserted (3→6,
+  1→3) and a rate-limit test that never reached its threshold. Root cause:
+  Vitest runs test _files_ concurrently by default (each in its own worker),
+  but all three integration files share one physical Postgres with no
+  per-file isolation — `db/testUtils.ts`'s `TRUNCATE`-per-test strategy is
+  only actually safe if files run one at a time. `fileParallelism: false`
+  (Vitest's documented mechanism for this — the same flag its own `inspect`/
+  `inspectBrk` debug options require) forces that. Fixed by config, not by
+  loosening any assertion; tests within a single file were never the
+  problem, since Vitest already serializes those by default.
 - **`useScreenshotUpload`'s replace-file bug (see Phase 6 in §10) fixed by
   revoking the previous preview URL synchronously, before transitioning to
   'uploading'** — not by fixing the check inside the delayed `setTimeout`'s
@@ -1141,6 +1153,30 @@ dev`), desktop and mobile. **Before:** desktop Performance 100 /
   self-hosted, subset-font, no-scroll-listener page) — no evidence pointed to
   a real fixable cause, and the instruction for this phase was to act on
   evidence, not invent optimization work.
+- **Phase 10 — CI: pipeline added, first real run found a genuine test-isolation
+  bug, root-caused and fixed (not papered over).** GitHub Actions workflow with
+  a Postgres service container (typecheck → lint → format check → migrations →
+  unit tests → integration tests → build). Opening the PR triggered the first
+  real execution of every integration test written since Phase 6: **17/20
+  passed, 3 failed** — investigated by root cause, not by adjusting
+  assertions. All three traced to one bug: `vitest.integration.config.ts` had
+  no `fileParallelism` setting, so Vitest ran the three integration test
+  files concurrently in separate workers, all against the _same_ physical
+  Postgres with no isolation between files. `listDonations`' pagination test
+  expected 3 rows and got 6; its status-filter test expected 1 and got 3 —
+  both consistent with another file's concurrently-running test inserting
+  rows into the same table mid-test. The rate-limit test expected
+  `rate_limited` after 10 submissions and got `created` — consistent with a
+  concurrent file's `beforeEach` `TRUNCATE` (on `rate_limits` and/or
+  `donations`) landing mid-loop and resetting the counter before it reached
+  the threshold. Fixed with one config line, `fileParallelism: false` —
+  forces all integration test files to run sequentially in one process, which
+  is what makes `db/testUtils.ts`'s TRUNCATE-per-test isolation strategy
+  actually safe; tests _within_ one file were never the problem, since
+  Vitest already runs those in order by default. Re-verified locally (still
+  fails cleanly for the expected "no `DATABASE_URL`" reason without one) and
+  pushed for CI to confirm for real — see this section's own update once
+  that result is in, per this project's resume-integrity standard.
 
 ## 11. Portfolio Case-Study Highlights
 
