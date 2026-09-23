@@ -1087,9 +1087,12 @@ Redeploy: `npx vercel deploy --prod --project sacrifice-one-pizza` (see §13).
   does not describe these as "passing" anywhere (including the eventual final
   production report) until a GitHub Actions Postgres service container has
   actually run migrations and all five tests successfully — see Phase 10.
-- **Phase 7 — Authentication + Security: implemented, integration tests not
-  yet run against real Postgres (same caveat as Phase 6 — see Phase 10).**
-  Added `POST /api/admin/login`, `POST /api/admin/logout`, `GET /api/admin/me`,
+  **Update: verified.** CI ran these for real (see Phase 10's own entry) —
+  they pass against a real Postgres, not just "fails for the expected
+  reason" as before.
+- **Phase 7 — Authentication + Security: implemented; integration tests now
+  verified by CI (see Phase 10) — session creation, expiry, and invalidation
+  all pass against a real Postgres.** Added `POST /api/admin/login`, `POST /api/admin/logout`, `GET /api/admin/me`,
   and the session/password machinery behind them (`api/_lib/auth.ts`,
   `api/_lib/password.ts`). Single admin account, bcrypt password hashing,
   DB-backed opaque sessions (only a SHA-256 hash of the token is ever stored),
@@ -1109,8 +1112,9 @@ Redeploy: `npx vercel deploy --prod --project sacrifice-one-pizza` (see §13).
   `Referrer-Policy`, and `Cache-Control: no-store` on `/api/*`. CSP behavior
   itself is only meaningfully verifiable against a live deployment (headers
   aren't applied by `vite dev`/`vite preview`) — pending Phase 11.
-- **Phase 8 — Admin Dashboard: built and verified in-browser; live data flow
-  pending real Postgres (same caveat as Phases 6–7).** Added the admin-only
+- **Phase 8 — Admin Dashboard: built, verified in-browser, and its
+  integration tests now confirmed passing by CI (see Phase 10).** Added the
+  admin-only
   `GET`/`PATCH` branches on `api/donations/index.ts` and the new
   `api/donations/[id].ts`, both behind `requireAdmin`, plus the business logic
   behind them (`listDonations`, `getDonationById`, `updateDonationStatus`,
@@ -1127,8 +1131,11 @@ Redeploy: `npx vercel deploy --prod --project sacrifice-one-pizza` (see §13).
   phase could actually break — **the public donor page's own bundle was
   confirmed unaffected**, by comparing `main` + the shared chunk's combined
   size (374.01 kB) against the pre-split single-bundle size (374.23 kB) from
-  Phase 5, not assumed from the multi-page config alone. Real login/dashboard
-  data flow is still unverified end-to-end pending Neon credentials.
+  Phase 5, not assumed from the multi-page config alone. CI's integration
+  tests confirm the query/auth logic works against a real Postgres; the
+  separate question of the _deployed_ app working against the real Neon
+  project and Vercel Blob store (not CI's ephemeral service-container
+  Postgres) is still pending those credentials — see §12.
 - **Phase 9 — Performance: baseline measured against the production build,
   two real (non-performance) issues found and fixed, no invented perf work.**
   Ran Lighthouse against `vite preview`'s actual production build (not `vite
@@ -1173,10 +1180,16 @@ dev`), desktop and mobile. **Before:** desktop Performance 100 /
   forces all integration test files to run sequentially in one process, which
   is what makes `db/testUtils.ts`'s TRUNCATE-per-test isolation strategy
   actually safe; tests _within_ one file were never the problem, since
-  Vitest already runs those in order by default. Re-verified locally (still
-  fails cleanly for the expected "no `DATABASE_URL`" reason without one) and
-  pushed for CI to confirm for real — see this section's own update once
-  that result is in, per this project's resume-integrity standard.
+  Vitest already runs those in order by default.
+
+  **Confirmed, not assumed:** pushed the fix, CI re-ran on
+  [PR #1](https://github.com/vijaykrishna68/S1P/pull/1), and every step
+  passed — typecheck, lint, format check, migrations, unit tests,
+  **integration tests**, and build, checked individually via the run's own
+  per-step results, not just the overall green check
+  (`gh run` id `35870213210`). This is the first genuinely verified pass of
+  every integration test written since Phase 6 — see those phases' own
+  entries, now updated to match.
 
 ## 11. Portfolio Case-Study Highlights
 
@@ -1236,15 +1249,16 @@ in this file rather than repeating it.
 
 Honest, current, non-exhaustive:
 
-- **The admin dashboard exists and is code-complete but not yet exercised
-  against real data.** An admin can log in, see a paginated/filterable
-  donation list, open a submission, and change its status — but this has only
-  been verified by direct browser testing of the UI's own behavior (loading,
-  error, and empty states; the login form) against a backend that isn't
-  actually running (`vite dev` doesn't execute `/api/*`). No CAPTCHA or
-  bot-challenge exists on either the donation or login endpoint; the Postgres
-  rate limiter is the only abuse mitigation so far (10/hour for donations,
-  20/hour for login attempts).
+- **The admin dashboard's query/auth logic is CI-verified against a real
+  Postgres, but the deployed app has never been exercised end-to-end against
+  the real Neon project and Vercel Blob store.** CI's Postgres is an
+  ephemeral per-run service container, not the actual production database —
+  it proves the SQL and auth logic are correct, not that the live deployment
+  works with real credentials. The dashboard UI itself has also only been
+  browser-tested against a backend that wasn't running (`vite dev` doesn't
+  execute `/api/*`). No CAPTCHA or bot-challenge exists on either the
+  donation or login endpoint; the Postgres rate limiter is the only abuse
+  mitigation so far (10/hour for donations, 20/hour for login attempts).
 - **Screenshot blobs are public-but-unguessable, not authenticated-private.** The
   installed `@vercel/blob` version's client-upload token doesn't bind an access
   level (verified by reading the SDK source, not assumed) — see the Decision Log.
