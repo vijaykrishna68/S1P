@@ -62,8 +62,8 @@ Success
 ```
 
 The site never claims to verify the UPI transaction automatically — the
-uploaded screenshot is explicitly the donor's proof of payment, reviewed by a
-human on the other end (once a real backend exists; see
+uploaded screenshot is explicitly the donor's proof of payment, persisted for
+a human to review once an admin review workflow exists (see
 [Future Improvements](#future-improvements)).
 
 ## Technical Architecture
@@ -104,10 +104,13 @@ full reasoning.
 
 **Backend boundary:** `src/components/donation/donationService.ts` exports one
 function, `submitDonation(submission): Promise<void>`. That signature is the
-entire contract every component depends on — nothing above it knows the
-current implementation is a mocked delay. See
-[Future Improvements](#future-improvements) for what a real backend behind
-this function would need to accept and return.
+entire contract every component depends on. As of the backend phase, it's a
+real implementation — Vercel Serverless Functions, Neon Postgres, and Vercel
+Blob for screenshot storage — but nothing above this function changed to get
+there, which is the actual payoff of designing the boundary before the real
+backend existed. See [Technical Architecture](#technical-architecture) below
+and `CLAUDE.md` for the full backend design (schema, idempotency, rate
+limiting, upload validation).
 
 ## Design Decisions
 
@@ -129,10 +132,38 @@ this function would need to accept and return.
 
 Production build (see [Deployment](#deployment) for how to reproduce):
 
-| Asset | Raw     | Gzip   |
-| ----- | ------- | ------ |
-| JS    | ~272 KB | ~83 KB |
-| CSS   | ~52 KB  | ~15 KB |
+| Asset | Raw     | Gzip    |
+| ----- | ------- | ------- |
+| JS    | ~374 KB | ~112 KB |
+| CSS   | ~52 KB  | ~15 KB  |
+
+JS grew from ~272 KB/~83 KB gzip after the backend phase added
+`@vercel/blob/client` for direct-to-Blob screenshot uploads — a real,
+measured cost of a real feature, not unexplained bloat. Note the admin
+dashboard (`admin.html`) adds only ~11 KB of its own JS on top of that same
+shared bundle — confirmed by comparing actual build output sizes, not
+assumed from the multi-page config alone.
+
+**Lighthouse** (against the production build via `vite preview`, not the dev
+server):
+
+| Category       | Desktop | Mobile |
+| -------------- | ------- | ------ |
+| Performance    | 100     | 95     |
+| Accessibility  | 100     | —      |
+| Best Practices | 100     | —      |
+| SEO            | 100     | —      |
+
+Accessibility and SEO started at 96/92 — both real, specific findings, not
+assumed defaults: a missing `robots.txt` (Lighthouse was parsing `index.html`
+as robots directives) and the primary CTA button's white text on the brand
+red measuring 4.17:1, under the 4.5:1 WCAG AA minimum. Both fixed and
+re-measured; see `CLAUDE.md`'s Phase 9 note and Decision Log for the exact
+before/after and why the button fix uses an existing brand color rather than
+an invented one. Mobile's 95 (2.4s FCP/LCP under Lighthouse's simulated
+throttling) wasn't chased further — no specific fixable cause was found, and
+the instruction for this phase was evidence-driven optimization, not
+optimization for its own sake.
 
 - Hero animation: `transform`/`opacity` only, CSS keyframes, no
   `requestAnimationFrame`, no canvas, no particle system — 6–11 small SVG
@@ -188,6 +219,8 @@ stylesheet (including nested `@layer`/`@media` rules), not just the source.
 
 ## Tech Stack
 
+**Frontend**
+
 - **Vite** — build tool / dev server
 - **React 18 + TypeScript** (strict mode)
 - **Tailwind CSS v4**
@@ -197,6 +230,20 @@ stylesheet (including nested `@layer`/`@media` rules), not just the source.
 - **ESLint + Prettier**
 
 No animation library, no state management library, no UI component library.
+
+**Backend**
+
+- **Vercel Serverless Functions** (`/api`) — same repo and deploy as the
+  frontend, no separate hosting or CORS to configure
+- **Neon Postgres** via **Drizzle ORM** + **Drizzle Kit** (SQL-file migrations)
+- **Vercel Blob** — screenshot storage, uploaded directly from the browser
+- **Zod** — server-side request validation (the client's own validation is
+  UX only; the server never trusts it)
+- **`bcryptjs`** — admin password hashing; DB-backed opaque sessions for auth
+  (not JWT — see `CLAUDE.md`'s Decision Log)
+
+See `CLAUDE.md`'s Decision Log for why each of these specifically, over the
+alternatives considered.
 
 ## Challenges & Solutions
 
@@ -222,19 +269,31 @@ No animation library, no state management library, no UI component library.
   signal to assistive technology. Documented as a single pattern rather than
   three unrelated fixes — see Accessibility above.
 
+## Admin Dashboard
+
+An authenticated admin can sign in at `/admin.html`, see summary tiles
+(total submissions, total amount, pending count), filter/paginate the
+donation list, and open a submission to mark it reviewed or rejected. This
+is a donation _submission and verification_ system, not a payment processor:
+nothing here verifies a UPI transaction actually happened — "verification"
+means a human admin reviewing the uploaded screenshot, which this dashboard
+exists to support.
+
 ## Future Improvements
 
-Honest list — none of this exists yet:
+Honest, current list:
 
-- A real backend accepting the confirmation payload (name, address, amount
-  paid, payment screenshot) and returning a submission ID / success status.
-- Secure, non-public storage for uploaded payment screenshots.
-- An actual donation verification / admin review workflow — today, nothing
-  the site does constitutes verifying a payment.
-- An admin dashboard for reviewing submissions.
+- **Authenticated-private screenshot storage.** Screenshots are stored at a
+  random, unguessable Blob URL, but not yet gated behind admin auth the way
+  the dashboard's own view of them conceptually should be — see `CLAUDE.md`
+  §12.
+- CI (no automated pipeline yet — see `CLAUDE.md`'s Phase Status for what's
+  written vs. verified against real infrastructure).
 - Real analytics.
 - Recurring/subscription donations.
 - Donor notifications (email/SMS confirmation).
+- CAPTCHA/bot-challenge on public forms, if real spam is ever observed (a
+  Postgres-backed rate limiter is the only abuse mitigation today).
 
 ## Running Locally
 
@@ -277,8 +336,12 @@ the following must be replaced — all centralized in
       demonstrate the crossfade transition, clearly flagged in
       `testimonialsData.ts`
 - [ ] Real social media URLs (currently placeholders in `Footer.tsx`)
-- [ ] A real backend behind `donationService.ts` (currently a mock that
-      always succeeds after a simulated delay)
+- [ ] A real Neon `DATABASE_URL` and `BLOB_READ_WRITE_TOKEN` in Vercel's
+      project environment variables — the backend code is real as of this
+      phase, but needs real infrastructure credentials to run
+- [ ] A real admin account (`npm run db:seed-admin`, see `.env.example`) —
+      there's no sign-up flow by design; someone has to create the one
+      admin account once, on the real database
 - [ ] Verified impact numbers (currently the placeholder figures from the
       product spec, not real totals)
 - [ ] Legal/registration status copy in the FAQ, once confirmed

@@ -35,7 +35,26 @@ and direct user instruction win — see the Decision Log.
 - No animation library, no state management library, no UI component library.
   The hero animation and all micro-interactions are CSS/SVG-driven. Added only if a
   genuine need appears (see Decision Log before adding anything new).
-- **Deployment: Vercel**, auto-detected as a Vite static build. See §13.
+- **Backend: Vercel Serverless Functions** (`/api`), same repo/deploy/origin as the
+  frontend — see §5's Backend section and §13. As of Phase 5, only the donation
+  submission path is live; admin auth/dashboard land in later phases (§10).
+- **Database: Neon Postgres**, direct (not the Vercel-managed integration).
+- **`drizzle-orm` + `drizzle-kit`** — schema and SQL-file migrations for the four
+  tables in `db/schema.ts`. See the Decision Log for why Drizzle over Prisma/raw `pg`.
+- **`pg` (node-postgres)** — the actual driver, via `drizzle-orm/node-postgres`, not
+  Neon's HTTP/edge driver. See the Decision Log.
+- **`zod`** — server-side request validation in `api/_lib/validation.ts`. The
+  client's own validation (`validateConfirmationForm`) is UX only; the server never
+  trusts it.
+- **`bcryptjs`** — pure-JS bcrypt (not the native-binding `bcrypt` package),
+  chosen specifically to avoid cross-compiling a native module between this
+  Windows dev machine and Vercel's Linux runtime.
+- **Vercel Blob** — screenshot storage, uploaded directly from the browser via
+  `@vercel/blob/client`'s `upload()`/`handleUpload()` client-upload pattern (bypasses
+  the serverless function body-size limit). See the Decision Log for the access-level
+  caveat.
+- **Deployment: Vercel**, auto-detected as a Vite static build for the frontend, plus
+  the `/api` serverless functions. See §13.
 
 ## 3. Design Principles
 
@@ -57,8 +76,9 @@ unjustified reach per the design skill's serif-discipline rule.
 
 | Purpose                    | Hex                                         |
 | -------------------------- | ------------------------------------------- |
-| Primary accent / CTA       | `#E63946` (warm tomato red)                 |
-| CTA hover/active           | `#C92C3A`                                   |
+| Primary accent (non-text)  | `#E63946` (warm tomato red)                 |
+| CTA resting fill           | `#C92C3A` (`--color-red-deep`)              |
+| CTA hover/active           | `#9F232E` (`--color-red-darkest`)           |
 | Background base            | `#FFF8F2` (soft cream, solid — no gradient) |
 | Headline text              | `#1D1D1F`                                   |
 | Secondary accent (sparing) | `#FF7A00`                                   |
@@ -220,7 +240,84 @@ processing, not a network call.
 
 ## 5. Architecture
 
-### Folder structure
+### Repo-level structure (as of Phase 1's backend)
+
+```
+api/                  Vercel Serverless Functions — see the Backend section below
+db/                   Drizzle schema, DB client, generated SQL migrations
+shared/               Plain constants imported by BOTH src/ and api/ (see below)
+src/                  The frontend — see Folder structure below
+```
+
+`db/` and `shared/` are outside `src/` deliberately: `src/`'s own tsconfig
+(`tsconfig.app.json`) targets the browser (DOM lib, `import.meta.env`), while `api/`
+and `db/` run in Vercel's Node.js runtime and are checked under a separate
+`tsconfig.api.json` (Node lib, no DOM). `shared/` has neither runtime's
+environment-specific globals, which is exactly why the two donation limits
+(`shared/donationLimits.ts`, `shared/screenshotLimits.ts`) live there instead of
+inside `src/components/donation/config.ts` — that file reads `import.meta.env`,
+a Vite-only global that would throw if imported from a Node function.
+
+### Backend
+
+```
+api/
+  donations/
+    index.ts          POST — creates a donation (public, rate-limited)
+  uploads/
+    screenshot.ts      POST — issues a constrained Vercel Blob client-upload token
+  admin/
+    login.ts           POST — bcrypt-verify + create a DB-backed session
+    logout.ts          POST — delete the session row + clear the cookie
+    me.ts              GET — current admin identity via requireAdmin, or 401
+  _lib/                Business logic, imported by route handlers AND by
+                        integration tests directly — never inlined into a handler.
+                        Vercel's convention: an underscore-prefixed folder under
+                        `api/` is never treated as a route.
+    validation.ts       Zod schemas — the server-side re-validation of every rule
+                        the frontend already enforces client-side for UX.
+    donations.ts        createDonation() — idempotency check, rate limit, screenshot
+                        magic-byte verification, insert. See its own doc comment
+                        for the exact, deliberate order of these steps.
+    password.ts          hashPassword/verifyPassword — pure bcrypt, deliberately
+                        with no db/client.ts import (see Decision Log).
+    auth.ts               Session lifecycle: createSession, getAdminIdentity,
+                        requireAdmin, invalidateSession, cookie helpers.
+    rateLimit.ts         Postgres-backed fixed-window counter, shared by the
+                        donation and login endpoints via a purpose-prefixed
+                        key (`donation:<ip>` / `login:<ip>`) — see Decision Log.
+    magicBytes.ts         Real image-signature sniffing, not just declared MIME type.
+    http.ts               sendError/sendJson/getClientIp/methodNotAllowed — shared
+                        request/response helpers used by more than one route.
+```
+
+`api/donations/[id].ts` (`GET` detail / `PATCH` status, both admin-only via
+`requireAdmin`) and `api/donations/index.ts`'s `GET` branch (paginated,
+status-filterable list + summary) back the admin dashboard — see the
+Frontend section below.
+
+### Admin frontend
+
+A second Vite entry, separate from the public donor-facing SPA:
+
+```
+admin.html                    New HTML entry, mounts into #admin-root
+src/admin/
+  main.tsx                    Entry point
+  AdminApp.tsx                 Owns auth-check state + which of 2 views is showing
+  api.ts                       fetch wrappers for /api/admin/* and /api/donations
+  LoginPage.tsx
+  DashboardPage.tsx             Summary tiles + status filter + paginated table
+  SubmissionDetail.tsx           Full record + screenshot + status-change buttons
+```
+
+Reuses `src/components/ui/Button.tsx` and `src/components/donation/FormField.tsx`
+rather than duplicating them — both were already generic enough to not be
+donation-flow-specific. `vite.config.ts`'s `build.rollupOptions.input` builds
+`admin.html` as its own bundle, verified (by comparing actual output byte
+counts, not assumed) to add nothing to the public page's own download.
+
+### Frontend folder structure
 
 ```
 src/
@@ -358,12 +455,16 @@ without triggering a render.
 
 `donationService.ts` exports one function, `submitDonation`, whose signature
 (accepts a `DonationSubmission`, resolves on success, throws on failure) is the
-entire contract every component depends on. Nothing above it knows or cares that
-the current implementation is `await sleep(1100ms)`. Wiring up a real endpoint
-later — including the actual screenshot upload — means changing the body of this
-one function and nothing else. It's intentionally not over-built with retry logic,
-request cancellation, or a generic API client, since none of that has a real
-requirement yet; adding it now would be architecture for architecture's sake.
+entire contract every component depends on. As of Phase 1, its implementation is
+real — it uploads the screenshot to Vercel Blob, then POSTs the donation metadata to
+`POST /api/donations` — but nothing above it changed at all: not `ConfirmationStep`,
+not either reducer. That's the payoff of having designed the boundary before a real
+backend existed. `DonationSubmission` gained one field, `idempotencyKey`, generated
+once per submission attempt in `ConfirmationStep` (not per HTTP request) so a retry
+of the same attempt is safely absorbed server-side rather than creating a duplicate
+row — see `api/_lib/donations.ts`'s doc comment. Still intentionally not over-built
+with retry logic, request cancellation, or a generic API client, since none of that
+has a real requirement yet.
 
 ### Testimonial transition approach
 
@@ -620,6 +721,189 @@ introduce one.
   the commits are real and the grouping is meaningful, but they don't
   represent a turn-by-turn history of every bug fixed along the way (those
   are documented in this file's Decision Log entries instead).
+- **Drizzle ORM + Drizzle Kit, not Prisma** — the schema is four small tables;
+  Prisma's binary query engine adds real cold-start/bundle-size cost inside a
+  Vercel serverless function for no corresponding benefit at this scale, and
+  Drizzle's SQL-file migrations stay readable in review. Raw `pg` with hand-written
+  SQL was also considered and rejected only because it throws away type-safe
+  queries and migration tooling for no real savings at 4 tables.
+- **`pg` (node-postgres) as the driver, not `@neondatabase/serverless`** — the HTTP
+  driver is Neon-specific and holds no persistent connection to wrap in a
+  transaction, which would have ruled out transaction-based test isolation later.
+  Plain `pg` against Neon's pooled connection string is the same code path locally,
+  in CI (a plain Postgres service container), and in production — one driver, not
+  two divergent ones to keep in sync.
+- **Neon connection pool cached at module + `global` scope**
+  (`db/client.ts`) — avoids opening a fresh Postgres connection on every request; a
+  warm Vercel serverless instance reuses the pool across invocations.
+- **`amountPaid` stored as a whole-rupee integer, never a float or paise** — the
+  donation UI has never collected sub-rupee amounts (₹300–₹3000, no decimal input
+  anywhere), so paise would be a unit-conversion concern invented for a precision
+  requirement that doesn't exist here.
+- **Idempotency key checked before the rate limiter and before re-verifying the
+  screenshot, not after** (`api/_lib/donations.ts`) — a retry of an
+  already-accepted submission (network blip, double-click) is free: it costs no
+  rate-limit quota and re-fetches nothing. Only a genuinely new submission pays for
+  the rate-limit check and the image verification.
+- **Rate limiting is a Postgres fixed-window counter, not Redis/Upstash** — this is
+  a low-traffic donation form, and Postgres is already a hard dependency; the
+  fixed-window's known imprecision (a burst spanning two windows could allow
+  briefly under 2x the limit) is an accepted, documented tradeoff against the
+  complexity of a sliding window or token bucket this traffic level doesn't need.
+  Implemented as a single atomic `INSERT ... ON CONFLICT DO UPDATE ... RETURNING`
+  upsert specifically so there's no separate check-then-write race to reason about.
+- **Screenshot uploads go directly from the browser to Vercel Blob**
+  (`@vercel/blob/client`'s `upload()`/`handleUpload()` pattern), not through this
+  app's own API route body — Vercel serverless functions cap request bodies well
+  under the 8MB this app allows for a screenshot; client-direct upload sidesteps
+  that limit entirely rather than raising it or hand-rolling multipart streaming.
+- **Screenshot blobs use `access: 'public'` with a random path, not `'private'`** —
+  investigated and rejected specifically because it doesn't hold up, not by
+  default: reading the installed `@vercel/blob@2.8.0` SDK's own
+  `generateClientTokenFromReadWriteToken` source shows the signed client-upload
+  token's payload never includes `access` at all, so this server cannot bind or
+  verify which access level the browser's `upload()` call actually requests for
+  this flow. Claiming `'private'` here would have been an unverified security
+  property. Documented as a known limitation (§12), not silently worked around.
+- **Screenshot pathnames are client-generated random UUIDs, never the donor's
+  original filename** — `donationService.ts` derives only a file extension from
+  the upload's MIME type; the filename itself never reaches Blob storage, so a
+  donor can't influence the storage path (which would otherwise be a path-planning
+  and information-leak surface, e.g. a filename revealing the donor's device/app).
+- **Real image-signature ("magic bytes") verification on the server**
+  (`api/_lib/magicBytes.ts`), not just trusting the declared `Content-Type` — a
+  request crafted outside the browser can set that header to anything; the actual
+  leading bytes of the uploaded file are checked against known PNG/JPEG/WEBP
+  signatures before a donation row is ever created.
+- **`donationLimits.ts` and `screenshotLimits.ts` split into `shared/`, outside both
+  `src/` and `api/`** — both the ₹300–3000 range and the 8MB/PNG-JPEG-WEBP
+  screenshot constraints are now enforced independently on the client (UX) and the
+  server (the check that actually matters), and needed one source of truth. They
+  couldn't live inside `src/components/donation/config.ts` because that file reads
+  `import.meta.env`, which doesn't exist in the Node runtime `api/` code runs in.
+- **A third TS project, `tsconfig.api.json`, added alongside the existing
+  `tsconfig.app.json`/`tsconfig.node.json` pair** — `api/`, `db/`, and `shared/`
+  need Node lib/types with no DOM, which is a different compilation target than
+  either existing project; referenced from the root `tsconfig.json` the same way
+  the other two already are, so `tsc -b` (already `npm run build`'s first step)
+  type-checks the backend for free.
+- **Vitest's default test environment is `node`, not `jsdom`** — most of this
+  project's tests are pure logic (reducers, validators) or backend code with no
+  DOM at all; only two files actually render a component or touch `URL`/`File`
+  browser APIs, and opt into `jsdom` per-file via a `// @vitest-environment
+jsdom` comment instead of paying jsdom's setup cost on every test file,
+  including backend ones that will never need it.
+- **React Testing Library's cleanup is wired explicitly in `vitest.setup.ts`
+  (`afterEach(() => cleanup())`), not left to RTL's automatic detection** — RTL
+  only auto-registers cleanup when it detects a _global_ `afterEach`, which
+  requires Vitest's `test.globals: true`. This project deliberately keeps
+  `globals` off (explicit imports everywhere else), so without this, a
+  component rendered in one test stayed mounted into the next test's DOM,
+  causing a real "found multiple elements" failure the moment a second test in
+  the same file queried the same role — caught immediately by actually running
+  the suite, not by inspecting the setup file.
+- **Backend integration tests live in a separate `vitest.integration.config.ts`,
+  not a second `include` pattern merged into the main config** — the first
+  attempt used Vitest's `mergeConfig`, which concatenates array options like
+  `exclude` rather than replacing them; overriding `exclude: []` on top of the
+  base config's `exclude` (which excludes `*.integration.test.ts`) left the
+  files still excluded, so the "integration" run found zero tests. Fixed by
+  writing a fully standalone config instead of merging — worth remembering:
+  `mergeConfig` is not a safe way to _clear_ an array-valued option.
+- **Test isolation between integration tests is a `TRUNCATE` in `beforeEach`
+  (`db/testUtils.ts`), not per-test transaction rollback** — the chosen `pg`
+  driver could technically support wrapping each test in a transaction, but
+  doing so would mean every business-logic function accepting an injectable db
+  client instead of importing the shared singleton from `db/client.ts` — a real
+  signature change to every function for a benefit (marginally faster test
+  cleanup) that doesn't matter at this table count. `TRUNCATE` between tests is
+  simpler and needed no changes to the code being tested.
+- **Password hashing (`api/_lib/password.ts`) split into its own module,
+  separate from session management (`api/_lib/auth.ts`)** — `auth.ts` imports
+  `db/client.ts`, which throws at module load if `DATABASE_URL` isn't set;
+  bundling the pure `hashPassword`/`verifyPassword` functions into that same
+  file would have meant even a test that only exercises bcrypt hashing
+  couldn't import the module without a live database configured. Found while
+  writing `password.test.ts` as what was supposed to be a zero-dependency
+  unit test.
+- **Login is timing-safe against email enumeration** — comparing against a
+  precomputed dummy bcrypt hash when the submitted email doesn't match any
+  admin account, so an unknown-email response and a wrong-password response
+  take about the same time. Without it, bcrypt only running when a user is
+  actually found makes the two cases distinguishable by response time alone.
+- **`rate_limits.ip_address` renamed to `rate_limits.key`** — Phase 7 needed a
+  second, independent rate limit (login attempts) sharing the same table and
+  mechanism as the donation endpoint's; keying both by bare IP would have let
+  a donor's submissions and an admin's login attempts from the same network
+  incorrectly share one counter. Renamed rather than adding a second table,
+  since the table's whole design (fixed window, atomic upsert) is identical
+  for both use cases — only the key and threshold differ. Safe to rename in
+  place rather than write a migration for it, since no real deployment had
+  used the original column yet.
+- **CSP's `style-src` includes `'unsafe-inline'` because inline styles are
+  genuinely used** (`App.tsx`'s scroll sentinel, `FAQ.tsx`'s height
+  transition) — checked by grepping the codebase before writing the policy,
+  not assumed. `connect-src`/`img-src` allow both
+  `*.public.blob.vercel-storage.com` and `*.private.blob.vercel-storage.com`
+  since the Blob access-level question (§ Decision Log, Phase 5) isn't fully
+  settled — narrowing to just `public` now would need revisiting the moment
+  that changes.
+- **Admin dashboard is a second Vite entry (`admin.html` + `src/admin/`), not
+  a route inside the existing SPA or a new router dependency** — with exactly
+  two internal views (dashboard, submission detail) and zero deep-linking
+  requirement, `AdminApp`'s own `useState` is the entire "routing" mechanism
+  needed. The separate entry point is what actually keeps admin code out of
+  the public bundle; a router wouldn't have helped with that on its own.
+- **`GET`/`PATCH` on donations reuse the existing `api/donations/index.ts` and
+  a new `api/donations/[id].ts`, both gated by the same `requireAdmin` guard
+  built in Phase 7** — no new auth mechanism, no new middleware pattern,
+  just calling the one guard that already existed.
+- **The dashboard's summary tiles (`getDonationSummary`) always query across
+  every donation regardless of the current status filter** — they're meant to
+  answer "how many donations exist in total," not "how many match the
+  current view," so `listDonations`' `where` clause deliberately isn't
+  reused there even though the two functions query the same table.
+- **The "reset to loading" setState call was moved out of the data-fetching
+  effects in `DashboardPage`/`SubmissionDetail` and into the click handlers
+  that actually trigger a refetch** — the same `react-hooks/set-state-in-effect`
+  rule already worked around for `useCountUp` (see that Decision Log entry)
+  flagged calling `setState` synchronously inside the effect body. Unlike
+  `useCountUp`'s one-time initial-read fix, this effect re-runs on every
+  `page`/`statusFilter` change, so a lazy initializer alone doesn't cover it;
+  the actual fix is that only a user-triggered event (a button click) should
+  synchronously reset to "loading," while the effect itself only ever calls
+  `setState` inside its async `.then()`/`.catch()` — which was never what the
+  rule objected to. Also improved perceived responsiveness: loading state now
+  appears the instant the button is clicked, not after the effect gets around
+  to running.
+- **Verified the admin bundle doesn't inflate the public bundle by comparing
+  actual byte counts, not by trusting the multi-page config's intent** —
+  `main.js` + the shared chunk together total 374.01 kB, matching Phase 5's
+  pre-split single-bundle size of 374.23 kB almost exactly. The small
+  admin-specific chunk (~11 kB) is only ever downloaded by someone who
+  actually visits `/admin.html`.
+- **Solid buttons' resting fill changed from `--color-red` to `--color-red-deep`,
+  with a new `--color-red-darkest` (#9f232e) added for hover/active** — a
+  Lighthouse audit found white button text on `--color-red` measures 4.17:1,
+  under the 4.5:1 WCAG AA minimum for normal-size text (confirmed by
+  computing relative luminance, matching this project's established practice
+  from the earlier error-text contrast fix, not eyeballed). `--color-red`
+  itself is unchanged and still used for icons, borders, and other non-text
+  elements, which only need 3:1. This was surfaced to the user as a real
+  design-system decision (it changes the primary CTA's default color
+  site-wide) rather than changed unilaterally; `--color-red-deep` was chosen
+  over an arbitrary new shade specifically because it was already a
+  cataloged brand color one step darker. The same bug, freshly introduced in
+  Phase 8's own dashboard filter buttons, was caught by grepping for every
+  `bg-red` usage rather than assuming Phase 8's code was already clean.
+- **`useScreenshotUpload`'s replace-file bug (see Phase 6 in §10) fixed by
+  revoking the previous preview URL synchronously, before transitioning to
+  'uploading'** — not by fixing the check inside the delayed `setTimeout`'s
+  `setState` updater, since that updater's `prev` can never be the 'uploaded'
+  state being replaced (the synchronous `setState` right before the timeout
+  already moved state to 'uploading' by the time the timeout fires). Revoking
+  the old preview immediately also makes more sense conceptually: it's stale
+  the instant a new file is chosen, not 500ms later when the new one finishes.
 
 ## 7. Performance Rules
 
@@ -748,6 +1032,115 @@ Redeploy: `npx vercel deploy --prod --project sacrifice-one-pizza` (see §13).
   fixes), metadata/favicon/OG-image verification, and mobile viewport, all
   against `https://sacrifice-one-pizza.vercel.app` itself. See §13 for full
   deployment details and §12 for known limitations.
+- **Phase 5 — Backend foundation: complete.** Continues the phase numbering above
+  rather than restarting at "Phase 1" for the productionization work, to avoid two
+  unrelated things in this file both being called "Phase 1." Replaced
+  `donationService`'s mock with a real Vercel Serverless Functions + Neon Postgres +
+  Vercel Blob backend, with the exact same exported signature — no caller changed.
+  Built: the four-table schema (`donations`, `admin_users`, `admin_sessions`,
+  `rate_limits` — the latter two exist now so Phase 7's auth has schema ready, but
+  aren't wired to any route yet, deliberately, since unused route code would be
+  exactly the kind of speculative addition this file argues against elsewhere),
+  `POST /api/donations` (server-side Zod re-validation, idempotency-key check before
+  rate limiting so retries are free, a Postgres fixed-window rate limiter, real
+  image magic-byte verification, orphaned-blob cleanup on every rejection path), and
+  `POST /api/uploads/screenshot` (Vercel Blob client-upload token, keeping the 8MB
+  screenshot off this function's own request body). `tsc -b`, `eslint`, and
+  `prettier --check` all clean across a new `tsconfig.api.json` project reference
+  covering `api/`, `db/`, and `shared/`. No test framework exists yet (Phase 6) and
+  end-to-end verification against a live Neon database/Blob store is still pending
+  real credentials — see §12.
+- **Phase 6 — Testing: frontend verified, backend integration tests written but
+  not yet run against a real database.** Added Vitest + React Testing Library.
+  27 frontend tests, all passing: every branch of `validateConfirmationForm`,
+  every transition of both `donationReducer` and `confirmationFormReducer`,
+  `useScreenshotUpload`'s full lifecycle including preview-URL cleanup, and a
+  regression test for the Phase 3 failed-validation-focus fix (submits an
+  incomplete form, asserts focus lands on the first invalid field — would fail
+  again if that fix were ever reverted). **Found and fixed one real,
+  pre-existing bug in the process**: replacing an already-selected screenshot
+  never revoked the old preview's object URL, because the synchronous
+  `setState({status:'uploading'})` call cleared the 'uploaded' state before the
+  delayed callback's own `prev.status === 'uploaded'` check could ever see it —
+  caught by a test asserting the revoke call, exactly the kind of bug this
+  project's own Decision Log says testing finds and code review doesn't. Wrote
+  5 backend integration tests (`api/_lib/donations.integration.test.ts`) against
+  `createDonation` — creation, real-image-signature rejection, idempotency
+  no-op, the DB-level unique constraint, and rate-limit enforcement — kept in a
+  separate `vitest.integration.config.ts` so `npm test` never tries to reach a
+  database that isn't configured. **Status: implemented, not yet verified
+  against real Postgres** — no local Docker, no Neon credentials as of this
+  phase; confirmed only to load correctly and fail for exactly the expected
+  reason (missing `DATABASE_URL`). Per direct user instruction, this project
+  does not describe these as "passing" anywhere (including the eventual final
+  production report) until a GitHub Actions Postgres service container has
+  actually run migrations and all five tests successfully — see Phase 10.
+- **Phase 7 — Authentication + Security: implemented, integration tests not
+  yet run against real Postgres (same caveat as Phase 6 — see Phase 10).**
+  Added `POST /api/admin/login`, `POST /api/admin/logout`, `GET /api/admin/me`,
+  and the session/password machinery behind them (`api/_lib/auth.ts`,
+  `api/_lib/password.ts`). Single admin account, bcrypt password hashing,
+  DB-backed opaque sessions (only a SHA-256 hash of the token is ever stored),
+  `httpOnly`/`SameSite=Strict`/(`Secure` in production) cookie, real
+  server-side logout via row deletion. Login is timing-safe against email
+  enumeration (a dummy bcrypt comparison runs even when the email doesn't
+  exist, so response time doesn't leak whether an account exists) and
+  separately rate-limited from the donation endpoint (`login:<ip>` vs.
+  `donation:<ip>` keys in the same `rate_limits` table — see the Decision Log
+  for why the table's column had to be generalized from `ip_address` to `key`
+  to support this). Added `db/seedAdmin.ts` (`npm run db:seed-admin`) since
+  there's deliberately no admin sign-up flow. Added `vercel.json` with a CSP
+  tailored to this app's actual resources (verified inline styles are really
+  used — `App.tsx`'s scroll sentinel, `FAQ.tsx`'s height transition — before
+  allowing `style-src 'unsafe-inline'`, rather than copying a generic
+  permissive policy), plus `X-Content-Type-Options`, `X-Frame-Options`,
+  `Referrer-Policy`, and `Cache-Control: no-store` on `/api/*`. CSP behavior
+  itself is only meaningfully verifiable against a live deployment (headers
+  aren't applied by `vite dev`/`vite preview`) — pending Phase 11.
+- **Phase 8 — Admin Dashboard: built and verified in-browser; live data flow
+  pending real Postgres (same caveat as Phases 6–7).** Added the admin-only
+  `GET`/`PATCH` branches on `api/donations/index.ts` and the new
+  `api/donations/[id].ts`, both behind `requireAdmin`, plus the business logic
+  behind them (`listDonations`, `getDonationById`, `updateDonationStatus`,
+  `getDonationSummary` in `api/_lib/donations.ts`) with 8 new integration
+  tests (pagination, status filtering, not-found handling, summary
+  aggregation) — same "implemented, not yet run against real Postgres"
+  status as Phases 6–7. Built the actual dashboard UI: `admin.html` as a
+  second Vite entry point (`src/admin/`), reusing the existing design tokens
+  and the donation flow's own `FormField`/`Button` components rather than
+  inventing new ones. `AdminApp` owns login-check + a two-view
+  dashboard/detail state with no router (see its own doc comment). Verified
+  directly in the browser, not just by reading the code: the admin login page
+  renders correctly with working focus/error states, and — the one thing this
+  phase could actually break — **the public donor page's own bundle was
+  confirmed unaffected**, by comparing `main` + the shared chunk's combined
+  size (374.01 kB) against the pre-split single-bundle size (374.23 kB) from
+  Phase 5, not assumed from the multi-page config alone. Real login/dashboard
+  data flow is still unverified end-to-end pending Neon credentials.
+- **Phase 9 — Performance: baseline measured against the production build,
+  two real (non-performance) issues found and fixed, no invented perf work.**
+  Ran Lighthouse against `vite preview`'s actual production build (not `vite
+dev`), desktop and mobile. **Before:** desktop Performance 100 /
+  Accessibility 96 / Best Practices 100 / SEO 92; mobile Performance 95 (2.4s
+  FCP/LCP under simulated throttling, 0ms TBT, 0.016 CLS). The two point
+  losses were real, specific findings, not noise: (1) no `robots.txt` existed
+  at all, so Lighthouse tried to parse `index.html`'s markup as robots
+  directives (53 "syntax not understood" errors) — fixed with a real
+  `public/robots.txt`; (2) the primary CTA button's white text on
+  `--color-red` measured 4.17:1, under the 4.5:1 WCAG AA minimum for
+  normal-size text, in three places (header, hero, donation form) — the same
+  pattern was also freshly introduced in Phase 8's dashboard filter buttons,
+  caught by grepping for `bg-red` usage rather than assuming Phase 8's own
+  code was clean. Fixed by making `--color-red-deep` (already a cataloged
+  brand color) the buttons' resting fill and adding one new, computed shade
+  (`--color-red-darkest`, `#9f232e`) for hover/active — not by inventing an
+  arbitrary color, and confirmed by user decision rather than a unilateral
+  brand-color change. **After, re-measured, not assumed:** Accessibility 100,
+  SEO 100. Explicitly did NOT chase the mobile performance score's remaining
+  points (95, driven by simulated network/CPU throttling on an already
+  self-hosted, subset-font, no-scroll-listener page) — no evidence pointed to
+  a real fixable cause, and the instruction for this phase was to act on
+  evidence, not invent optimization work.
 
 ## 11. Portfolio Case-Study Highlights
 
@@ -807,15 +1200,28 @@ in this file rather than repeating it.
 
 Honest, current, non-exhaustive:
 
-- **No real backend.** `donationService.submitDonation` is a mock that
-  always succeeds after a simulated delay. No donation submitted through
-  this site is actually recorded anywhere. See §4 and the README's Future
-  Improvements for what a real backend behind it would need to accept
-  (name, address, amount paid, payment screenshot) and return.
+- **The admin dashboard exists and is code-complete but not yet exercised
+  against real data.** An admin can log in, see a paginated/filterable
+  donation list, open a submission, and change its status — but this has only
+  been verified by direct browser testing of the UI's own behavior (loading,
+  error, and empty states; the login form) against a backend that isn't
+  actually running (`vite dev` doesn't execute `/api/*`). No CAPTCHA or
+  bot-challenge exists on either the donation or login endpoint; the Postgres
+  rate limiter is the only abuse mitigation so far (10/hour for donations,
+  20/hour for login attempts).
+- **Screenshot blobs are public-but-unguessable, not authenticated-private.** The
+  installed `@vercel/blob` version's client-upload token doesn't bind an access
+  level (verified by reading the SDK source, not assumed) — see the Decision Log.
+  A payment screenshot's URL is a random, unlisted path never linked from the
+  public site, but isn't gated behind admin auth the way the eventual dashboard's
+  _view_ of it will be.
 - **No payment verification of any kind.** The UI is careful never to imply
   otherwise, but it's worth stating plainly here too: nothing about this
   site verifies a UPI transaction happened. The uploaded screenshot is the
-  donor's claim, not a verified fact.
+  donor's claim, not a verified fact. This is a donation submission and
+  verification system — "verification" meaning human admin review, once that
+  exists — never a payment-processing or payment-gateway system, and neither this
+  file nor the README should describe it as one.
 - **Placeholder content still in place**: the UPI ID, phone number (both in
   `donation/config.ts`, overridable via `VITE_UPI_ID`/`VITE_PHONE_NUMBER`),
   2 of 3 testimonials, social media links (`Footer.tsx`), and the impact
