@@ -3,12 +3,12 @@ import { Writable } from 'node:stream'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { get } from '@vercel/blob'
-import { db } from '../../../../db/client.js'
-import { resetDatabase } from '../../../../db/testUtils.js'
-import { adminUsers, donations } from '../../../../db/schema.js'
-import { createSession } from '../../../_lib/auth.js'
-import { hashPassword } from '../../../_lib/password.js'
-import handler from './screenshot.js'
+import { db } from '../../db/client.js'
+import { resetDatabase } from '../../db/testUtils.js'
+import { adminUsers, donations } from '../../db/schema.js'
+import { createSession } from './auth.js'
+import { hashPassword } from './password.js'
+import handler from '../admin/donations/[id]/screenshot.js'
 
 // The route's only Blob dependency is `get()` — mocked so this test never
 // needs a real Blob network call, while donation lookup and admin-session
@@ -17,6 +17,19 @@ import handler from './screenshot.js'
 // matters here: which donation, whose session).
 vi.mock('@vercel/blob', () => ({ get: vi.fn() }))
 
+/**
+ * Lives in api/_lib/, not next to the route it tests
+ * (api/admin/donations/[id]/screenshot.ts), even though this is the only
+ * *.integration.test.ts file in the repo testing a route handler rather
+ * than a plain _lib function. Vercel's file-based routing treats every
+ * non-underscore-prefixed .ts under api/ as a deployable function — a first
+ * version of this file next to the route was built and deployed as its own
+ * (broken, vitest-import-only) serverless endpoint, confirmed directly from
+ * a real deployment's build manifest. api/_lib/ is the one place already
+ * proven excluded from routing (see CLAUDE.md's Backend section), so that's
+ * where every *.integration.test.ts file belongs, regardless of what it
+ * tests.
+ */
 async function createTestAdmin() {
   const [user] = await db
     .insert(adminUsers)
