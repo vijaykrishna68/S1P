@@ -1,4 +1,4 @@
-import { upload } from '@vercel/blob/client'
+import { uploadPresigned } from '@vercel/blob/client'
 
 export interface DonationSubmission {
   fullName: string
@@ -43,8 +43,8 @@ export async function submitDonation(submission: DonationSubmission): Promise<vo
   // storage path.
   const pathname = `donations/${crypto.randomUUID()}.${extension}`
 
-  const blob = await upload(pathname, submission.screenshot, {
-    access: 'public',
+  const blob = await uploadPresigned(pathname, submission.screenshot, {
+    access: 'private',
     handleUploadUrl: '/api/uploads/screenshot',
   })
 

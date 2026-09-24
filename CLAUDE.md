@@ -50,9 +50,11 @@ and direct user instruction win — see the Decision Log.
   chosen specifically to avoid cross-compiling a native module between this
   Windows dev machine and Vercel's Linux runtime.
 - **Vercel Blob** — screenshot storage, uploaded directly from the browser via
-  `@vercel/blob/client`'s `upload()`/`handleUpload()` client-upload pattern (bypasses
-  the serverless function body-size limit). See the Decision Log for the access-level
-  caveat.
+  `@vercel/blob/client`'s `uploadPresigned()`/`handleUploadPresigned()` client-upload
+  pattern (bypasses the serverless function body-size limit). As of the OIDC
+  migration (Decision Log), this uses Vercel's Signed URLs flow — OIDC
+  (`VERCEL_OIDC_TOKEN` + `BLOB_STORE_ID`) authenticates the server, no
+  `BLOB_READ_WRITE_TOKEN` involved — against the project's Private Blob store.
 - **Deployment: Vercel**, auto-detected as a Vite static build for the frontend, plus
   the `/api` serverless functions. See §13.
 
@@ -265,11 +267,16 @@ api/
   donations/
     index.ts          POST — creates a donation (public, rate-limited)
   uploads/
-    screenshot.ts      POST — issues a constrained Vercel Blob client-upload token
+    screenshot.ts      POST — issues a constrained Vercel Blob presigned upload URL
+                       (OIDC-authenticated `issueSignedToken`, no read-write token)
   admin/
     login.ts           POST — bcrypt-verify + create a DB-backed session
     logout.ts          POST — delete the session row + clear the cookie
     me.ts              GET — current admin identity via requireAdmin, or 401
+    donations/
+      [id]/
+        screenshot.ts   GET — requireAdmin, then streams that donation's
+                        private screenshot Blob server-side (see Decision Log)
   _lib/                Business logic, imported by route handlers AND by
                         integration tests directly — never inlined into a handler.
                         Vercel's convention: an underscore-prefixed folder under
@@ -753,18 +760,66 @@ introduce one.
   Implemented as a single atomic `INSERT ... ON CONFLICT DO UPDATE ... RETURNING`
   upsert specifically so there's no separate check-then-write race to reason about.
 - **Screenshot uploads go directly from the browser to Vercel Blob**
-  (`@vercel/blob/client`'s `upload()`/`handleUpload()` pattern), not through this
-  app's own API route body — Vercel serverless functions cap request bodies well
-  under the 8MB this app allows for a screenshot; client-direct upload sidesteps
-  that limit entirely rather than raising it or hand-rolling multipart streaming.
-- **Screenshot blobs use `access: 'public'` with a random path, not `'private'`** —
-  investigated and rejected specifically because it doesn't hold up, not by
-  default: reading the installed `@vercel/blob@2.8.0` SDK's own
-  `generateClientTokenFromReadWriteToken` source shows the signed client-upload
-  token's payload never includes `access` at all, so this server cannot bind or
-  verify which access level the browser's `upload()` call actually requests for
-  this flow. Claiming `'private'` here would have been an unverified security
-  property. Documented as a known limitation (§12), not silently worked around.
+  (`@vercel/blob/client`'s `uploadPresigned()`/`handleUploadPresigned()` pattern),
+  not through this app's own API route body — Vercel serverless functions cap
+  request bodies well under the 8MB this app allows for a screenshot;
+  client-direct upload sidesteps that limit entirely rather than raising it or
+  hand-rolling multipart streaming.
+- **Migrated the client-upload flow from `handleUpload()`/`upload()` to
+  `handleUploadPresigned()`/`uploadPresigned()` (Vercel Signed URLs), and
+  screenshot blobs now use `access: 'private'`, not `'public'`** — superseding
+  the two entries below. Root cause: Vercel's dashboard "Connect to Project"
+  flow now provisions Blob access via OIDC (`VERCEL_OIDC_TOKEN` +
+  `BLOB_STORE_ID`) by default and no longer mints a `BLOB_READ_WRITE_TOKEN` for
+  that path, confirmed by reading current Vercel documentation directly (not
+  assumed) and by observing that `vercel env pull` added `VERCEL_OIDC_TOKEN`
+  but no read-write token after connecting this project's existing Private
+  store. `handleUpload()` requires that static token to sign client tokens —
+  it cannot use OIDC — so it stopped being viable without deliberately
+  re-provisioning a token type Vercel's own flow no longer sets up by default.
+  `handleUploadPresigned()` is the documented, currently-supported
+  presigned-URL counterpart: it accepts OIDC credentials directly via
+  `issueSignedToken()`, so no long-lived token exists anywhere in this flow.
+  This also resolves the access-level limitation below for real: unlike the
+  old `handleUpload` client token, `uploadPresigned()`'s `access` option is a
+  real, enforced part of the presigned-URL flow against this project's
+  actual Blob store, which is genuinely configured Private — not an
+  unverified claim layered on top of a public store. See §12 for the
+  resulting caveat this introduces (an existing admin-dashboard `<img>` tag
+  that predates this migration).
+- ~~Screenshot blobs use `access: 'public'` with a random path, not
+  `'private'`~~ — **superseded, see above.** Originally investigated and
+  rejected specifically because it didn't hold up, not by default: reading
+  the installed `@vercel/blob@2.8.0` SDK's own
+  `generateClientTokenFromReadWriteToken` source showed the legacy
+  `handleUpload` client-upload token's payload never included `access` at
+  all, so the server couldn't bind or verify which access level the
+  browser's `upload()` call actually requested. That constraint no longer
+  applies under `handleUploadPresigned()`/`uploadPresigned()`.
+- **Private screenshot retrieval added as its own admin-only route,
+  `GET /api/admin/donations/[id]/screenshot`, rather than making the blob
+  reachable any other way** — direct follow-up to the OIDC migration above:
+  once uploads switched to `access: 'private'`, `donation.screenshotUrl`
+  stopped being a URL a browser could fetch at all, which broke
+  `SubmissionDetail.tsx`'s direct `<img src>`/`<a href>` usage of it. The new
+  route takes only a donation `id`; it looks up that donation's own
+  `screenshotUrl` from the database itself (never from anything the request
+  supplies) and passes it to the SDK's `get(urlOrPathname, { access: 'private'
+})`, which is the documented way to read a private blob server-side —
+  confirmed against the installed `@vercel/blob@2.8.0` type definitions, not
+  assumed. The response is the streamed image bytes
+  (`Readable.fromWeb(result.stream).pipe(res)`), never the underlying Blob URL
+  or any Blob/OIDC credential. Gated by the same `requireAdmin()` every other
+  admin route already uses — no new auth mechanism. `Cache-Control: private,
+no-store` on the response, since this is a donor's proof-of-payment image,
+  not something a shared cache should ever hold. The frontend change is a
+  one-line swap in `SubmissionDetail.tsx` (`donation.screenshotUrl` →
+  `/api/admin/donations/${id}/screenshot`) since an `<img>`/top-level `<a>`
+  request to a same-origin URL already carries the admin's session cookie —
+  no client-side auth wiring needed. `donation.screenshotUrl` itself is
+  unchanged in the schema and in `createDonation`/`listDonations`/etc.; it
+  remains the backend's own reference to the object, just no longer served to
+  the browser directly.
 - **Screenshot pathnames are client-generated random UUIDs, never the donor's
   original filename** — `donationService.ts` derives only a file extension from
   the upload's MIME type; the filename itself never reaches Blob storage, so a
@@ -863,11 +918,23 @@ jsdom` comment instead of paying jsdom's setup cost on every test file,
 - **CSP's `style-src` includes `'unsafe-inline'` because inline styles are
   genuinely used** (`App.tsx`'s scroll sentinel, `FAQ.tsx`'s height
   transition) — checked by grepping the codebase before writing the policy,
-  not assumed. `connect-src`/`img-src` allow both
+  not assumed.
+- **CSP's `connect-src`/`img-src` narrowed once the Blob access-level
+  question was actually settled** — the original Phase 7 policy allowed both
   `*.public.blob.vercel-storage.com` and `*.private.blob.vercel-storage.com`
-  since the Blob access-level question (§ Decision Log, Phase 5) isn't fully
-  settled — narrowing to just `public` now would need revisiting the moment
-  that changes.
+  on both directives because which access level the app would end up using
+  wasn't decided yet. Now that uploads use `access: 'private'` against a
+  store that's genuinely Private (OIDC migration, above) and the admin
+  dashboard reads screenshots through the same-origin
+  `/api/admin/donations/[id]/screenshot` route rather than an `<img>`
+  pointed at a Blob URL, neither directive has any real use for either
+  domain anymore: `img-src` no longer loads Blob URLs at all (confirmed by
+  grepping `src/` — nothing does), and `connect-src` only still needs
+  `*.private.blob.vercel-storage.com`, for `uploadPresigned()`'s direct
+  browser PUT to the private store's presigned URL. `public.blob...` never
+  applied to this store to begin with (access mode is fixed at store
+  creation and this store was created Private) and was removed from both
+  directives; `img-src`'s Blob entries were removed entirely.
 - **Admin dashboard is a second Vite entry (`admin.html` + `src/admin/`), not
   a route inside the existing SPA or a new router dependency** — with exactly
   two internal views (dashboard, submission detail) and zero deep-linking
@@ -1291,12 +1358,11 @@ Honest, current, non-exhaustive:
   execute `/api/*`). No CAPTCHA or bot-challenge exists on either the
   donation or login endpoint; the Postgres rate limiter is the only abuse
   mitigation so far (10/hour for donations, 20/hour for login attempts).
-- **Screenshot blobs are public-but-unguessable, not authenticated-private.** The
-  installed `@vercel/blob` version's client-upload token doesn't bind an access
-  level (verified by reading the SDK source, not assumed) — see the Decision Log.
-  A payment screenshot's URL is a random, unlisted path never linked from the
-  public site, but isn't gated behind admin auth the way the eventual dashboard's
-  _view_ of it will be.
+- ~~Screenshot blobs are now genuinely private, but the admin dashboard
+  doesn't fetch them through an authenticated route yet~~ — **resolved, see
+  the Decision Log's screenshot-read-path entry.** `SubmissionDetail.tsx` now
+  points at `GET /api/admin/donations/[id]/screenshot` instead of the raw
+  `donation.screenshotUrl`.
 - **No payment verification of any kind.** The UI is careful never to imply
   otherwise, but it's worth stating plainly here too: nothing about this
   site verifies a UPI transaction happened. The uploaded screenshot is the
@@ -1340,6 +1406,14 @@ Honest, current, non-exhaustive:
   project's settings to override the placeholder values without a code
   change. Unset, the app falls back to the obvious placeholders in
   `donation/config.ts`.
+- **Vercel Blob (required for the confirmation screenshot upload)**: the
+  project must have its Private Blob store connected with `BLOB_STORE_ID`
+  and `VERCEL_OIDC_TOKEN` (both automatic once connected, scoped to
+  Production/Preview and, for local `vercel env pull`, Development too) and
+  `BLOB_WEBHOOK_PUBLIC_KEY` (an explicit opt-in from the store's connection
+  menu, needed for `handleUploadPresigned` to verify its upload-completed
+  callback). `BLOB_READ_WRITE_TOKEN` is not used by this flow — see the
+  Decision Log's OIDC migration entry.
 - **Verified directly against the live URL** (not inferred from the local
   build): fresh page load with a clean console and all-200 network
   requests, canonical/OG/favicon metadata, the full donation flow end-to-end

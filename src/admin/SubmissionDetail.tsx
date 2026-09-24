@@ -118,9 +118,18 @@ export function SubmissionDetail({ id, onBack }: SubmissionDetailProps) {
 
             <div>
               <p className="text-sm text-charcoal-muted">Payment screenshot</p>
-              <a href={state.donation.screenshotUrl} target="_blank" rel="noreferrer">
+              {/* Routed through the authenticated screenshot endpoint, not
+                  donation.screenshotUrl directly — that Blob URL is private
+                  and not browser-fetchable on its own. An <img>/top-level
+                  <a> navigation to a same-origin URL still sends the admin's
+                  session cookie, so no extra wiring is needed here. */}
+              <a
+                href={`/api/admin/donations/${state.donation.id}/screenshot`}
+                target="_blank"
+                rel="noreferrer"
+              >
                 <img
-                  src={state.donation.screenshotUrl}
+                  src={`/api/admin/donations/${state.donation.id}/screenshot`}
                   alt={`Payment screenshot uploaded by ${state.donation.fullName}`}
                   loading="lazy"
                   className="mt-2 max-h-96 rounded-xl border border-charcoal/10 object-contain"
