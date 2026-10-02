@@ -4,6 +4,7 @@ import { Container } from '../components/ui/Container'
 import { Button } from '../components/ui/Button'
 import { ClosingBand } from '../components/ui/ClosingBand'
 import { IllustrationSlot } from '../components/ui/IllustrationSlot'
+import { EchoMark } from '../components/mission/EchoMark'
 import { SectionDivider } from '../components/ui/SectionDivider'
 import { TwoTrack } from '../components/ui/TwoTrack'
 import { revealStep, useScrollReveal } from '../components/ui/useScrollReveal'
@@ -62,7 +63,13 @@ export function AboutPage() {
         <section className="pad-t-breathing pad-b-standard">
           <Container>
             <div ref={heroRef} className={heroReveal.className}>
-              <TwoTrack aside={<IllustrationSlot name="about-hero-mark" />}>
+              <TwoTrack
+                aside={
+                  <IllustrationSlot name="about-hero-mark">
+                    <EchoMark className="h-56 w-56" />
+                  </IllustrationSlot>
+                }
+              >
                 <h1
                   className="font-display text-4xl font-bold leading-[1.1] tracking-tight text-charcoal md:text-5xl reveal-item"
                   style={revealStep(0)}

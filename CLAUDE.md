@@ -418,6 +418,12 @@ src/
                        useScrollReveal, usePrefersReducedMotion, TwoTrack,
                        IllustrationSlot, SectionDivider, ClosingBand) — added on
                        real reuse, not speculatively
+    illustrations/    Phase 4C art: TrustSeal, ViewfinderMark, WedgeOnNotebook
+                       (thin components over supplied PNGs, via DecorativeImage)
+                       and illustrationTokens.ts (Tier A line weight/opacity,
+                       used by the code-drawn EchoMark in mission/)
+  assets/illustrations/  The processed PNGs those components import (Vite hashes
+                       them). Originals: art/phase4c/preview/ (not shipped)
   styles/             Global CSS, Tailwind entry, design tokens, shared .reveal
                        and .step-enter entrance utilities
   App.tsx             Composes all sections in page order; no page-shell
@@ -1436,6 +1442,24 @@ dev`), desktop and mobile. **Before:** desktop Performance 100 /
   skeleton is a gentler pulse with a proper `role="status"`; copy buttons no longer
   resize. Explicitly deferred: viewer previous/next and swipe, the success-heart
   settle, field/uploader fades. No copy, layout, colour, or illustration changes.
+
+- **Phase 4C — Illustrations: implemented, pending approval.** Audit:
+  `Docs/PHASE4C_ILLUSTRATION_AUDIT.md`; production briefs:
+  `Docs/PHASE4C_ILLUSTRATION_SPECS.md`. `EchoMark` stays code-drawn (non-scaling
+  1.75px strokes, outline dots .45, core opaque). The Trust seal, Gallery
+  viewfinder and shared closing illustration are **externally generated PNGs**
+  (the generator could not output SVG), used directly as decorative `<img>`s
+  (`aria-hidden`, empty alt) rather than traced. Processing, done once from the
+  originals in `art/phase4c/preview/` into `src/assets/illustrations/`: seal and
+  viewfinder were made transparent (colour-to-alpha against the page cream) and
+  trimmed to their ink; the closing image stays opaque (its figure fills must
+  stay solid over the red/green blocks) with its background snapped to the
+  ClosingBand's `#FDEDE3`. Known trade-offs of raster art: line weight is baked
+  in (seal about 3px, closing about 1.1px rendered, versus the 1.75/2px
+  spec), and palette drifts slightly from the tokens (reds `#D53F3D` to
+  `#E04545`, charcoal about `#2C2C2C`). The supplied closing art crops its arm and
+  ghost circle at the image edge, not the band edge. Slots stay hidden below
+  `md`; no motion; Origin objects, stat markers and quote anchor unchanged.
 
 ## 11. Portfolio Case-Study Highlights
 

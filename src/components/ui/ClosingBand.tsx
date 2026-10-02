@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { WedgeOnNotebook } from '../illustrations/WedgeOnNotebook'
 import { Container } from './Container'
 import { TwoTrack } from './TwoTrack'
 import { IllustrationSlot } from './IllustrationSlot'
@@ -13,8 +14,9 @@ interface ClosingBandProps {
 
 /**
  * The shared closing section for About and Gallery, which previously carried
- * two near-identical copies of the same text block (audit §6, §7.7). Reserves
- * the Tier B closing illustration slot; the artwork itself is Phase 4C.
+ * two near-identical copies of the same text block (audit §6, §7.7). Carries
+ * the shared Tier B closing illustration, whose baked-in background is this
+ * band's cream-soft colour.
  */
 export function ClosingBand({ heading, children, action }: ClosingBandProps) {
   const { ref, revealProps } = useScrollReveal<HTMLDivElement>()
@@ -23,7 +25,13 @@ export function ClosingBand({ heading, children, action }: ClosingBandProps) {
     <section className="bg-cream-soft pad-breathing">
       <Container>
         <div ref={ref} className={revealProps.className}>
-          <TwoTrack aside={<IllustrationSlot name="closing-band" on="soft" />}>
+          <TwoTrack
+            aside={
+              <IllustrationSlot name="closing-band">
+                <WedgeOnNotebook />
+              </IllustrationSlot>
+            }
+          >
             <h2
               className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl reveal-item"
               style={revealStep(0)}

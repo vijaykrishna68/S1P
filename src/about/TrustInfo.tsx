@@ -1,4 +1,5 @@
 import { Container } from '../components/ui/Container'
+import { TrustSeal } from '../components/illustrations/TrustSeal'
 import { IllustrationSlot } from '../components/ui/IllustrationSlot'
 import { TwoTrack } from '../components/ui/TwoTrack'
 import { revealStep, useScrollReveal } from '../components/ui/useScrollReveal'
@@ -17,7 +18,13 @@ export function TrustInfo() {
     <section className="pad-tight">
       <Container>
         <div ref={ref} className={revealProps.className}>
-          <TwoTrack aside={<IllustrationSlot name="trust-seal" />}>
+          <TwoTrack
+            aside={
+              <IllustrationSlot name="trust-seal">
+                <TrustSeal />
+              </IllustrationSlot>
+            }
+          >
             <h2
               className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl reveal-item"
               style={revealStep(0)}

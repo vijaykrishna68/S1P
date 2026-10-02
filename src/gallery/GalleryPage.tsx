@@ -3,6 +3,7 @@ import { Footer } from '../components/layout/Footer'
 import { Container } from '../components/ui/Container'
 import { Button } from '../components/ui/Button'
 import { ClosingBand } from '../components/ui/ClosingBand'
+import { ViewfinderMark } from '../components/illustrations/ViewfinderMark'
 import { IllustrationSlot } from '../components/ui/IllustrationSlot'
 import { SectionDivider } from '../components/ui/SectionDivider'
 import { TwoTrack } from '../components/ui/TwoTrack'
@@ -28,10 +29,9 @@ export function GalleryPage() {
             <div ref={heroRef} className={heroReveal.className}>
               <TwoTrack
                 aside={
-                  <IllustrationSlot
-                    name="gallery-hero-mark"
-                    className="aspect-[3/2] max-w-xs"
-                  />
+                  <IllustrationSlot name="gallery-hero-mark">
+                    <ViewfinderMark />
+                  </IllustrationSlot>
                 }
               >
                 <h1

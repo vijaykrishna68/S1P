@@ -78,9 +78,9 @@ export function GalleryGrid() {
 
   if (state.items.length === 0) {
     return (
-      // Quiet-mark slot (Tier A): holds the existing EchoMark until Phase 4C
-      // decides on final art. Not a spot illustration, so it stays inside the
-      // per-page spot-illustration budget alongside the closing band.
+      // Quiet-mark slot (Tier A): the plain EchoMark (Phase 4C S8), kept distinct
+      // from the viewfinder in the hero above it. Not a spot illustration, so it
+      // stays inside the per-page spot-illustration budget alongside the closing band.
       <div
         data-illustration-slot="gallery-empty-state"
         className="mx-auto flex max-w-2xl flex-col items-center gap-6 rounded-2xl bg-yellow-tint px-6 py-14 text-center"
