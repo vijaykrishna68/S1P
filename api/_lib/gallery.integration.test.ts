@@ -33,7 +33,9 @@ function fakeImageStream(bytes: Uint8Array): ReadableStream<Uint8Array> {
 const REAL_PNG_BYTES = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
 const NOT_AN_IMAGE_BYTES = new Uint8Array([0x00, 0x01, 0x02, 0x03])
 
-async function insertGalleryImage(overrides: Partial<typeof galleryImages.$inferInsert> = {}) {
+async function insertGalleryImage(
+  overrides: Partial<typeof galleryImages.$inferInsert> = {},
+) {
   const [row] = await db
     .insert(galleryImages)
     .values({
@@ -140,9 +142,13 @@ describe('gallery images (integration)', () => {
 
   describe('listGalleryImages', () => {
     it('orders newest first', async () => {
-      const first = await insertGalleryImage({ createdAt: new Date('2026-01-01T00:00:00Z') })
+      const first = await insertGalleryImage({
+        createdAt: new Date('2026-01-01T00:00:00Z'),
+      })
       await insertGalleryImage({ createdAt: new Date('2026-01-02T00:00:00Z') })
-      const third = await insertGalleryImage({ createdAt: new Date('2026-01-03T00:00:00Z') })
+      const third = await insertGalleryImage({
+        createdAt: new Date('2026-01-03T00:00:00Z'),
+      })
 
       const rows = await listGalleryImages()
 

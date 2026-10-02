@@ -204,11 +204,11 @@ verification, no CAPTCHA, placeholder content still in place, etc.).
 
 ## Documentation Map
 
-| File | Purpose |
-|---|---|
-| [`CLAUDE.md`](CLAUDE.md) | Living engineering/design context, phase-by-phase history, full decision log |
-| [`Docs/DECISIONS.md`](Docs/DECISIONS.md) | Standalone architecture/decision record (choice, why, alternatives) |
-| [`Docs/PROJECT_CONTEXT.md`](Docs/PROJECT_CONTEXT.md) | Deep technical reference: data flow, security model, endpoints, schema, historical bugs |
-| [`Docs/INTERVIEW_PREP.md`](Docs/INTERVIEW_PREP.md) | Interview Q&A grounded in this specific implementation |
-| [`Docs/CASE_STUDY.md`](Docs/CASE_STUDY.md) | Portfolio-style narrative case study (frontend-focused; predates the backend) |
-| [`Docs/PRD.md`](Docs/PRD.md) / [`Docs/02UI_UX.md`](Docs/02UI_UX.md) | Original product/design spec (partially superseded — see `CLAUDE.md`'s Decision Log) |
+| File                                                                | Purpose                                                                                 |
+| ------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| [`CLAUDE.md`](CLAUDE.md)                                            | Living engineering/design context, phase-by-phase history, full decision log            |
+| [`Docs/DECISIONS.md`](Docs/DECISIONS.md)                            | Standalone architecture/decision record (choice, why, alternatives)                     |
+| [`Docs/PROJECT_CONTEXT.md`](Docs/PROJECT_CONTEXT.md)                | Deep technical reference: data flow, security model, endpoints, schema, historical bugs |
+| [`Docs/INTERVIEW_PREP.md`](Docs/INTERVIEW_PREP.md)                  | Interview Q&A grounded in this specific implementation                                  |
+| [`Docs/CASE_STUDY.md`](Docs/CASE_STUDY.md)                          | Portfolio-style narrative case study (frontend-focused; predates the backend)           |
+| [`Docs/PRD.md`](Docs/PRD.md) / [`Docs/02UI_UX.md`](Docs/02UI_UX.md) | Original product/design spec (partially superseded — see `CLAUDE.md`'s Decision Log)    |

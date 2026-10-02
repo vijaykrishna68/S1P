@@ -194,6 +194,7 @@ across invocations instead of opening a fresh connection per request.
 section.
 
 **Why (indexes specifically):**
+
 - `donations_idempotency_key_key` (unique) — makes the idempotency guarantee
   a real database constraint, not just an application-level check, so a race
   between two concurrent requests with the same key can't both insert.

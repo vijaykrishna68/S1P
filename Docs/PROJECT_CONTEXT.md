@@ -45,6 +45,7 @@ database and Blob store with real credentials (see §12 Known Limitations)
 that is a different Postgres from the production Neon project.
 
 **What this is explicitly NOT:**
+
 - **Not a payment processor or payment gateway.** No transaction is
   initiated, executed, or verified by this system. The donor pays entirely
   within their own UPI app; this site never touches money.
@@ -85,6 +86,7 @@ landing page
 ```
 
 **Important edge cases actually handled:**
+
 - **Amount above ₹3000:** the amount field shows a `tel:` link to a
   placeholder phone number instead of letting the donor proceed — no
   backend involvement, purely a frontend branch in `AmountStep`.
@@ -128,13 +130,14 @@ admin login (LoginPage, /admin.html)
 ```
 
 **Important edge cases actually handled:**
+
 - **Session expiry:** every admin route calls `getAdminIdentity`/`requireAdmin`,
   which checks the session row's `expiresAt` against the current time on
   every request — an expired session is treated identically to no session
   (401), not trusted just because the cookie is present.
 - **Unauthenticated access to any `/api/admin/*` or admin-gated
   `/api/donations*` route:** 401 with `{ error: { message: "Authentication
-  required." } }`, uniform across every admin route via the shared
+required." } }`, uniform across every admin route via the shared
   `requireAdmin` guard.
 - **Donation not found (bad id in the URL):** `GET`/`PATCH /api/donations/[id]`
   and the screenshot route all return 404, not a 500 or an empty success.
@@ -190,7 +193,7 @@ or a pile of booleans:
 
 1. **`donationReducer`** (`src/components/donation/donationReducer.ts`) —
    owns which of 4 screens is showing (`amount → payment → confirmation →
-   success`). 4 actions (`AMOUNT_CONFIRMED`, `PAYMENT_CONFIRMED`,
+success`). 4 actions (`AMOUNT_CONFIRMED`, `PAYMENT_CONFIRMED`,
    `SUBMISSION_SUCCEEDED`, `RESTART`), changes a handful of times per
    donation, owned by `DonationSection`.
 2. **`confirmationFormReducer`** (`.../confirmationFormReducer.ts`) — owns
@@ -359,17 +362,17 @@ bug on a test file being deployed as a real function).
 
 ### Endpoint table
 
-| Method | Endpoint | Purpose | Auth | Important behavior |
-|---|---|---|---|---|
-| `POST` | `/api/donations` | Create a donation | Public, rate-limited (10/hr per IP) | Idempotency-key check before rate limit/image verification; server-side magic-byte screenshot check; orphaned-blob cleanup on every rejection path; `201` on new, `200` on idempotent replay |
-| `GET` | `/api/donations` | List donations (paginated, status-filterable) + always-unfiltered summary tiles | Admin (`requireAdmin`) | `page`/`pageSize`/`status` via Zod query schema; summary is computed across all donations regardless of the active filter |
-| `GET` | `/api/donations/[id]` | Donation detail | Admin | 404 if not found |
-| `PATCH` | `/api/donations/[id]` | Update donation status (`pending`/`reviewed`/`rejected`) | Admin | 404 if not found; Zod-validated status enum |
-| `POST` | `/api/uploads/screenshot` | Issue a presigned Vercel Blob upload token | Public (no session required — needed before the donor has submitted anything) | Constrained to `image/png`/`jpeg`/`webp`, 8MB max, `access: 'private'`, random-suffixed pathname; OIDC-authenticated via `issueSignedToken` |
-| `POST` | `/api/admin/login` | Admin login | Public, rate-limited (20/hr per IP) | Timing-safe against email enumeration (dummy bcrypt hash compared for unknown emails); sets `httpOnly`/`SameSite=Strict` session cookie |
-| `POST` | `/api/admin/logout` | Admin logout | Session cookie (no `requireAdmin` gate — safe to call even with an already-invalid/missing session) | Deletes the session row server-side, then clears the cookie |
-| `GET` | `/api/admin/me` | Current admin identity | Admin | Used by `AdminApp` on mount to decide login vs. dashboard |
-| `GET` | `/api/admin/donations/[id]/screenshot` | Stream a donation's private screenshot | Admin | Blob URL resolved server-side from the DB row only, never from request input; `Cache-Control: private, no-store`; streams bytes, never returns the underlying Blob URL |
+| Method  | Endpoint                               | Purpose                                                                         | Auth                                                                                                | Important behavior                                                                                                                                                                           |
+| ------- | -------------------------------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `POST`  | `/api/donations`                       | Create a donation                                                               | Public, rate-limited (10/hr per IP)                                                                 | Idempotency-key check before rate limit/image verification; server-side magic-byte screenshot check; orphaned-blob cleanup on every rejection path; `201` on new, `200` on idempotent replay |
+| `GET`   | `/api/donations`                       | List donations (paginated, status-filterable) + always-unfiltered summary tiles | Admin (`requireAdmin`)                                                                              | `page`/`pageSize`/`status` via Zod query schema; summary is computed across all donations regardless of the active filter                                                                    |
+| `GET`   | `/api/donations/[id]`                  | Donation detail                                                                 | Admin                                                                                               | 404 if not found                                                                                                                                                                             |
+| `PATCH` | `/api/donations/[id]`                  | Update donation status (`pending`/`reviewed`/`rejected`)                        | Admin                                                                                               | 404 if not found; Zod-validated status enum                                                                                                                                                  |
+| `POST`  | `/api/uploads/screenshot`              | Issue a presigned Vercel Blob upload token                                      | Public (no session required — needed before the donor has submitted anything)                       | Constrained to `image/png`/`jpeg`/`webp`, 8MB max, `access: 'private'`, random-suffixed pathname; OIDC-authenticated via `issueSignedToken`                                                  |
+| `POST`  | `/api/admin/login`                     | Admin login                                                                     | Public, rate-limited (20/hr per IP)                                                                 | Timing-safe against email enumeration (dummy bcrypt hash compared for unknown emails); sets `httpOnly`/`SameSite=Strict` session cookie                                                      |
+| `POST`  | `/api/admin/logout`                    | Admin logout                                                                    | Session cookie (no `requireAdmin` gate — safe to call even with an already-invalid/missing session) | Deletes the session row server-side, then clears the cookie                                                                                                                                  |
+| `GET`   | `/api/admin/me`                        | Current admin identity                                                          | Admin                                                                                               | Used by `AdminApp` on mount to decide login vs. dashboard                                                                                                                                    |
+| `GET`   | `/api/admin/donations/[id]/screenshot` | Stream a donation's private screenshot                                          | Admin                                                                                               | Blob URL resolved server-side from the DB row only, never from request input; `Cache-Control: private, no-store`; streams bytes, never returns the underlying Blob URL                       |
 
 ### Request/response behavior and error handling
 
@@ -386,6 +389,7 @@ methods.
 
 See `Docs/DECISIONS.md`'s "Idempotency key checked before the rate limiter"
 entry for the full reasoning. In order:
+
 1. Look up an existing row by `idempotencyKey`. If found, it's a retry —
    clean up the just-uploaded blob if it differs from the original (a donor
    who retries after re-selecting a different screenshot shouldn't leave
@@ -426,17 +430,18 @@ its own.
 ### Schema (as implemented in `db/schema.ts`)
 
 **`donations`**
-| Column | Type | Notes |
-|---|---|---|
-| `id` | `uuid`, PK, default random | |
-| `full_name` | `text`, not null | |
-| `address` | `text`, not null | |
-| `amount_paid` | `integer`, not null | Whole rupees — no paise, no float |
-| `screenshot_url` | `text`, not null | Vercel Blob URL |
-| `status` | enum (`pending`/`reviewed`/`rejected`), not null, default `pending` | |
-| `idempotency_key` | `uuid`, not null, **unique** | One per submission attempt, not per HTTP request |
-| `ip_address` | `text`, nullable | From `x-forwarded-for` |
-| `created_at` / `updated_at` | `timestamptz`, not null, default now | |
+
+| Column                      | Type                                                                | Notes                                            |
+| --------------------------- | ------------------------------------------------------------------- | ------------------------------------------------ |
+| `id`                        | `uuid`, PK, default random                                          |                                                  |
+| `full_name`                 | `text`, not null                                                    |                                                  |
+| `address`                   | `text`, not null                                                    |                                                  |
+| `amount_paid`               | `integer`, not null                                                 | Whole rupees — no paise, no float                |
+| `screenshot_url`            | `text`, not null                                                    | Vercel Blob URL                                  |
+| `status`                    | enum (`pending`/`reviewed`/`rejected`), not null, default `pending` |                                                  |
+| `idempotency_key`           | `uuid`, not null, **unique**                                        | One per submission attempt, not per HTTP request |
+| `ip_address`                | `text`, nullable                                                    | From `x-forwarded-for`                           |
+| `created_at` / `updated_at` | `timestamptz`, not null, default now                                |                                                  |
 
 Indexes: `donations_idempotency_key_key` (unique — the real idempotency
 guarantee, not just an app-level check), `donations_created_at_idx`
@@ -444,28 +449,31 @@ guarantee, not just an app-level check), `donations_created_at_idx`
 `status` then `created_at` — the filtered listing's exact query shape).
 
 **`admin_users`**
-| Column | Type | Notes |
-|---|---|---|
-| `id` | `uuid`, PK | |
-| `email` | `text`, not null, **unique** | |
-| `password_hash` | `text`, not null | bcrypt, cost 12 |
-| `created_at` | `timestamptz`, default now | |
+
+| Column          | Type                         | Notes           |
+| --------------- | ---------------------------- | --------------- |
+| `id`            | `uuid`, PK                   |                 |
+| `email`         | `text`, not null, **unique** |                 |
+| `password_hash` | `text`, not null             | bcrypt, cost 12 |
+| `created_at`    | `timestamptz`, default now   |                 |
 
 **`admin_sessions`**
-| Column | Type | Notes |
-|---|---|---|
-| `id` | `uuid`, PK | |
-| `user_id` | `uuid`, not null, FK → `admin_users.id`, `ON DELETE CASCADE` | |
-| `token_hash` | `text`, not null, **unique** | SHA-256 of the raw token — raw token never stored |
-| `expires_at` | `timestamptz`, not null | 12 hours from creation |
-| `created_at` | `timestamptz`, default now | |
+
+| Column       | Type                                                         | Notes                                             |
+| ------------ | ------------------------------------------------------------ | ------------------------------------------------- |
+| `id`         | `uuid`, PK                                                   |                                                   |
+| `user_id`    | `uuid`, not null, FK → `admin_users.id`, `ON DELETE CASCADE` |                                                   |
+| `token_hash` | `text`, not null, **unique**                                 | SHA-256 of the raw token — raw token never stored |
+| `expires_at` | `timestamptz`, not null                                      | 12 hours from creation                            |
+| `created_at` | `timestamptz`, default now                                   |                                                   |
 
 **`rate_limits`**
-| Column | Type | Notes |
-|---|---|---|
-| `key` | `text` | Purpose-prefixed (`donation:<ip>`, `login:<ip>`) |
-| `window_start` | `timestamptz` | Current hour, truncated |
-| `count` | `integer`, default 0 | |
+
+| Column         | Type                 | Notes                                            |
+| -------------- | -------------------- | ------------------------------------------------ |
+| `key`          | `text`               | Purpose-prefixed (`donation:<ip>`, `login:<ip>`) |
+| `window_start` | `timestamptz`        | Current hour, truncated                          |
+| `count`        | `integer`, default 0 |                                                  |
 
 Composite primary key `(key, window_start)` — this is what makes the atomic
 upsert (`INSERT ... ON CONFLICT (key, window_start) DO UPDATE SET count = count + 1`)
@@ -481,7 +489,7 @@ keyed by IP, not by donation).
 - **Admin list, unfiltered:** `ORDER BY created_at DESC LIMIT ? OFFSET ?`
   — served by `donations_created_at_idx`.
 - **Admin list, filtered:** `WHERE status = ? ORDER BY created_at DESC
-  LIMIT ? OFFSET ?` — served by the composite `donations_status_created_at_idx`
+LIMIT ? OFFSET ?` — served by the composite `donations_status_created_at_idx`
   in a single index scan.
 - **Summary tiles:** a single aggregate query
   (`count(*)`, `sum(amount_paid)`, `count(*) filter (where status = 'pending')`)
@@ -636,6 +644,7 @@ viewing) goes through OIDC-authenticated SDK calls, never a public URL.
 **Frontend unit/component tests** (Vitest, `node` environment by default,
 `jsdom` opt-in per file) — currently **30 tests passing across 5 files**
 (verified by running `npx vitest run` directly against this repository):
+
 - `api/_lib/password.test.ts` — bcrypt hash/verify round-trip, zero
   database dependency (see §Backend/password module decision).
 - `src/components/donation/confirmationFormReducer.test.ts` — every
@@ -653,6 +662,7 @@ viewing) goes through OIDC-authenticated SDK calls, never a public URL.
 run only via `npm run test:integration`, requiring a real `DATABASE_URL`)
 — **28 test cases across 4 files** (counted directly from the current
 repository's test files):
+
 - `api/_lib/donations.integration.test.ts` (9 cases) — `createDonation`:
   creation, real-image-signature rejection, idempotency no-op, the DB-level
   unique constraint under a race, rate-limit enforcement.
@@ -810,7 +820,7 @@ each in its own worker; all the integration test files shared one physical
 Postgres with no per-file isolation, so one file's `TRUNCATE`/inserts could
 land mid-test in another file. **Fix:** `fileParallelism: false` in
 `vitest.integration.config.ts`, forcing all integration files to run
-sequentially — tests *within* a file were never the problem, since Vitest
+sequentially — tests _within_ a file were never the problem, since Vitest
 already serializes those. **Lesson:** "tests pass locally, one file at a
 time" and "tests pass in a full concurrent run" are different claims;
 concurrency bugs in test infrastructure look exactly like flaky
@@ -891,12 +901,13 @@ server), desktop and mobile Lighthouse runs, as recorded in `CLAUDE.md`'s
 Phase 9 entry:
 
 **Before fixes:**
-| Category | Desktop | Mobile |
-|---|---|---|
-| Performance | 100 | 95 |
-| Accessibility | 96 | — |
-| Best Practices | 100 | — |
-| SEO | 92 | — |
+
+| Category       | Desktop | Mobile |
+| -------------- | ------- | ------ |
+| Performance    | 100     | 95     |
+| Accessibility  | 96      | —      |
+| Best Practices | 100     | —      |
+| SEO            | 92      | —      |
 
 Two specific, real findings (not simulated/invented): (1) no
 `public/robots.txt` existed, so Lighthouse tried parsing `index.html`'s own

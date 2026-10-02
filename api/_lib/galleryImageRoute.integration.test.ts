@@ -14,7 +14,9 @@ import handler from '../gallery/[id]/image.js'
 // Postgres from vitest.integration.config.ts.
 vi.mock('@vercel/blob', () => ({ get: vi.fn() }))
 
-async function insertGalleryImage(overrides: Partial<typeof galleryImages.$inferInsert> = {}) {
+async function insertGalleryImage(
+  overrides: Partial<typeof galleryImages.$inferInsert> = {},
+) {
   const [row] = await db
     .insert(galleryImages)
     .values({
@@ -25,8 +27,14 @@ async function insertGalleryImage(overrides: Partial<typeof galleryImages.$infer
   return row
 }
 
-function mockRequest(opts: { id?: string; extraQuery?: Record<string, string> }): VercelRequest {
-  return { method: 'GET', query: { id: opts.id, ...opts.extraQuery } } as unknown as VercelRequest
+function mockRequest(opts: {
+  id?: string
+  extraQuery?: Record<string, string>
+}): VercelRequest {
+  return {
+    method: 'GET',
+    query: { id: opts.id, ...opts.extraQuery },
+  } as unknown as VercelRequest
 }
 
 /** Same Writable-based response mock as adminScreenshotRoute.integration.test.ts
@@ -134,7 +142,10 @@ describe('GET /api/gallery/[id]/image (integration)', () => {
 
     const { res, finished } = mockResponse()
     await handler(
-      mockRequest({ id: image.id, extraQuery: { url: other.blobUrl, path: other.blobUrl } }),
+      mockRequest({
+        id: image.id,
+        extraQuery: { url: other.blobUrl, path: other.blobUrl },
+      }),
       res,
     )
     await finished

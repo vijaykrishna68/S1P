@@ -171,7 +171,7 @@ image bytes, in that specific order, before inserting.
    screenshot).
 2. **Client:** once the upload resolves, the client `POST`s
    `/api/donations` with `{ fullName, address, amountPaid, screenshotUrl,
-   idempotencyKey }` — the idempotency key was generated once, client-side,
+idempotencyKey }` — the idempotency key was generated once, client-side,
    when the confirmation form was first submitted (not per HTTP request),
    cached in a `useRef` so a retry reuses the same value.
 3. **Server (`api/donations/index.ts` → `createDonation` in
@@ -210,7 +210,7 @@ image bytes, in that specific order, before inserting.
 
 **Short answer**
 
-The client generates one UUID per submission *attempt* (not per HTTP
+The client generates one UUID per submission _attempt_ (not per HTTP
 request), sends it with every retry of that same attempt, and the database
 enforces uniqueness on it — so a duplicate key means "this exact attempt
 already happened," and the server returns the original result instead of
@@ -222,7 +222,7 @@ The key is generated in `ConfirmationStep.tsx` the first time the donor
 presses submit (`idempotencyKeyRef.current ??= crypto.randomUUID()`), and
 cached in a `useRef` — a `ref`, not state, specifically because it needs to
 survive re-renders during the submission but must not itself trigger one.
-If that submission fails and the donor presses submit again, the *same*
+If that submission fails and the donor presses submit again, the _same_
 key is reused, not a new one. Server-side, `donations.idempotency_key` has
 a unique index (`donations_idempotency_key_key`), so the guarantee is a
 real database constraint, not just an application-level "check first" that
@@ -606,8 +606,8 @@ on the rate-limit table that doubles as its atomic-upsert target.
 - `donations_created_at_idx` — serves the admin dashboard's default,
   unfiltered "newest first" listing (`ORDER BY created_at DESC LIMIT ?`).
 - `donations_status_created_at_idx`, composite with `status` as the leading
-  column — serves the *filtered* listing (`WHERE status = ? ORDER BY
-  created_at DESC`) from a single index scan. Kept as a separate index from
+  column — serves the _filtered_ listing (`WHERE status = ? ORDER BY
+created_at DESC`) from a single index scan. Kept as a separate index from
   the plain `created_at` one deliberately: a composite index with `status`
   leading can't efficiently serve a query with no `status` predicate at
   all, so one index can't cover both query shapes.
@@ -615,7 +615,7 @@ on the rate-limit table that doubles as its atomic-upsert target.
   can't share an email), not just a lookup speed-up.
 - `admin_sessions_token_hash_key` (unique) — the hot-path lookup on every
   single authenticated request.
-- `rate_limits`' composite primary key `(key, window_start)` — this *is*
+- `rate_limits`' composite primary key `(key, window_start)` — this _is_
   the mechanism that makes the atomic
   `INSERT ... ON CONFLICT (key, window_start) DO UPDATE` upsert possible.
 
@@ -643,7 +643,7 @@ operation in a `try/catch`; on an unexpected failure it `console.error`s
 the real error (visible in Vercel's function logs, not the response) and
 sends a generic `500` with a safe message like "We couldn't submit your
 confirmation. Please try again." Validation failures (Zod) are the one case
-where the client *does* get a specific message — the first Zod issue's own
+where the client _does_ get a specific message — the first Zod issue's own
 message, which is written to be donor/admin-readable already (e.g. "Amount
 must be at least ₹300."). Unsupported HTTP methods get a `405` with an
 `Allow` header listing what is supported.
@@ -686,7 +686,7 @@ screenshots got large or numerous enough to matter.
 **Evidence in S1P**
 
 `db/client.ts`'s `max: 5` pool size; `api/_lib/rateLimit.ts`'s documented
-fixed-window tradeoff (this is a documented *current* limitation, not
+fixed-window tradeoff (this is a documented _current_ limitation, not
 something already fixed).
 
 ---
@@ -747,7 +747,7 @@ reachable except through that API layer.
 validation exists purely for UX (`validateConfirmationForm`); the server
 independently re-validates everything with Zod. The uploaded screenshot's
 declared MIME type is untrusted; the server checks real bytes. The
-idempotency key is client-generated but its *uniqueness guarantee* is
+idempotency key is client-generated but its _uniqueness guarantee_ is
 enforced by the database, not trusted from the client's good behavior. The
 donor's browser never has direct database or Blob credentials — it gets a
 narrowly-scoped, short-lived presigned upload token, and even that token is
@@ -831,7 +831,7 @@ queue would make sense for anything genuinely asynchronous that doesn't
 need to block the donor's submission response — a donor confirmation
 email, or a future automated pre-check on the screenshot before it reaches
 a human reviewer — but the core `createDonation` write path itself
-(idempotency check, rate limit, insert) is a good candidate to *keep*
+(idempotency check, rate limit, insert) is a good candidate to _keep_
 synchronous, since the donor is waiting on that response and the operations
 involved are already fast.
 
@@ -915,11 +915,11 @@ probably per-admin audit trail on status changes.
 
 **Deep answer**
 
-**Current S1P architecture:** deliberately single-admin by *process*, not
+**Current S1P architecture:** deliberately single-admin by _process_, not
 by schema — `admin_users.email` is unique per row, but nothing prevents a
 second row from existing; there's simply no code path that creates one
 except the manual `npm run db:seed-admin` script, run directly against the
-database. `updateDonationStatus` doesn't currently record *which* admin
+database. `updateDonationStatus` doesn't currently record _which_ admin
 made a change.
 
 **How I would evolve it:** add an invite or admin-creation flow (currently
@@ -933,7 +933,7 @@ person can make them.
 
 `db/schema.ts`'s `adminUsers` (no single-row constraint, just a unique
 email index); `db/seedAdmin.ts`'s `onConflictDoUpdate` (designed for
-rotating *one* known account, not managing many).
+rotating _one_ known account, not managing many).
 
 ---
 
@@ -1045,7 +1045,7 @@ sliding-window precision.
 **Current S1P architecture:** `POST /api/donations` is capped at 10/hour
 per IP, `POST /api/admin/login` at 20/hour per IP, both via the same
 Postgres fixed-window mechanism. This is a real, working deterrent against
-casual scripted abuse, and it's explicitly documented as *not* a claim of
+casual scripted abuse, and it's explicitly documented as _not_ a claim of
 strong resistance against a sophisticated or distributed attacker — there's
 no CAPTCHA, no device fingerprinting, no anomaly detection anywhere in the
 system.
@@ -1110,11 +1110,11 @@ independent flags.
 **Deep answer**
 
 `useReducer` was chosen over plain `useState` specifically where a piece of
-UI has *multiple states with named transitions between them* — the
+UI has _multiple states with named transitions between them_ — the
 donation step flow (`amount → payment → confirmation → success`, 4
 actions) and the confirmation form's submission lifecycle
 (`idle → submitting → error`, 4 actions) both fit that shape well. They're
-kept as two *separate* reducers, not merged, because they change at
+kept as two _separate_ reducers, not merged, because they change at
 completely different rates for different reasons: the step reducer changes
 a handful of times per donation, advanced by discrete button clicks; the
 form reducer changes on every keystroke. Merging them would mean every
@@ -1163,7 +1163,7 @@ passes, it dispatches `SUBMIT_STARTED` and calls
 `donationService.submitDonation()` — the one function this whole flow
 depends on for actually reaching the backend. On success, it calls the
 `onSuccess` callback passed down from `DonationSection`, which dispatches
-`SUBMISSION_SUCCEEDED` on the *outer* reducer, moving to the `success`
+`SUBMISSION_SUCCEEDED` on the _outer_ reducer, moving to the `success`
 step. On failure, it dispatches `SUBMIT_FAILED` with the error message,
 staying on the same step with the donor's typed values intact.
 
@@ -1198,7 +1198,7 @@ log as the seam where an async validation step, like a real-time address
 lookup, would get added back if one were ever needed). `FIELD_CHANGED`
 clears only that one field's own error, not the whole error set, so fixing
 one mistake doesn't hide a still-real error on another field — and errors
-don't reappear until the *next* submit attempt, deliberately not
+don't reappear until the _next_ submit attempt, deliberately not
 revalidated on every keystroke, since that tends to read as the form
 scolding the user mid-sentence rather than confirming a finished field.
 
@@ -1228,12 +1228,12 @@ state with a specific message and stops. If valid, it sets `uploading`
 `window.setTimeout`, generates the preview via `URL.createObjectURL(file)`
 and moves to `uploaded`. That delay is a deliberately honest UX choice, not
 a fake network simulation — the hook's own comment explains that "uploading"
-here means *local processing*, since the real network transfer only
+here means _local processing_, since the real network transfer only
 happens once, later, when the whole form submits. Memory management: a
 `stateRef` mirrors the current state so effect cleanup (on unmount) can
 revoke whatever preview URL is currently held without needing `state` as a
 dependency; `removeFile` revokes inside its own `setState` updater; and
-replacing an already-selected file revokes the *previous* preview
+replacing an already-selected file revokes the _previous_ preview
 synchronously, immediately when the new file is chosen — not inside the
 delayed callback, because by the time that callback's own `setState`
 updater runs, the synchronous `setState({status: 'uploading'})` that
@@ -1302,7 +1302,7 @@ rather than re-entering everything. On the admin side, `src/admin/api.ts`'s
 `ApiError` carrying both the message and the HTTP status, which
 `DashboardPage`/`SubmissionDetail` catch and render inline (also via
 `role="alert"`). `AdminApp`'s initial auth check (`me()`) specifically
-treats *any* failure — network error or a genuine 401 — as "not logged in"
+treats _any_ failure — network error or a genuine 401 — as "not logged in"
 and shows the login page, rather than distinguishing them, since both
 cases have the identical correct UI response.
 
@@ -1331,7 +1331,7 @@ step removes the just-clicked button from the DOM, and browsers reset
 focus to `<body>` by default with zero indication anything happened. The
 same root cause showed up twice more: a failed confirmation-form
 submission wasn't moving focus anywhere (an `aria-describedby`-associated
-error message doesn't get announced until its field is actually *focused*
+error message doesn't get announced until its field is actually _focused_
 — fixed by focusing the first invalid field, in a fixed priority order, on
 a failed submit), and closing the mobile nav menu via Escape stranded
 focus at `<body>` when its now-hidden links unmounted (fixed by explicitly
@@ -1422,8 +1422,7 @@ than assuming the newer admin code was already clean). Fixed by making
 resting fill, with a new `--color-red-darkest` added for hover/active — a
 real design-system decision (it changes the primary CTA's default color
 site-wide), surfaced to the user rather than changed unilaterally.
-Re-measured after the fix, not assumed: Accessibility and SEO both reached
-100. Mobile's remaining 95 (driven by simulated network/CPU throttling on
+Re-measured after the fix, not assumed: Accessibility and SEO both reached 100. Mobile's remaining 95 (driven by simulated network/CPU throttling on
 an already self-hosted-font, no-scroll-listener page) was deliberately not
 chased further — the instruction for that phase was evidence-driven
 optimization, and no specific fixable cause was identified.
@@ -1483,7 +1482,7 @@ mechanism required.
 
 If admin were "just another route" inside the existing single-page app, a
 donor loading the public site would still download all of the admin
-dashboard's code in the same JavaScript bundle — a router changes *which*
+dashboard's code in the same JavaScript bundle — a router changes _which_
 component renders for a given URL, not which code ships to the browser in
 the first place; code-splitting that away would need its own additional
 setup. A second Vite entry (`admin.html`, built via
@@ -1521,7 +1520,7 @@ sizes, not just assumed from the config.
 production bundler) then produces separate entry chunks for each, with any
 genuinely shared code (React itself, shared UI components like `Button`)
 factored into a common chunk both entries reference. This is the standard
-mechanism, not a custom one — the discipline here was in *verifying* it
+mechanism, not a custom one — the discipline here was in _verifying_ it
 actually worked as expected rather than trusting the config: comparing the
 public bundle's real byte count before and after the admin app existed
 (374.23 kB → 374.01 kB combined `main` + shared chunk — effectively

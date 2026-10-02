@@ -18,9 +18,8 @@ vi.mock('@vercel/blob', async () => {
   return { ...actual, get: vi.fn(), del: vi.fn(), issueSignedToken: vi.fn() }
 })
 vi.mock('@vercel/blob/client', async () => {
-  const actual = await vi.importActual<typeof import('@vercel/blob/client')>(
-    '@vercel/blob/client',
-  )
+  const actual =
+    await vi.importActual<typeof import('@vercel/blob/client')>('@vercel/blob/client')
   return { ...actual, handleUploadPresigned: vi.fn() }
 })
 
@@ -80,7 +79,12 @@ function mockResponse() {
     },
   } as unknown as VercelResponse
 
-  return { res, getStatus: () => statusCode, getJsonBody: () => jsonBody, getHeaders: () => headers }
+  return {
+    res,
+    getStatus: () => statusCode,
+    getJsonBody: () => jsonBody,
+    getHeaders: () => headers,
+  }
 }
 
 describe('gallery routes (integration)', () => {
@@ -129,7 +133,9 @@ describe('gallery routes (integration)', () => {
       await galleryIndexHandler(
         mockRequest({
           method: 'POST',
-          body: { blobUrl: 'https://example.private.blob.vercel-storage.com/gallery/x.png' },
+          body: {
+            blobUrl: 'https://example.private.blob.vercel-storage.com/gallery/x.png',
+          },
         }),
         res,
       )
@@ -149,7 +155,9 @@ describe('gallery routes (integration)', () => {
         statusCode: 200,
         stream: new ReadableStream({
           start(controller) {
-            controller.enqueue(new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))
+            controller.enqueue(
+              new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+            )
             controller.close()
           },
         }),
@@ -240,7 +248,9 @@ describe('gallery routes (integration)', () => {
     it('rejects an unauthenticated request with 401 and never touches Blob', async () => {
       const [image] = await db
         .insert(galleryImages)
-        .values({ blobUrl: 'https://example.private.blob.vercel-storage.com/gallery/x.png' })
+        .values({
+          blobUrl: 'https://example.private.blob.vercel-storage.com/gallery/x.png',
+        })
         .returning()
 
       const { res, getStatus } = mockResponse()
@@ -255,7 +265,9 @@ describe('gallery routes (integration)', () => {
       const token = await createSession(admin.id)
       const [image] = await db
         .insert(galleryImages)
-        .values({ blobUrl: 'https://example.private.blob.vercel-storage.com/gallery/x.png' })
+        .values({
+          blobUrl: 'https://example.private.blob.vercel-storage.com/gallery/x.png',
+        })
         .returning()
       vi.mocked(del).mockResolvedValue(undefined)
 
@@ -297,7 +309,9 @@ describe('gallery routes (integration)', () => {
     it('proceeds to handleUploadPresigned for an authenticated admin', async () => {
       const admin = await createTestAdmin()
       const token = await createSession(admin.id)
-      vi.mocked(handleUploadPresigned).mockResolvedValue({ type: 'blob.generate-client-token' } as never)
+      vi.mocked(handleUploadPresigned).mockResolvedValue({
+        type: 'blob.generate-client-token',
+      } as never)
 
       const { res, getStatus } = mockResponse()
       await galleryUploadTokenHandler(

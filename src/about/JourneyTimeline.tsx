@@ -119,8 +119,8 @@ export function JourneyTimeline() {
               every reader, not only assistive tech. */}
           <p className="mt-4 text-sm italic text-charcoal-muted">
             Cumulative disbursement grew from ₹{firstCumulative.lakhs}L in{' '}
-            {firstCumulative.year} to ₹{lastCumulative.lakhs}L in {lastCumulative.year}{' '}
-            — including ₹{latestYearly.lakhs}L disbursed in {latestYearly.year} alone.
+            {firstCumulative.year} to ₹{lastCumulative.lakhs}L in {lastCumulative.year} —
+            including ₹{latestYearly.lakhs}L disbursed in {latestYearly.year} alone.
           </p>
         </div>
 
