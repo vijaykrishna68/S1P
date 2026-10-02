@@ -20,9 +20,15 @@ interface DashboardPageProps {
   email: string
   onLogout: () => void
   onSelectDonation: (id: string) => void
+  onOpenGallery: () => void
 }
 
-export function DashboardPage({ email, onLogout, onSelectDonation }: DashboardPageProps) {
+export function DashboardPage({
+  email,
+  onLogout,
+  onSelectDonation,
+  onOpenGallery,
+}: DashboardPageProps) {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [page, setPage] = useState(1)
   const [state, setState] = useState<LoadState>({ status: 'loading' })
@@ -78,12 +84,20 @@ export function DashboardPage({ email, onLogout, onSelectDonation }: DashboardPa
             <h1 className="font-display text-2xl font-bold text-charcoal">Donations</h1>
             <p className="text-sm text-charcoal-muted">Signed in as {email}</p>
           </div>
-          <button
-            onClick={onLogout}
-            className="min-h-11 rounded-full border border-charcoal/15 px-5 text-sm font-semibold text-charcoal transition-colors hover:bg-cream-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red/40"
-          >
-            Log Out
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onOpenGallery}
+              className="min-h-11 rounded-full border border-charcoal/15 px-5 text-sm font-semibold text-charcoal transition-colors hover:bg-cream-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red/40"
+            >
+              Gallery
+            </button>
+            <button
+              onClick={onLogout}
+              className="min-h-11 rounded-full border border-charcoal/15 px-5 text-sm font-semibold text-charcoal transition-colors hover:bg-cream-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red/40"
+            >
+              Log Out
+            </button>
+          </div>
         </header>
 
         {state.status === 'loaded' && (

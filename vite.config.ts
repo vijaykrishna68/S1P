@@ -16,14 +16,19 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      // Two separate entry points, two separate bundles — the admin app
-      // (src/admin/) is a distinct build output from the public donor-facing
-      // one, so a donor's page load never downloads admin code and vice
-      // versa. See CLAUDE.md's admin-dashboard note for why this is a Vite
-      // multi-page build rather than a route added to the existing SPA.
+      // Separate entry points, separate bundles — the admin app (src/admin/)
+      // is a distinct build output from the public donor-facing one, so a
+      // donor's page load never downloads admin code and vice versa. See
+      // CLAUDE.md's admin-dashboard note for why this is a Vite multi-page
+      // build rather than a route added to the existing SPA. About and
+      // Gallery (Phase 2/approved Phase 1 architecture) reuse the same
+      // pattern instead of introducing React Router — see
+      // Docs/PHASE1_IA_PROPOSAL.md §B.
       input: {
         main: resolve(import.meta.dirname, 'index.html'),
         admin: resolve(import.meta.dirname, 'admin.html'),
+        about: resolve(import.meta.dirname, 'about.html'),
+        gallery: resolve(import.meta.dirname, 'gallery.html'),
       },
     },
   },

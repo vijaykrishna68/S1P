@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { MIN_DONATION_AMOUNT, MAX_DONATION_AMOUNT } from '../../shared/donationLimits.js'
+import { MAX_GALLERY_CAPTION_LENGTH } from '../../shared/galleryLimits.js'
 
 /**
  * Server-side re-validation of exactly the same rule the frontend already
@@ -42,3 +43,16 @@ export const loginSchema = z.object({
   email: z.string().trim().email('Invalid email.'),
   password: z.string().min(1, 'Password is required.'),
 })
+
+export const createGalleryImageSchema = z.object({
+  blobUrl: z
+    .string()
+    .url('Invalid image reference.')
+    // Matches the exact suffix @vercel/blob's own SDK checks internally.
+    .refine((url) => new URL(url).hostname.endsWith('.blob.vercel-storage.com'), {
+      message: 'Image must be a Vercel Blob URL.',
+    }),
+  caption: z.string().trim().max(MAX_GALLERY_CAPTION_LENGTH).optional(),
+})
+
+export type CreateGalleryImageInput = z.infer<typeof createGalleryImageSchema>

@@ -1,11 +1,15 @@
 import { InstagramLogo, LinkedinLogo, XLogo } from '@phosphor-icons/react'
 import { Container } from '../ui/Container'
 
+// Root-relative for the same cross-page reason as Header's NAV_LINKS — see
+// Docs/PHASE1_IA_PROPOSAL.md §H. "About" now points at the real About page
+// instead of standing in for the homepage's Mission section.
 const FOOTER_LINKS = [
-  { label: 'About', href: '#mission' },
-  { label: 'Impact', href: '#impact' },
-  { label: 'Donate', href: '#donate' },
-  { label: 'FAQ', href: '#faq' },
+  { label: 'About', href: '/about.html' },
+  { label: 'Gallery', href: '/gallery.html' },
+  { label: 'Impact', href: '/#impact' },
+  { label: 'Donate', href: '/#donate' },
+  { label: 'FAQ', href: '/#faq' },
 ]
 
 // Placeholder hrefs — no real social profiles exist yet. See CLAUDE.md.

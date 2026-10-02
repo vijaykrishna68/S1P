@@ -1,8 +1,8 @@
 import { desc, eq, sql } from 'drizzle-orm'
-import { del, get } from '@vercel/blob'
 import { db } from '../../db/client.js'
 import { donations, type donationStatusEnum } from '../../db/schema.js'
-import { sniffImageType } from './magicBytes.js'
+import { verifyBlobIsRealImage } from './magicBytes.js'
+import { safeDeleteBlob } from './blobCleanup.js'
 import { checkAndIncrementRateLimit, MAX_DONATIONS_PER_HOUR } from './rateLimit.js'
 import type { CreateDonationInput } from './validation.js'
 
@@ -17,75 +17,6 @@ export type CreateDonationResult =
   | { outcome: 'duplicate'; donation: DonationRow }
   | { outcome: 'rate_limited' }
   | { outcome: 'invalid_screenshot' }
-
-async function safeDeleteBlob(url: string): Promise<void> {
-  try {
-    await del(url)
-  } catch (err) {
-    // Best-effort cleanup only — an orphaned blob is a minor storage cost,
-    // never a reason to fail the request that's already being rejected for
-    // another reason.
-    console.error('Failed to delete blob during cleanup', url, err)
-  }
-}
-
-// Matches sniffImageType's longest signature check (WEBP: "RIFF" at 0-3,
-// "WEBP" at 8-11) — same byte count the old Range: 'bytes=0-15' request
-// fetched, just read from the stream instead of via an HTTP range header.
-const MAGIC_BYTE_SNIFF_LENGTH = 16
-
-/**
- * Reads only the leading bytes of a Blob stream needed for signature
- * sniffing, then cancels it — screenshots can be up to 8MB, and nothing
- * downstream needs the rest of the file, so there's no reason to buffer it
- * all just to check the first few bytes.
- */
-async function readLeadingBytes(
-  stream: ReadableStream<Uint8Array>,
-  maxBytes: number,
-): Promise<Buffer> {
-  const reader = stream.getReader()
-  const chunks: Uint8Array[] = []
-  let total = 0
-  try {
-    while (total < maxBytes) {
-      const { done, value } = await reader.read()
-      if (done) break
-      chunks.push(value)
-      total += value.length
-    }
-  } finally {
-    await reader.cancel().catch(() => {})
-  }
-  return Buffer.concat(chunks).subarray(0, maxBytes)
-}
-
-/**
- * Confirms the uploaded file's actual bytes are a real image, rather than
- * trusting the Content-Type recorded at upload time (see
- * api/uploads/screenshot.ts) — a browser sets that header from the file's
- * declared type, which a request crafted outside the browser can set to
- * anything.
- *
- * Reads via the SDK's `get(url, { access: 'private' })`, not a raw `fetch()`
- * — screenshots live in this project's Private Blob store (see CLAUDE.md's
- * OIDC migration note), so an unauthenticated fetch against the blob URL
- * would 401/403 on every call and this function would incorrectly reject
- * every real submission. `get()` resolves the same OIDC credentials
- * (`VERCEL_OIDC_TOKEN` + `BLOB_STORE_ID`) this app's upload route already
- * relies on; no `BLOB_READ_WRITE_TOKEN` involved. A missing/inaccessible
- * blob (`get()` returns `null` or a non-200 result) is treated as
- * verification failure, same as the old `!response.ok` check; an unexpected
- * SDK error (e.g. auth misconfigured) still propagates uncaught, same as an
- * unexpected `fetch()` rejection did before — both surface as this route's
- * existing generic 500, not a silently-swallowed `false`.
- */
-async function verifyScreenshotIsRealImage(url: string): Promise<boolean> {
-  const result = await get(url, { access: 'private' })
-  if (!result || result.statusCode !== 200) return false
-  const buffer = await readLeadingBytes(result.stream, MAGIC_BYTE_SNIFF_LENGTH)
-  return sniffImageType(buffer) !== null
-}
 
 /**
  * Order of operations is deliberate:
@@ -125,7 +56,7 @@ export async function createDonation(
     return { outcome: 'rate_limited' }
   }
 
-  const isRealImage = await verifyScreenshotIsRealImage(input.screenshotUrl)
+  const isRealImage = await verifyBlobIsRealImage(input.screenshotUrl)
   if (!isRealImage) {
     await safeDeleteBlob(input.screenshotUrl)
     return { outcome: 'invalid_screenshot' }

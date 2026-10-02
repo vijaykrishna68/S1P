@@ -3,10 +3,11 @@ import { me, logout as apiLogout } from './api'
 import { LoginPage } from './LoginPage'
 import { DashboardPage } from './DashboardPage'
 import { SubmissionDetail } from './SubmissionDetail'
+import { AdminGalleryPage } from './AdminGalleryPage'
 
 type AuthState =
   { status: 'checking' } | { status: 'loggedOut' } | { status: 'loggedIn'; email: string }
-type View = { name: 'dashboard' } | { name: 'detail'; id: string }
+type View = { name: 'dashboard' } | { name: 'detail'; id: string } | { name: 'gallery' }
 
 /**
  * Owns auth-check state and which of the two admin screens (dashboard vs.
@@ -52,11 +53,16 @@ export function AdminApp() {
     return <SubmissionDetail id={view.id} onBack={() => setView({ name: 'dashboard' })} />
   }
 
+  if (view.name === 'gallery') {
+    return <AdminGalleryPage onBack={() => setView({ name: 'dashboard' })} />
+  }
+
   return (
     <DashboardPage
       email={auth.email}
       onLogout={handleLogout}
       onSelectDonation={(id) => setView({ name: 'detail', id })}
+      onOpenGallery={() => setView({ name: 'gallery' })}
     />
   )
 }

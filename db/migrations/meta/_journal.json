@@ -8,6 +8,13 @@
       "when": 1790157104955,
       "tag": "0000_married_punisher",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790586498733,
+      "tag": "0001_regular_hydra",
+      "breakpoints": true
     }
   ]
 }

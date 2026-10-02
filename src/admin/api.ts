@@ -1,3 +1,5 @@
+import type { GalleryImage } from '../gallery/galleryApi'
+
 export type DonationStatus = 'pending' | 'reviewed' | 'rejected'
 
 export interface Donation {
@@ -92,4 +94,18 @@ export function updateDonationStatus(id: string, status: DonationStatus) {
     method: 'PATCH',
     body: JSON.stringify({ status }),
   })
+}
+
+/** Metadata step of gallery upload — the file itself has already gone
+ * straight to Blob via uploadPresigned (see useGalleryUpload.ts) by the time
+ * this is called. */
+export function createGalleryImage(blobUrl: string, caption: string) {
+  return request<GalleryImage>('/api/gallery', {
+    method: 'POST',
+    body: JSON.stringify({ blobUrl, ...(caption ? { caption } : {}) }),
+  })
+}
+
+export function deleteGalleryImage(id: string) {
+  return request<{ ok: true }>(`/api/gallery/${id}`, { method: 'DELETE' })
 }

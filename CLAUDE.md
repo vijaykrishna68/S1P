@@ -266,6 +266,14 @@ a Vite-only global that would throw if imported from a Node function.
 api/
   donations/
     index.ts          POST — creates a donation (public, rate-limited)
+  gallery/
+    index.ts           GET (public, list) / POST (admin, create record)
+    [id].ts             DELETE (admin) — deletes the row, then best-effort
+                        deletes the underlying blob
+    [id]/
+      image.ts           GET (public, no auth) — streams the image bytes;
+                        see Decision Log for why this is public despite the
+                        project's one Blob store being fixed Private
   uploads/
     screenshot.ts      POST — issues a constrained Vercel Blob presigned upload URL
                        (OIDC-authenticated `issueSignedToken`, no read-write token)
@@ -277,6 +285,9 @@ api/
       [id]/
         screenshot.ts   GET — requireAdmin, then streams that donation's
                         private screenshot Blob server-side (see Decision Log)
+    uploads/
+      gallery.ts         POST — admin-gated counterpart to uploads/screenshot.ts;
+                        requireAdmin runs before any signed token is issued
   _lib/                Business logic, imported by route handlers AND by
                         integration tests directly — never inlined into a handler.
                         Vercel's convention: an underscore-prefixed folder under
@@ -286,6 +297,9 @@ api/
     donations.ts        createDonation() — idempotency check, rate limit, screenshot
                         magic-byte verification, insert. See its own doc comment
                         for the exact, deliberate order of these steps.
+    gallery.ts           createGalleryImage/listGalleryImages/
+                        getGalleryImageById/deleteGalleryImage/
+                        toPublicGalleryImage — mirrors donations.ts's shape.
     password.ts          hashPassword/verifyPassword — pure bcrypt, deliberately
                         with no db/client.ts import (see Decision Log).
     auth.ts               Session lifecycle: createSession, getAdminIdentity,
@@ -293,7 +307,12 @@ api/
     rateLimit.ts         Postgres-backed fixed-window counter, shared by the
                         donation and login endpoints via a purpose-prefixed
                         key (`donation:<ip>` / `login:<ip>`) — see Decision Log.
-    magicBytes.ts         Real image-signature sniffing, not just declared MIME type.
+    magicBytes.ts         Real image-signature sniffing, not just declared MIME
+                        type — also exports verifyBlobIsRealImage(), shared by
+                        donations.ts and gallery.ts (extracted in Phase 11).
+    blobCleanup.ts         safeDeleteBlob() — best-effort blob deletion, also
+                        shared by donations.ts and gallery.ts (extracted in
+                        Phase 11; previously duplicated inside donations.ts).
     http.ts               sendError/sendJson/getClientIp/methodNotAllowed — shared
                         request/response helpers used by more than one route.
 ```
@@ -1289,6 +1308,41 @@ dev`), desktop and mobile. **Before:** desktop Performance 100 /
   `nodenext`, added `.js` to every relative import — 19 files, 55/56
   lines), and re-verified typecheck/lint/format/unit tests/build all clean
   before pushing. This is now the actual, current state of `main`.
+
+- **Phase 11 — Gallery: implemented, backend verified against a real
+  Postgres.** Full technical reference: `Docs/PHASE3_GALLERY.md`. Added a
+  new `gallery_images` table (id, `blobUrl`, optional `caption`,
+  `createdAt`), five new routes (`GET`/`POST /api/gallery`,
+  `DELETE /api/gallery/[id]`, `GET /api/gallery/[id]/image`,
+  `POST /api/admin/uploads/gallery`), and a full public gallery page +
+  admin gallery management view (upload with preview/caption, delete with
+  confirmation, both reusing the existing design system and the
+  `Dialog` primitive — a new, shared, native-`<dialog>`-based component
+  used by both the image viewer and the delete confirmation, since no
+  modal/dialog pattern existed yet). **No second Blob store or new env var**:
+  gallery images live in the same Private store as donation screenshots;
+  `GET /api/gallery/[id]/image` (public, unauthenticated) is what makes an
+  otherwise-private object effectively public, resolving the blob URL from
+  its own DB row and streaming the bytes through — the exact private-blob-
+  through-a-route pattern already used for admin donation screenshots, just
+  without the admin gate. `verifyBlobIsRealImage`/`safeDeleteBlob` were
+  extracted out of `donations.ts` into shared `_lib` modules (`magicBytes.ts`,
+  new `blobCleanup.ts`) so gallery uploads reuse the same real-image
+  verification and best-effort cleanup instead of duplicating it — a pure
+  refactor, not a behavior change. 25 new integration tests pass against a
+  real Postgres (`gallery.integration.test.ts`,
+  `galleryRoutes.integration.test.ts`, `galleryImageRoute.integration.test.ts`),
+  using a new `resetGalleryImages()` helper rather than the existing
+  `resetDatabase()`, specifically so running them never truncates a
+  developer's real seeded admin account or donation data. The pre-existing
+  donation/auth/admin-screenshot integration tests were not re-run this
+  phase for the same reason — see `Docs/PHASE3_GALLERY.md`'s "Known
+  limitations." Client bundle explicitly grepped for
+  `BLOB_READ_WRITE_TOKEN`/`VERCEL_OIDC_TOKEN`/`BLOB_STORE_ID`/
+  `DATABASE_URL`/`ADMIN_PASSWORD`/session-and-password-hash column names —
+  none present as real values, only inert SDK string literals. Also
+  corrected `.env.example`'s stale claim that `BLOB_READ_WRITE_TOKEN` is
+  required (it hasn't been since the OIDC migration below).
 
 ## 11. Portfolio Case-Study Highlights
 

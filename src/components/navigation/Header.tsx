@@ -3,10 +3,16 @@ import { List, X } from '@phosphor-icons/react'
 import { Container } from '../ui/Container'
 import { Button } from '../ui/Button'
 
+// Root-relative so these resolve correctly from any page (Home, About,
+// Gallery) — a bare "#impact" would only work while already on Home. "Why
+// It Matters" (Mission's old nav label) is dropped in favor of "About" now
+// that About covers that role more fully; Mission itself stays on the
+// homepage unchanged. See Docs/PHASE1_IA_PROPOSAL.md §H.
 const NAV_LINKS = [
-  { label: 'Why It Matters', href: '#mission' },
-  { label: 'Impact', href: '#impact' },
-  { label: 'FAQ', href: '#faq' },
+  { label: 'About', href: '/about.html' },
+  { label: 'Gallery', href: '/gallery.html' },
+  { label: 'Impact', href: '/#impact' },
+  { label: 'FAQ', href: '/#faq' },
 ]
 
 /**
@@ -62,7 +68,7 @@ export function Header() {
     >
       <Container className="flex h-[4.5rem] items-center justify-between">
         <a
-          href="#top"
+          href="/"
           className="font-display text-lg font-bold tracking-tight text-charcoal"
         >
           Sacrifice One Pizza
@@ -87,7 +93,7 @@ export function Header() {
         </nav>
 
         <div className="hidden lg:block">
-          <Button href="#donate">Donate One Pizza</Button>
+          <Button href="/#donate">Donate One Pizza</Button>
         </div>
 
         <button
@@ -124,7 +130,7 @@ export function Header() {
             ))}
             <div className="pt-2">
               <Button
-                href="#donate"
+                href="/#donate"
                 className="w-full"
                 onClick={() => setIsMenuOpen(false)}
               >

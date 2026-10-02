@@ -118,3 +118,26 @@ export const rateLimits = pgTable(
   },
   (table) => [primaryKey({ columns: [table.key, table.windowStart] })],
 )
+
+/**
+ * `blobUrl` is the actual (private) Blob URL, resolved server-side only —
+ * mirrors `donations.screenshotUrl`. The public gallery never sees this
+ * value directly; it's served through `GET /api/gallery/[id]/image`, which
+ * looks it up from this row and streams the bytes, the same
+ * private-blob-through-a-route pattern already used for admin-only donation
+ * screenshots, just without the admin gate (gallery images are meant to be
+ * public — see api/gallery/[id]/image.ts). No `sortOrder`/album/tag columns:
+ * `createdAt`-ordered is the only ordering need so far; a nullable
+ * `sortOrder` column is the natural place to add manual reordering later,
+ * not something to build unused now.
+ */
+export const galleryImages = pgTable(
+  'gallery_images',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    blobUrl: text('blob_url').notNull(),
+    caption: text('caption'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('gallery_images_created_at_idx').on(table.createdAt)],
+)
