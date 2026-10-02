@@ -1,6 +1,6 @@
 import { Container } from '../ui/Container'
 import { TwoTrack } from '../ui/TwoTrack'
-import { useScrollReveal } from '../ui/useScrollReveal'
+import { revealStep, useScrollReveal } from '../ui/useScrollReveal'
 import { EchoMark } from './EchoMark'
 
 /**
@@ -20,11 +20,17 @@ export function Mission() {
           <TwoTrack
             aside={<EchoMark className="h-40 w-40 md:h-56 md:w-56 lg:h-72 lg:w-72" />}
           >
-            <h2 className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl">
+            <h2
+              className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl reveal-item"
+              style={revealStep(0)}
+            >
               Why One Pizza Matters
             </h2>
 
-            <p className="mt-6 text-base leading-relaxed text-charcoal-muted md:text-lg">
+            <p
+              className="mt-6 text-base leading-relaxed text-charcoal-muted md:text-lg reveal-item"
+              style={revealStep(1)}
+            >
               Every year, students drop out not because they lack talent, but because they
               lack small financial support. Sometimes ₹500 can cover books. Sometimes ₹700
               can fund a month of meals.

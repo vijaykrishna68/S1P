@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { Container } from './Container'
 import { TwoTrack } from './TwoTrack'
 import { IllustrationSlot } from './IllustrationSlot'
-import { useScrollReveal } from './useScrollReveal'
+import { revealStep, useScrollReveal } from './useScrollReveal'
 
 interface ClosingBandProps {
   heading: string
@@ -24,10 +24,16 @@ export function ClosingBand({ heading, children, action }: ClosingBandProps) {
       <Container>
         <div ref={ref} className={revealProps.className}>
           <TwoTrack aside={<IllustrationSlot name="closing-band" on="soft" />}>
-            <h2 className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl">
+            <h2
+              className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl reveal-item"
+              style={revealStep(0)}
+            >
               {heading}
             </h2>
-            <p className="mt-4 max-w-xl text-base leading-relaxed text-charcoal-muted md:text-lg">
+            <p
+              className="mt-4 max-w-xl text-base leading-relaxed text-charcoal-muted md:text-lg reveal-item"
+              style={revealStep(1)}
+            >
               {children}
             </p>
             <div className="mt-8">{action}</div>

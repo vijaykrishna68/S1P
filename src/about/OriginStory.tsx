@@ -1,5 +1,5 @@
 import { Container } from '../components/ui/Container'
-import { useScrollReveal } from '../components/ui/useScrollReveal'
+import { revealStep, useScrollReveal } from '../components/ui/useScrollReveal'
 import { EightSlicesMark } from './EightSlicesMark'
 import { ORIGIN_STORY_PARAGRAPHS } from './aboutData'
 
@@ -20,12 +20,21 @@ export function OriginStory() {
           className={`grid gap-10 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-20 ${revealProps.className}`}
         >
           <div className="max-w-2xl">
-            <h2 className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl">
+            <h2
+              className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl reveal-item"
+              style={revealStep(0)}
+            >
               The Story That Started It
             </h2>
             <div className="mt-6 space-y-5 text-base leading-relaxed text-charcoal-muted md:text-lg">
               {ORIGIN_STORY_PARAGRAPHS.map((paragraph, i) => (
-                <p key={i}>{paragraph}</p>
+                <p
+                  key={i}
+                  className={i === 0 ? 'reveal-item' : undefined}
+                  style={i === 0 ? revealStep(1) : undefined}
+                >
+                  {paragraph}
+                </p>
               ))}
             </div>
           </div>

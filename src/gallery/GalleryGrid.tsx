@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Dialog } from '../components/ui/Dialog'
 import { EchoMark } from '../components/mission/EchoMark'
+import { GalleryTile } from './GalleryTile'
 import { listGalleryImages, GalleryApiError, type GalleryImage } from './galleryApi'
 
 type LoadState =
@@ -17,7 +18,10 @@ const DEFAULT_ALT = "Photo from Sacrifice One Pizza's gallery"
  */
 export function GalleryGrid() {
   const [state, setState] = useState<LoadState>({ status: 'loading' })
-  const [openImage, setOpenImage] = useState<GalleryImage | null>(null)
+  // The image stays set after the viewer closes so its content doesn't vanish
+  // while the dialog is still fading out; `viewerOpen` drives open/close.
+  const [viewerImage, setViewerImage] = useState<GalleryImage | null>(null)
+  const [viewerOpen, setViewerOpen] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -47,12 +51,18 @@ export function GalleryGrid() {
   if (state.status === 'loading') {
     return (
       <div
+        role="status"
         className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4"
-        aria-busy="true"
-        aria-label="Loading gallery"
       >
+        <span className="sr-only">Loading gallery</span>
         {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="aspect-square animate-pulse rounded-xl bg-cream-soft" />
+          // Pending-state indicator: a gentle pulse that stops when data arrives
+          // and, by design, keeps running under reduced motion (CLAUDE.md §3).
+          <div
+            key={i}
+            aria-hidden="true"
+            className="skeleton-pulse motion-pending aspect-square rounded-xl bg-cream-soft"
+          />
         ))}
       </div>
     )
@@ -85,42 +95,36 @@ export function GalleryGrid() {
 
   return (
     <>
-      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+      <ul className="fade-in grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
         {state.items.map((image) => (
           <li key={image.id}>
-            <button
-              type="button"
-              onClick={() => setOpenImage(image)}
-              className="block aspect-square w-full overflow-hidden rounded-xl bg-cream-soft
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red/40 focus-visible:ring-offset-2"
-            >
-              <img
-                src={image.imageUrl}
-                alt={image.caption || DEFAULT_ALT}
-                loading="lazy"
-                decoding="async"
-                className="h-full w-full object-cover"
-              />
-            </button>
+            <GalleryTile
+              image={image}
+              alt={image.caption || DEFAULT_ALT}
+              onOpen={(opened) => {
+                setViewerImage(opened)
+                setViewerOpen(true)
+              }}
+            />
           </li>
         ))}
       </ul>
 
       <Dialog
-        open={openImage !== null}
-        onClose={() => setOpenImage(null)}
-        title={openImage?.caption || DEFAULT_ALT}
+        open={viewerOpen}
+        onClose={() => setViewerOpen(false)}
+        title={viewerImage?.caption || DEFAULT_ALT}
       >
-        {openImage && (
+        {viewerImage && (
           <figure>
             <img
-              src={openImage.imageUrl}
-              alt={openImage.caption || DEFAULT_ALT}
+              src={viewerImage.imageUrl}
+              alt={viewerImage.caption || DEFAULT_ALT}
               className="max-h-[80vh] w-full rounded-2xl object-contain"
             />
-            {openImage.caption && (
+            {viewerImage.caption && (
               <figcaption className="mt-3 text-center text-sm text-white">
-                {openImage.caption}
+                {viewerImage.caption}
               </figcaption>
             )}
           </figure>

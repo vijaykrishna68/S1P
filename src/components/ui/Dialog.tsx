@@ -20,6 +20,13 @@ interface DialogProps {
  * needs an accessible name, and callers already have a natural one (the
  * image's alt text, "Delete this image?", etc.) rather than needing to
  * invent a separate visible heading.
+ *
+ * Opens and closes with a short fade + scale, written as plain CSS in
+ * styles/index.css (.dialog-motion: @starting-style + allow-discrete
+ * transitions). Browsers without that support just open and close instantly.
+ * Page scroll behind an open dialog is locked there too. Callers should keep
+ * their content mounted until the dialog has closed so it doesn't empty out
+ * mid-fade.
  */
 export function Dialog({ open, onClose, title, children, className = '' }: DialogProps) {
   const ref = useRef<HTMLDialogElement>(null)
@@ -55,7 +62,7 @@ export function Dialog({ open, onClose, title, children, className = '' }: Dialo
         // native <dialog>.
         if (event.target === ref.current) onClose()
       }}
-      className={`m-auto max-w-[min(90vw,640px)] rounded-2xl bg-transparent p-0 backdrop:bg-charcoal/70 ${className}`}
+      className={`dialog-motion m-auto max-w-[min(90vw,640px)] rounded-2xl bg-transparent p-0 backdrop:bg-charcoal/70 ${className}`}
     >
       <h2 id={titleId} className="sr-only">
         {title}
@@ -65,8 +72,8 @@ export function Dialog({ open, onClose, title, children, className = '' }: Dialo
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="absolute right-2 top-2 z-10 flex size-11 items-center justify-center rounded-full
-            bg-white/90 text-charcoal transition-colors duration-200 hover:bg-white
+          className="pressable absolute right-2 top-2 z-10 flex size-11 items-center justify-center rounded-full
+            bg-white/90 text-charcoal hover:bg-white
             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red/40"
         >
           <X size={20} weight="bold" />

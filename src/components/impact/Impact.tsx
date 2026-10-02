@@ -1,5 +1,5 @@
 import { Container } from '../ui/Container'
-import { useScrollReveal } from '../ui/useScrollReveal'
+import { revealStep, useScrollReveal } from '../ui/useScrollReveal'
 import { ImpactStat } from './ImpactStat'
 
 // Figures from Docs/02UI_UX.md §4 — placeholders until real numbers are
@@ -18,17 +18,23 @@ export function Impact() {
     <section id="impact" className="bg-cream-soft pad-standard">
       <Container>
         <div ref={ref} className={`max-w-2xl ${revealProps.className}`}>
-          <h2 className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl">
+          <h2
+            className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl reveal-item"
+            style={revealStep(0)}
+          >
             Small Sacrifices. Big Change.
           </h2>
-          <p className="mt-4 text-base leading-relaxed text-charcoal-muted md:text-lg">
+          <p
+            className="mt-4 text-base leading-relaxed text-charcoal-muted md:text-lg reveal-item"
+            style={revealStep(1)}
+          >
             This is what happens when people choose purpose over one meal out.
           </p>
         </div>
 
         <div className="mt-14 grid grid-cols-2 gap-x-8 gap-y-10 border-t border-charcoal/15 pt-10 md:mt-16 md:grid-cols-4 md:gap-x-10">
-          {IMPACT_METRICS.map((metric) => (
-            <ImpactStat key={metric.label} {...metric} />
+          {IMPACT_METRICS.map((metric, i) => (
+            <ImpactStat key={metric.label} index={i} {...metric} />
           ))}
         </div>
       </Container>

@@ -1,7 +1,7 @@
 import { Container } from '../components/ui/Container'
 import { IllustrationSlot } from '../components/ui/IllustrationSlot'
 import { TwoTrack } from '../components/ui/TwoTrack'
-import { useScrollReveal } from '../components/ui/useScrollReveal'
+import { revealStep, useScrollReveal } from '../components/ui/useScrollReveal'
 import { TRUST_INFO } from './aboutData'
 
 /**
@@ -18,10 +18,16 @@ export function TrustInfo() {
       <Container>
         <div ref={ref} className={revealProps.className}>
           <TwoTrack aside={<IllustrationSlot name="trust-seal" />}>
-            <h2 className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl">
+            <h2
+              className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl reveal-item"
+              style={revealStep(0)}
+            >
               About the Trust
             </h2>
-            <p className="mt-4 text-base leading-relaxed text-charcoal-muted md:text-lg">
+            <p
+              className="mt-4 text-base leading-relaxed text-charcoal-muted md:text-lg reveal-item"
+              style={revealStep(1)}
+            >
               Here&rsquo;s the official information, for anyone who wants it:
             </p>
 

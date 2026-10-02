@@ -1,5 +1,5 @@
 import { Container } from '../components/ui/Container'
-import { useScrollReveal } from '../components/ui/useScrollReveal'
+import { revealStep, useScrollReveal } from '../components/ui/useScrollReveal'
 import { ACTIVE_MEMBERS, CUMULATIVE_DISBURSEMENT, YEARLY_DISBURSEMENT } from './aboutData'
 
 const CHART_WIDTH = 640
@@ -60,10 +60,16 @@ export function JourneyTimeline() {
     <section className="pad-standard">
       <Container>
         <div ref={ref} className={`max-w-2xl ${revealProps.className}`}>
-          <h2 className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl">
+          <h2
+            className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl reveal-item"
+            style={revealStep(0)}
+          >
             Our Journey
           </h2>
-          <p className="mt-4 text-base leading-relaxed text-charcoal-muted md:text-lg">
+          <p
+            className="mt-4 text-base leading-relaxed text-charcoal-muted md:text-lg reveal-item"
+            style={revealStep(1)}
+          >
             S1P has been funding student education since it was registered in 2016. Below
             is what that&rsquo;s added up to, cumulatively, year by year — real
             disbursements, not projections.

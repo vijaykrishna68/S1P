@@ -42,6 +42,13 @@
   --color-yellow: #f2b632;
   --color-yellow-tint: #fbefc8;
 
+  /* Phase 4B motion easings (Docs/PHASE4B_INTERACTION_AUDIT.md §5). Defined in
+     @theme so they also exist as utilities (ease-out-expo, ease-state,
+     ease-exit). Durations and distances live in :root below. */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-state: cubic-bezier(0, 0, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
   --font-display: 'Outfit', 'Segoe UI', system-ui, sans-serif;
   --font-body: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif;
 }
@@ -137,10 +144,41 @@
   }
 }
 
+/*
+ * Phase 4B motion tokens. Plain custom properties (not @theme) so they are
+ * always emitted. Every new transition picks from these; a literal duration
+ * or easing in a component needs a written reason.
+ *   durations: fast 150 · base 200 · medium 300 · slow 500 · count 1100
+ *   distances: sm 4 · md 8 · lg 12   (the primary button's 2px lift is the
+ *   one other distance)
+ * The hero's own 700ms entrance and its loop are locked and do not use these.
+ */
+:root {
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-medium: 300ms;
+  --duration-slow: 500ms;
+  --duration-count: 1100ms;
+  --shift-sm: 4px;
+  --shift-md: 8px;
+  --shift-lg: 12px;
+}
+
 @layer base {
   html {
     background-color: var(--color-cream);
     color-scheme: light;
+    /* The sticky header is 4.5rem tall; in-page anchors land clear of it. */
+    scroll-padding-top: 5rem;
+    /* Reserve the scrollbar's width so locking page scroll behind a modal
+       dialog doesn't make the layout jump sideways. */
+    scrollbar-gutter: stable;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
   }
 
   body {
@@ -165,53 +203,196 @@
 }
 
 /*
- * Shared one-time entrance treatment (Tier 3 motion — see CLAUDE.md's motion
- * system). Used via the useScrollReveal hook across Phase 2 sections instead
- * of each section inventing its own entrance CSS. Default state is fully
- * visible; only under prefers-reduced-motion: no-preference does the element
- * start hidden and animate in once it gains .reveal-visible (added by the
- * hook when it enters the viewport). Reduced-motion users simply see the
- * finished layout immediately — same pattern as the hero's entrance.
+ * Reveal system (Phase 4B). Lead blocks only: a section's heading and its
+ * introductory line fade and rise 12px, once, as the block scrolls into view.
+ * Supporting content (lists, stat grids, panels, marks) appears with its
+ * section without its own entrance, so the page doesn't feel uniformly animated.
+ *
+ * Usage: the useScrollReveal hook puts .reveal on a wrapper (or directly on a
+ * single-element lead); the elements that should animate carry .reveal-item
+ * and, optionally, style={revealStep(n)} for a 60ms-per-step stagger
+ * (max 3 steps). Default state is fully visible; hiding only happens under
+ * prefers-reduced-motion: no-preference and never for something that holds
+ * keyboard focus.
  */
-.reveal {
-  opacity: 1;
-  transform: none;
-}
-
 @media (prefers-reduced-motion: no-preference) {
-  .reveal {
+  .reveal .reveal-item,
+  .reveal.reveal-item {
     transition:
-      opacity 600ms cubic-bezier(0.16, 1, 0.3, 1),
-      transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+      opacity var(--duration-slow) var(--ease-out-expo),
+      transform var(--duration-slow) var(--ease-out-expo);
+    transition-delay: calc(var(--reveal-step, 0) * 60ms);
   }
 
-  .reveal:not(.reveal-visible) {
+  .reveal:not(.reveal-visible):not(:focus-within) .reveal-item,
+  .reveal.reveal-item:not(.reveal-visible):not(:focus-within) {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(var(--shift-lg));
   }
 }
 
 /*
- * Step-change entrance for the donation flow (Tier 2 motion — interaction-
- * driven, not ambient). Applied to a wrapper keyed by the current step, so
- * each step transition remounts it and replays the animation. Deliberately
- * entrance-only: no exit animation, since coordinating an exit+enter pair
- * without an animation library added meaningful complexity for a small
- * visual gain. See CLAUDE.md's donation-architecture note.
+ * Step-change entrance for the donation flow (interaction-driven). Applied to
+ * a wrapper keyed by the current step, so each step remounts it and replays
+ * the animation. Entrance-only: no exit animation. See CLAUDE.md's
+ * donation-architecture note.
  */
 @media (prefers-reduced-motion: no-preference) {
   .step-enter {
-    animation: step-enter 450ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: step-enter var(--duration-medium) var(--ease-out-expo) both;
   }
 }
 
 @keyframes step-enter {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(var(--shift-md));
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Whole-grid crossfade when the gallery's data arrives. */
+@media (prefers-reduced-motion: no-preference) {
+  .fade-in {
+    animation: fade-in var(--duration-fast) var(--ease-state) both;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/*
+ * Pending-state skeleton: a gentle opacity pulse that exists only while data
+ * is loading. It is a pending-state indicator, so it is exempt from the
+ * reduced-motion policy below (via .motion-pending), see CLAUDE.md §3.
+ * No gradient shimmer: gradients are excluded by the design system.
+ */
+.skeleton-pulse {
+  animation: skeleton-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.72;
+  }
+}
+
+/*
+ * Shared pressed-state feedback for compact controls (icon buttons, copy and
+ * share buttons, dialog close). Colour changes ease at --duration-base; a
+ * press scales to .97 for --duration-fast, only when motion is allowed.
+ * Don't combine with transition-colors/duration-* classes on the same element.
+ */
+@utility pressable {
+  transition-property: color, background-color, border-color, transform;
+  transition-duration:
+    var(--duration-base), var(--duration-base), var(--duration-base), var(--duration-fast);
+  transition-timing-function: var(--ease-state);
+
+  @media (prefers-reduced-motion: no-preference) {
+    &:active {
+      transform: scale(0.97);
+    }
+  }
+}
+
+/*
+ * Native <dialog> open/close (image viewer, admin delete confirmation).
+ * Pure CSS using @starting-style + allow-discrete transitions; browsers
+ * without support simply open and close instantly. Open: fade + scale from
+ * .97 over --duration-medium. Close: shorter and sharper. Background page
+ * scroll is locked while any dialog is open.
+ */
+dialog.dialog-motion {
+  opacity: 0;
+  transform: scale(0.97);
+  transition:
+    opacity var(--duration-fast) var(--ease-exit),
+    transform var(--duration-fast) var(--ease-exit),
+    overlay var(--duration-fast) allow-discrete,
+    display var(--duration-fast) allow-discrete;
+}
+
+dialog.dialog-motion[open] {
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity var(--duration-medium) var(--ease-out-expo),
+    transform var(--duration-medium) var(--ease-out-expo),
+    overlay var(--duration-medium) allow-discrete,
+    display var(--duration-medium) allow-discrete;
+}
+
+@starting-style {
+  dialog.dialog-motion[open] {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+dialog.dialog-motion::backdrop {
+  opacity: 0;
+  transition:
+    opacity var(--duration-fast) var(--ease-exit),
+    overlay var(--duration-fast) allow-discrete,
+    display var(--duration-fast) allow-discrete;
+}
+
+dialog.dialog-motion[open]::backdrop {
+  opacity: 1;
+  transition:
+    opacity var(--duration-medium) var(--ease-out-expo),
+    overlay var(--duration-medium) allow-discrete,
+    display var(--duration-medium) allow-discrete;
+}
+
+@starting-style {
+  dialog.dialog-motion[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
+/*
+ * Reduced-motion policy (single, global; Phase 4B).
+ *
+ * Decorative motion is removed: every transition and animation collapses to
+ * an instant state change, and smooth scrolling is turned off. Transform-based
+ * hover/press effects are additionally gated with `motion-safe:` where they
+ * are authored, so a lift or zoom doesn't just snap into place.
+ *
+ * EXCEPTION: pending-state indicators. A spinner or loading skeleton that
+ * communicates "an operation is in progress" may keep animating. Mark such an
+ * element with the `motion-pending` class. Anything that is not showing a
+ * pending state must NOT use it. The hero loop is handled by its own
+ * reduced-motion rules in gatheringPoint.css.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *:not(.motion-pending),
+  *:not(.motion-pending)::before,
+  *:not(.motion-pending)::after,
+  *::backdrop {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
   }
 }

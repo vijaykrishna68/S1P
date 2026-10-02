@@ -2,18 +2,17 @@ import { useEffect, useRef, useState } from 'react'
 import { Heart } from '@phosphor-icons/react'
 import { Button } from '../../ui/Button'
 import { useAutoFocus } from '../../ui/useAutoFocus'
-import { useScrollReveal } from '../../ui/useScrollReveal'
 
 interface SuccessStepProps {
   onRestart: () => void
 }
 
 /**
- * Quiet confirmation — a heart icon and the shared .reveal fade/lift, no
- * confetti or particle celebration. See CLAUDE.md's motion philosophy.
+ * Quiet confirmation — a heart icon, no confetti or particle celebration.
+ * Enters once via DonationSection's .step-enter wrapper (it previously also
+ * applied .reveal, so the entrance ran twice). See CLAUDE.md's motion philosophy.
  */
 export function SuccessStep({ onRestart }: SuccessStepProps) {
-  const { ref, revealProps } = useScrollReveal<HTMLDivElement>()
   const headingRef = useAutoFocus<HTMLHeadingElement>()
   const [linkCopied, setLinkCopied] = useState(false)
   const timeoutRef = useRef<number | undefined>(undefined)
@@ -46,11 +45,12 @@ export function SuccessStep({ onRestart }: SuccessStepProps) {
 
   const handleBackToHome = () => {
     onRestart()
-    document.getElementById('top')?.scrollIntoView({ behavior: 'smooth' })
+    // 'auto' defers to CSS scroll-behavior, which is smooth only when motion is allowed.
+    document.getElementById('top')?.scrollIntoView({ behavior: 'auto' })
   }
 
   return (
-    <div ref={ref} className={`text-center ${revealProps.className}`}>
+    <div className="text-center">
       <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-cream-soft">
         <Heart size={26} weight="fill" className="text-red" />
       </div>
@@ -71,17 +71,26 @@ export function SuccessStep({ onRestart }: SuccessStepProps) {
         <Button type="button" onClick={handleBackToHome}>
           Back to Home
         </Button>
+        {/* Both labels share one grid cell (inactive one invisible) so the
+            button never resizes; the confirmation is announced from the
+            separate live region below, not from inside the button. */}
         <button
           type="button"
           onClick={handleShare}
-          className="inline-flex min-h-11 items-center rounded-full border border-charcoal/15 px-6 py-3
-            font-display text-[15px] font-semibold text-charcoal transition-colors duration-200
+          className="pressable inline-grid min-h-11 items-center rounded-full border border-charcoal/15 px-6 py-3
+            font-display text-[15px] font-semibold text-charcoal
             hover:border-charcoal/30 hover:bg-cream-soft"
         >
-          <span aria-live="polite">
-            {linkCopied ? 'Link copied ✓' : 'Share the Mission'}
+          <span className={`col-start-1 row-start-1 ${linkCopied ? 'invisible' : ''}`}>
+            Share the Mission
+          </span>
+          <span className={`col-start-1 row-start-1 ${linkCopied ? '' : 'invisible'}`}>
+            Link copied ✓
           </span>
         </button>
+        <span role="status" className="sr-only">
+          {linkCopied ? 'Link copied ✓' : ''}
+        </span>
       </div>
     </div>
   )

@@ -64,8 +64,8 @@ export function ScreenshotUploader({
           <div className="flex shrink-0 items-center gap-1">
             <label
               htmlFor={inputId}
-              className="flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full
-                text-charcoal-muted transition-colors duration-200 hover:bg-cream-soft hover:text-charcoal"
+              className="pressable flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full
+                text-charcoal-muted hover:bg-cream-soft hover:text-charcoal"
               aria-label="Replace screenshot"
             >
               <ArrowsClockwise size={18} />
@@ -73,8 +73,8 @@ export function ScreenshotUploader({
             <button
               type="button"
               onClick={onRemoveFile}
-              className="flex min-h-11 min-w-11 items-center justify-center rounded-full text-charcoal-muted
-                transition-colors duration-200 hover:bg-cream-soft hover:text-red"
+              className="pressable flex min-h-11 min-w-11 items-center justify-center rounded-full text-charcoal-muted
+                hover:bg-cream-soft hover:text-red"
               aria-label="Remove screenshot"
             >
               <Trash size={18} />
@@ -116,7 +116,10 @@ export function ScreenshotUploader({
           className="flex cursor-pointer flex-col items-center gap-2.5"
         >
           {state.status === 'uploading' ? (
-            <CircleNotch size={26} className="animate-spin text-charcoal-muted" />
+            <CircleNotch
+              size={26}
+              className="motion-pending animate-spin text-charcoal-muted"
+            />
           ) : message ? (
             <WarningCircle size={26} className="text-red" />
           ) : (

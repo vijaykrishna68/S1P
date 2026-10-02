@@ -1,5 +1,4 @@
 import { useReducer, useRef, type FormEvent } from 'react'
-import { CircleNotch } from '@phosphor-icons/react'
 import { Button } from '../../ui/Button'
 import { useAutoFocus } from '../../ui/useAutoFocus'
 import { FormField } from '../FormField'
@@ -173,15 +172,8 @@ export function ConfirmationStep({ initialAmount, onSuccess }: ConfirmationStepP
           </p>
         )}
 
-        <Button type="submit" disabled={isSubmitting} className="w-full">
-          {isSubmitting ? (
-            <>
-              <CircleNotch size={16} className="animate-spin" />
-              Submitting…
-            </>
-          ) : (
-            'Confirm Donation'
-          )}
+        <Button type="submit" busy={isSubmitting} className="w-full">
+          {isSubmitting ? 'Submitting…' : 'Confirm Donation'}
         </Button>
       </form>
     </div>

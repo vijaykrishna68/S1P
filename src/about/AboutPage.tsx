@@ -6,7 +6,7 @@ import { ClosingBand } from '../components/ui/ClosingBand'
 import { IllustrationSlot } from '../components/ui/IllustrationSlot'
 import { SectionDivider } from '../components/ui/SectionDivider'
 import { TwoTrack } from '../components/ui/TwoTrack'
-import { useScrollReveal } from '../components/ui/useScrollReveal'
+import { revealStep, useScrollReveal } from '../components/ui/useScrollReveal'
 import { ImpactStat } from '../components/impact/ImpactStat'
 import { OriginStory } from './OriginStory'
 import { JourneyTimeline } from './JourneyTimeline'
@@ -63,15 +63,24 @@ export function AboutPage() {
           <Container>
             <div ref={heroRef} className={heroReveal.className}>
               <TwoTrack aside={<IllustrationSlot name="about-hero-mark" />}>
-                <h1 className="font-display text-4xl font-bold leading-[1.1] tracking-tight text-charcoal md:text-5xl">
+                <h1
+                  className="font-display text-4xl font-bold leading-[1.1] tracking-tight text-charcoal md:text-5xl reveal-item"
+                  style={revealStep(0)}
+                >
                   It started with a pizza order that never happened.
                 </h1>
-                <p className="mt-6 max-w-[52ch] text-base leading-relaxed text-charcoal-muted md:text-lg">
+                <p
+                  className="mt-6 max-w-[52ch] text-base leading-relaxed text-charcoal-muted md:text-lg reveal-item"
+                  style={revealStep(1)}
+                >
                   Sacrifice 1 Pizza (S1P) is a Chennai-based trust that turns everyday
                   choices — like skipping a pizza — into real educational support for
                   students who need it.
                 </p>
-                <p className="mt-6 font-display text-sm font-semibold uppercase tracking-wide text-charcoal-muted">
+                <p
+                  className="mt-6 font-display text-sm font-semibold uppercase tracking-wide text-charcoal-muted reveal-item"
+                  style={revealStep(2)}
+                >
                   Registered Trust · No. 316/2016
                 </p>
               </TwoTrack>
@@ -87,11 +96,17 @@ export function AboutPage() {
               ref={whatItIsRef}
               className={`grid gap-6 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.4fr)] lg:gap-16 ${whatItIsReveal.className}`}
             >
-              <h2 className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl">
+              <h2
+                className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl reveal-item"
+                style={revealStep(0)}
+              >
                 What S1P Is
               </h2>
               <div className="max-w-2xl">
-                <p className="text-base leading-relaxed text-charcoal-muted md:text-lg">
+                <p
+                  className="text-base leading-relaxed text-charcoal-muted md:text-lg reveal-item"
+                  style={revealStep(1)}
+                >
                   Sacrifice 1 Pizza Welfare Trust is a registered non-profit that funds
                   education for underprivileged students — from UKG through MBBS. Some
                   students receive one-time help with a specific need; others are
@@ -131,16 +146,22 @@ export function AboutPage() {
         <section className="bg-cream-soft pad-standard">
           <Container>
             <div ref={impactRef} className={`max-w-2xl ${impactReveal.className}`}>
-              <h2 className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl">
+              <h2
+                className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl reveal-item"
+                style={revealStep(0)}
+              >
                 What It&rsquo;s Added Up To
               </h2>
-              <p className="mt-4 text-base leading-relaxed text-charcoal-muted md:text-lg">
+              <p
+                className="mt-4 text-base leading-relaxed text-charcoal-muted md:text-lg reveal-item"
+                style={revealStep(1)}
+              >
                 None of this is hypothetical — here&rsquo;s the total, so far:
               </p>
             </div>
             <div className="mt-14 grid grid-cols-1 gap-x-12 gap-y-12 border-t border-charcoal/15 pt-10 sm:grid-cols-2 md:mt-16">
-              {ABOUT_IMPACT_METRICS.map((metric) => (
-                <ImpactStat key={metric.label} size="lg" {...metric} />
+              {ABOUT_IMPACT_METRICS.map((metric, i) => (
+                <ImpactStat key={metric.label} size="lg" index={i} {...metric} />
               ))}
             </div>
           </Container>

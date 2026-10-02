@@ -6,7 +6,7 @@ import { ClosingBand } from '../components/ui/ClosingBand'
 import { IllustrationSlot } from '../components/ui/IllustrationSlot'
 import { SectionDivider } from '../components/ui/SectionDivider'
 import { TwoTrack } from '../components/ui/TwoTrack'
-import { useScrollReveal } from '../components/ui/useScrollReveal'
+import { revealStep, useScrollReveal } from '../components/ui/useScrollReveal'
 import { GalleryGrid } from './GalleryGrid'
 
 /**
@@ -34,10 +34,16 @@ export function GalleryPage() {
                   />
                 }
               >
-                <h1 className="font-display text-4xl font-bold leading-[1.1] tracking-tight text-charcoal md:text-5xl">
+                <h1
+                  className="font-display text-4xl font-bold leading-[1.1] tracking-tight text-charcoal md:text-5xl reveal-item"
+                  style={revealStep(0)}
+                >
                   Our Gallery
                 </h1>
-                <p className="mt-6 max-w-[52ch] text-base leading-relaxed text-charcoal-muted md:text-lg">
+                <p
+                  className="mt-6 max-w-[52ch] text-base leading-relaxed text-charcoal-muted md:text-lg reveal-item"
+                  style={revealStep(1)}
+                >
                   Moments from S1P&rsquo;s journey — school visits, scholarship handovers,
                   and the community behind them.
                 </p>

@@ -107,10 +107,63 @@ content we haven't written yet.
 "Motion should reward attention, not demand it." The hero animation is the _only_
 continuous ambient motion on the page. Everything else animates in response to a
 user action (hover, focus, scroll-into-view, form state) and animates once or on
-demand — never loops indefinitely outside the hero. Animate `transform` and
-`opacity` only; never `top`/`left`/`width`/`height`. No decorative eyebrows, pills,
-dots, or badges added purely to "feel dynamic" — every visual element must serve a
-UX or storytelling purpose.
+demand — never loops indefinitely outside the hero, with one exception: a
+**pending-state indicator** (a spinner, or the gallery's loading skeleton) may loop
+for exactly as long as the operation it represents is pending (see the Phase 4B
+motion system below). Animate `transform` and `opacity` only; never
+`top`/`left`/`width`/`height` (documented exception: `grid-template-rows` 0fr→1fr
+for the FAQ and the mobile menu, the only known-good CSS technique for animating to
+an unknown height). No decorative eyebrows, pills, dots, or badges added purely to
+"feel dynamic" — every visual element must serve a UX or storytelling purpose.
+
+### Motion system (Phase 4B)
+
+Docs: `Docs/PHASE4B_INTERACTION_AUDIT.md`. For every interaction the test is: does
+it communicate state, hierarchy, affordance, or feedback? If not, it isn't added.
+
+**Tokens** (defined once in `src/styles/index.css`; a literal duration or easing in
+a component needs a written reason):
+
+| Token                                              | Value                                                    | Use                                                |
+| -------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------- |
+| `--duration-fast`                                  | 150ms                                                    | press feedback, icon crossfades, exits             |
+| `--duration-base`                                  | 200ms                                                    | hover colour/transform, underline, dots            |
+| `--duration-medium`                                | 300ms                                                    | crossfades, disclosure, dialog/menu open, steps    |
+| `--duration-slow`                                  | 500ms                                                    | lead-block reveals                                 |
+| `--duration-count`                                 | 1100ms                                                   | stat counters only                                 |
+| `--ease-out-expo` / `--ease-state` / `--ease-exit` | `cubic-bezier(.16,1,.3,1)` / `(0,0,.2,1)` / `(.4,0,1,1)` | entrances and disclosure / hover and state / exits |
+| `--shift-sm` / `-md` / `-lg`                       | 4 / 8 / 12px                                             | arrow nudge / step and crossfade / reveal          |
+
+The hero's own 700ms entrance and loop are locked and don't use these. Other fixed
+values: Button lift −2px, press scale .98 (compact controls .97), gallery zoom
+1.03, dialog scale .97→1, stagger 60ms per step (max 3; counters 80ms).
+
+**Reveals** apply to a section's _lead block only_ (heading + intro): the hook
+`useScrollReveal` puts `.reveal` on a wrapper, elements carrying `.reveal-item`
+(optionally `style={revealStep(n)}`) fade and rise 12px over 500ms once. Supporting
+content appears with its section, with no entrance of its own.
+
+**Reduced-motion policy** (single, global): one block at the end of
+`styles/index.css` collapses every transition and animation to an instant change and
+turns smooth scrolling off; transform-based hover/press effects are also gated with
+`motion-safe:` where authored; `usePrefersReducedMotion()` is the one JS-side check
+(never call `matchMedia` directly). **Exception — pending-state indicators:** a
+spinner or loading skeleton that shows an operation is in progress may keep
+animating; mark it with the `motion-pending` class. Nothing that isn't showing a
+pending state may use that class or loop.
+
+**Tailwind v4 gotcha:** `translate-*`, `scale-*` and `rotate-*` utilities set the
+standalone CSS properties `translate`, `scale` and `rotate`, not `transform`. A
+transition list such as `transition-[opacity,transform]` therefore does _not_
+animate them (they snap). Use `transition-transform` (covers all four) or name the
+property you actually change: `transition-[opacity,translate]`,
+`transition-[scale,...]`. Check with `element.getAnimations()` after triggering the
+state.
+
+**Shared pieces:** `pressable` utility (compact-control press feedback), `Button`'s
+`busy` prop (pending spinner + `aria-busy`), `.dialog-motion` (native `<dialog>`
+fade + scale via `@starting-style`, with page-scroll lock), `.skeleton-pulse`,
+`.fade-in`, `.step-enter`.
 
 ### Hero animation philosophy — "The Gathering Point" + "Absorbed Facet"
 
@@ -362,8 +415,9 @@ src/
     testimonials/     Editorial crossfade + placeholder testimonial data
     faq/              Accordion + FAQ content
     ui/               Small reusable primitives (Button, Container, TextLink,
-                       useScrollReveal, TwoTrack, IllustrationSlot, SectionDivider,
-                       ClosingBand) — added on real reuse, not speculatively
+                       useScrollReveal, usePrefersReducedMotion, TwoTrack,
+                       IllustrationSlot, SectionDivider, ClosingBand) — added on
+                       real reuse, not speculatively
   styles/             Global CSS, Tailwind entry, design tokens, shared .reveal
                        and .step-enter entrance utilities
   App.tsx             Composes all sections in page order; no page-shell
@@ -1068,8 +1122,12 @@ jsdom` comment instead of paying jsdom's setup cost on every test file,
   each dot's small visual pill, rather than the pill itself being the target).
 - `prefers-reduced-motion: reduce` freezes the hero to a static resting frame —
   not just a slower version of the same loop. Same treatment extended to the
-  testimonial crossfade (jumps directly, no phase choreography) and the FAQ
-  accordion (`motion-reduce:transition-none` on the height transition).
+  testimonial crossfade (jumps directly, no phase choreography, no autoplay) and
+  the FAQ accordion. Since Phase 4B a single global policy covers everything
+  else: all transitions/animations become instant and smooth scrolling is off,
+  except pending-state indicators (spinners, the loading skeleton), which may
+  keep animating and carry the `motion-pending` class. See "Motion system (Phase
+  4B)" in §3.
 - Color is never the only signal (errors, success, active states all pair color
   with an icon, text, or border change).
 - Form fields have visible `<label>`s (via the shared `FormField` wrapper),
@@ -1361,6 +1419,23 @@ dev`), desktop and mobile. **Before:** desktop Performance 100 /
   slots are reserved (`data-illustration-slot`) and hold only existing marks or
   plain rules; **no new artwork, copy, or motion** (Phases 4C/4D/4B). Copy was
   verified unchanged by hashing each page's normalised text against the baseline.
+
+- **Phase 4B — Interaction & motion: implemented.** Spec and decisions:
+  `Docs/PHASE4B_INTERACTION_AUDIT.md`; the system is summarised under "Motion
+  system (Phase 4B)" in §3. Added motion tokens and one global reduced-motion policy
+  (with the pending-state exception); lead-block-only reveals; Button `busy` state
+  and `:active`-only dark shade; `pressable` compact-control feedback; current-page
+  nav indicator (`aria-current` + persistent underline); a mounted, animated mobile
+  menu (`inert` while closed, outside-click close); FAQ closed panels are `inert`
+  and fade in with the height; stat counters reserve their final width, announce
+  the finished figure once, and start staggered; Testimonials autoplay only while
+  in view, stops on interaction, has a visible pause/play control, is `aria-live="off"`
+  while autoplay is enabled, and its swap timeout is now stored and cleaned up;
+  gallery tiles (new `GalleryTile`) fade images in and zoom 1.03 on hover-capable
+  devices; the image viewer fades and scales open/closed with scroll locking; the
+  skeleton is a gentler pulse with a proper `role="status"`; copy buttons no longer
+  resize. Explicitly deferred: viewer previous/next and swipe, the success-heart
+  settle, field/uploader fades. No copy, layout, colour, or illustration changes.
 
 ## 11. Portfolio Case-Study Highlights
 

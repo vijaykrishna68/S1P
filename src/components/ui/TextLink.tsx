@@ -14,14 +14,14 @@ export function TextLink({ children, className = '', ...props }: TextLinkProps) 
   return (
     <a
       className={`group inline-flex min-h-11 items-center gap-1.5 font-display text-[15px]
-        font-semibold text-charcoal transition-colors duration-200 hover:text-red ${className}`}
+        font-semibold text-charcoal transition-colors duration-(--duration-base) ease-state hover:text-red ${className}`}
       {...props}
     >
       {children}
       <ArrowRight
         size={17}
         weight="bold"
-        className="transition-transform duration-200 ease-out group-hover:translate-x-1"
+        className="transition-transform duration-(--duration-base) ease-state motion-safe:group-hover:translate-x-1"
       />
     </a>
   )
