@@ -5,17 +5,17 @@ import { ImpactStat } from './ImpactStat'
 // Figures from Docs/02UI_UX.md §4 — placeholders until real numbers are
 // confirmed (see CLAUDE.md's Open Content Decisions note). Not invented.
 const IMPACT_METRICS = [
-  { value: 50000, prefix: '₹', suffix: '+', label: 'Raised' },
-  { value: 120, suffix: '+', label: 'Meals Funded' },
-  { value: 30, suffix: '+', label: 'Students Supported' },
-  { value: 200, suffix: '+', label: 'Donors Joined' },
+  { value: 50000, prefix: '₹', suffix: '+', label: 'Raised', accent: 'red' as const },
+  { value: 120, suffix: '+', label: 'Meals Funded', accent: 'green' as const },
+  { value: 30, suffix: '+', label: 'Students Supported', accent: 'green' as const },
+  { value: 200, suffix: '+', label: 'Donors Joined', accent: 'red' as const },
 ]
 
 export function Impact() {
   const { ref, revealProps } = useScrollReveal<HTMLDivElement>()
 
   return (
-    <section id="impact" className="bg-cream-soft py-20 md:py-28 lg:py-32">
+    <section id="impact" className="bg-cream-soft pad-standard">
       <Container>
         <div ref={ref} className={`max-w-2xl ${revealProps.className}`}>
           <h2 className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl">
@@ -26,7 +26,7 @@ export function Impact() {
           </p>
         </div>
 
-        <div className="mt-14 grid grid-cols-2 gap-x-8 gap-y-10 md:mt-16 md:grid-cols-4 md:gap-x-10">
+        <div className="mt-14 grid grid-cols-2 gap-x-8 gap-y-10 border-t border-charcoal/15 pt-10 md:mt-16 md:grid-cols-4 md:gap-x-10">
           {IMPACT_METRICS.map((metric) => (
             <ImpactStat key={metric.label} {...metric} />
           ))}

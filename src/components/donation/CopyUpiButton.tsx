@@ -36,7 +36,7 @@ export function CopyUpiButton({ upiId }: CopyUpiButtonProps) {
         duration-200 hover:border-charcoal/30 hover:bg-cream-soft"
     >
       {copied ? (
-        <Check size={16} weight="bold" className="text-green" />
+        <Check size={16} weight="bold" className="text-green-deep" />
       ) : (
         <Copy size={16} />
       )}

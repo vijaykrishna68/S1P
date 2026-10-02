@@ -143,7 +143,7 @@ export function SubmissionDetail({ id, onBack }: SubmissionDetailProps) {
                   <button
                     onClick={() => handleStatusChange('reviewed')}
                     disabled={updating}
-                    className="min-h-11 rounded-full bg-green px-5 text-sm font-semibold text-white transition-opacity disabled:opacity-60"
+                    className="min-h-11 rounded-full bg-green-deep px-5 text-sm font-semibold text-white transition-opacity disabled:opacity-60"
                   >
                     Mark Reviewed
                   </button>

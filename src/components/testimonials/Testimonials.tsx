@@ -85,7 +85,7 @@ export function Testimonials() {
   return (
     <section
       id="testimonials"
-      className="py-20 md:py-28 lg:py-32"
+      className="bg-yellow-tint pad-breathing"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onFocus={() => setIsPaused(true)}
@@ -101,7 +101,7 @@ export function Testimonials() {
 
         <div
           ref={contentRef}
-          className={`mt-12 grid gap-x-16 gap-y-10 md:mt-16 md:grid-cols-2 ${transitionClasses} ${contentClasses}`}
+          className={`mt-12 grid gap-x-16 gap-y-10 md:mt-16 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] md:items-end ${transitionClasses} ${contentClasses}`}
           aria-live="polite"
         >
           {visible.map((testimonial, i) => (
@@ -109,7 +109,22 @@ export function Testimonials() {
               key={`${index}-${i}`}
               className={i === 1 ? 'hidden md:block' : ''}
             >
-              <p className="font-display text-xl font-medium leading-snug tracking-tight text-charcoal md:text-2xl">
+              {i === 0 && (
+                // Quote-anchor slot: a short rule today; Phase 4C may replace
+                // it with a mark built from the hero's core + outline motif.
+                <div
+                  data-illustration-slot="quote-anchor"
+                  aria-hidden="true"
+                  className="mb-6 flex h-3 items-center"
+                >
+                  <span className="block h-0.5 w-10 rounded-full bg-red" />
+                </div>
+              )}
+              <p
+                className={`font-display font-medium leading-snug tracking-tight text-charcoal ${
+                  i === 0 ? 'text-2xl md:text-3xl lg:text-4xl' : 'text-xl md:text-2xl'
+                }`}
+              >
                 “{testimonial.quote}”
               </p>
               {/* Not <footer>: nested inside <blockquote> (not one of the

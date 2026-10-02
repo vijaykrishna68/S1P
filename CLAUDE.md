@@ -76,21 +76,25 @@ unjustified reach per the design skill's serif-discipline rule.
 
 ### Colors
 
-| Purpose                    | Hex                                         |
-| -------------------------- | ------------------------------------------- |
-| Primary accent (non-text)  | `#E63946` (warm tomato red)                 |
-| CTA resting fill           | `#C92C3A` (`--color-red-deep`)              |
-| CTA hover/active           | `#9F232E` (`--color-red-darkest`)           |
-| Background base            | `#FFF8F2` (soft cream, solid — no gradient) |
-| Headline text              | `#1D1D1F`                                   |
-| Secondary accent (sparing) | `#FF7A00`                                   |
-| Success                    | `#2ECC71`                                   |
-| Soft surface               | `#FDEDE3`                                   |
-| Secondary text             | `#6B6B6B`                                   |
+| Purpose                   | Hex                                                      |
+| ------------------------- | -------------------------------------------------------- |
+| Primary accent (non-text) | `#E63946` (warm tomato red)                              |
+| CTA resting fill          | `#C92C3A` (`--color-red-deep`)                           |
+| CTA hover                 | `#C92C3A` (unchanged fill; lift + red shadow)            |
+| CTA pressed (`:active`)   | `#9F232E` (`--color-red-darkest`)                        |
+| Background base           | `#FFF8F2` (soft cream, solid — no gradient)              |
+| Headline text             | `#1D1D1F`                                                |
+| Secondary accent: green   | `#2D7A4D` (`--color-green-deep`) + tint `#E6F1E8`        |
+| Secondary accent: yellow  | `#F2B632` (`--color-yellow`, fill only) + tint `#FBEFC8` |
+| Success fills only        | `#2ECC71` (never text or icons; 2.0:1 on cream)          |
+| Soft surface              | `#FDEDE3`                                                |
+| Secondary text            | `#6B6B6B`                                                |
 
-One accent color (red) used consistently for all primary actions. Orange and green
-are reserved for their specific meanings (secondary emphasis / success) and never
-used interchangeably with red. Minimum 4.5:1 contrast for body text everywhere.
+One accent color (red) used consistently for all primary actions. Green and yellow
+(Phase 4A) are restrained supporting accents with specific meanings (green:
+growth/outcomes; yellow: warmth, surfaces and fills only, never text) and are never
+used interchangeably with red. Orange was removed. Minimum 4.5:1 contrast for body
+text everywhere.
 
 ### Spacing
 
@@ -358,7 +362,8 @@ src/
     testimonials/     Editorial crossfade + placeholder testimonial data
     faq/              Accordion + FAQ content
     ui/               Small reusable primitives (Button, Container, TextLink,
-                       useScrollReveal) — added on real reuse, not speculatively
+                       useScrollReveal, TwoTrack, IllustrationSlot, SectionDivider,
+                       ClosingBand) — added on real reuse, not speculatively
   styles/             Global CSS, Tailwind entry, design tokens, shared .reveal
                        and .step-enter entrance utilities
   App.tsx             Composes all sections in page order; no page-shell
@@ -1343,6 +1348,19 @@ dev`), desktop and mobile. **Before:** desktop Performance 100 /
   none present as real values, only inert SDK string literals. Also
   corrected `.env.example`'s stale claim that `BLOB_READ_WRITE_TOKEN` is
   required (it hasn't been since the OIDC migration below).
+
+- **Phase 4A — Visual system & layout refinement: implemented.** Spec and
+  decisions: `Docs/PHASE4A_VISUAL_SYSTEM_AUDIT.md`. Per-side spacing tiers
+  (`pad-tight`/`pad-standard`/`pad-breathing` utilities in `index.css`) replace
+  the single `py-20 md:py-28 lg:py-32` recipe; green-deep/yellow tokens (hex
+  chosen by computed contrast: the audit's `≈#2F7D4F` measured 4.42:1 on
+  `cream-soft`, so `#2D7A4D` was used); `--color-orange` removed; `Button`
+  hover keeps its red fill (lift + red-hued shadow) with the dark maroon moved to
+  `:active` only; Mission, FAQ, About, Trust, Journey, Impact, Testimonials
+  (yellow band), Donation (panel at lg+) and Gallery recomposed. Illustration
+  slots are reserved (`data-illustration-slot`) and hold only existing marks or
+  plain rules; **no new artwork, copy, or motion** (Phases 4C/4D/4B). Copy was
+  verified unchanged by hashing each page's normalised text against the baseline.
 
 ## 11. Portfolio Case-Study Highlights
 

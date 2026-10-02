@@ -57,7 +57,7 @@ export function JourneyTimeline() {
   const lastMemberCount = ACTIVE_MEMBERS[ACTIVE_MEMBERS.length - 1]
 
   return (
-    <section className="py-20 md:py-28 lg:py-32">
+    <section className="pad-standard">
       <Container>
         <div ref={ref} className={`max-w-2xl ${revealProps.className}`}>
           <h2 className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl">
@@ -70,7 +70,10 @@ export function JourneyTimeline() {
           </p>
         </div>
 
-        <div className="mt-10 md:mt-12 md:max-w-3xl">
+        {/* Chart takes the wide track; the two supporting facts sit beside it at
+            lg so the section uses the row instead of leaving its right third
+            empty. Stacks chart → caption → members on smaller screens. */}
+        <div className="mt-10 grid gap-8 md:mt-12 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-end lg:gap-16">
           <svg
             viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
             className="h-auto w-full"
@@ -114,21 +117,23 @@ export function JourneyTimeline() {
               ))}
           </svg>
 
-          {/* Visible text equivalent for the chart above — not just an
+          <div className="lg:border-l lg:border-charcoal/10 lg:pl-10">
+            {/* Visible text equivalent for the chart above — not just an
               sr-only summary, since stating the trend in words is useful to
               every reader, not only assistive tech. */}
-          <p className="mt-4 text-sm italic text-charcoal-muted">
-            Cumulative disbursement grew from ₹{firstCumulative.lakhs}L in{' '}
-            {firstCumulative.year} to ₹{lastCumulative.lakhs}L in {lastCumulative.year} —
-            including ₹{latestYearly.lakhs}L disbursed in {latestYearly.year} alone.
-          </p>
-        </div>
+            <p className="text-sm italic text-charcoal-muted">
+              Cumulative disbursement grew from ₹{firstCumulative.lakhs}L in{' '}
+              {firstCumulative.year} to ₹{lastCumulative.lakhs}L in {lastCumulative.year}{' '}
+              — including ₹{latestYearly.lakhs}L disbursed in {latestYearly.year} alone.
+            </p>
 
-        <p className="mt-8 max-w-2xl text-base leading-relaxed text-charcoal-muted md:text-lg">
-          Alongside that, the community carrying it forward has grown too —{' '}
-          {lastMemberCount.count} active members in {lastMemberCount.year}, up from{' '}
-          {firstMemberCount.count} in {firstMemberCount.year}.
-        </p>
+            <p className="mt-6 text-base leading-relaxed text-charcoal-muted md:text-lg">
+              Alongside that, the community carrying it forward has grown too —{' '}
+              {lastMemberCount.count} active members in {lastMemberCount.year}, up from{' '}
+              {firstMemberCount.count} in {firstMemberCount.year}.
+            </p>
+          </div>
+        </div>
       </Container>
     </section>
   )

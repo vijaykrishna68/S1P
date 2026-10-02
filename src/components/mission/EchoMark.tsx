@@ -6,14 +6,13 @@
  * hero animation philosophy and its note on why sections after the hero
  * don't get their own decorative visuals.
  */
-export function EchoMark() {
+export function EchoMark({
+  className = 'h-16 w-16 md:h-20 md:w-20',
+}: {
+  className?: string
+}) {
   return (
-    <svg
-      viewBox="0 0 120 120"
-      className="h-16 w-16 md:h-20 md:w-20"
-      aria-hidden="true"
-      focusable="false"
-    >
+    <svg viewBox="0 0 120 120" className={className} aria-hidden="true" focusable="false">
       <circle
         cx={38}
         cy={30}

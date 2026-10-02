@@ -15,16 +15,16 @@ export function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
   return (
-    <section id="faq" className="py-20 md:py-28 lg:py-32">
-      <Container>
+    <section id="faq" className="pad-tight">
+      <Container className="grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.4fr)] lg:gap-16">
         <h2
           ref={headingRef}
-          className={`font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl ${revealProps.className}`}
+          className={`font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl lg:self-start ${revealProps.className}`}
         >
           Questions You Might Have
         </h2>
 
-        <div className="mt-10 divide-y divide-charcoal/10 border-y border-charcoal/10 md:mt-12">
+        <div className="divide-y divide-charcoal/10 border-y border-charcoal/10">
           {FAQ_ITEMS.map((item, i) => {
             const isOpen = openIndex === i
             const buttonId = `faq-button-${i}`

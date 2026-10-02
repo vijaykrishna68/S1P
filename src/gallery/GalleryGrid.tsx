@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { ImageBroken } from '@phosphor-icons/react'
 import { Dialog } from '../components/ui/Dialog'
+import { EchoMark } from '../components/mission/EchoMark'
 import { listGalleryImages, GalleryApiError, type GalleryImage } from './galleryApi'
 
 type LoadState =
@@ -68,9 +68,15 @@ export function GalleryGrid() {
 
   if (state.items.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-2xl bg-cream-soft px-6 py-16 text-center">
-        <ImageBroken size={32} className="text-charcoal-muted" aria-hidden="true" />
-        <p className="text-charcoal-muted">
+      // Quiet-mark slot (Tier A): holds the existing EchoMark until Phase 4C
+      // decides on final art. Not a spot illustration, so it stays inside the
+      // per-page spot-illustration budget alongside the closing band.
+      <div
+        data-illustration-slot="gallery-empty-state"
+        className="mx-auto flex max-w-2xl flex-col items-center gap-6 rounded-2xl bg-yellow-tint px-6 py-14 text-center"
+      >
+        <EchoMark className="h-24 w-24 md:h-28 md:w-28" />
+        <p className="max-w-[40ch] text-charcoal-muted">
           Photos from our journey are on their way. Check back soon.
         </p>
       </div>

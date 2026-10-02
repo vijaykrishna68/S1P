@@ -25,11 +25,116 @@
      resting fill for solid buttons carrying white text — see CLAUDE.md's
      Decision Log. */
   --color-red-darkest: #9f232e;
-  --color-orange: #ff7a00;
+  /* Success-state fills only (e.g. a confirmation badge background). It is
+     2.0:1 on cream, so it must never carry text or icons — use green-deep. */
   --color-green: #2ecc71;
+  /* Phase 4A secondary accents (Docs/PHASE4A_VISUAL_SYSTEM_AUDIT.md §4).
+     Contrast computed from WCAG relative luminance, not estimated:
+       green-deep  #2d7a4d  4.99:1 on cream, 4.60:1 on cream-soft, 5.25:1 as a
+                            white-text fill. (The audit's ≈#2f7d4f measured only
+                            4.42:1 on cream-soft, under AA, so it was nudged.)
+       green-tint  #e6f1e8  charcoal-muted text on it: 4.60:1
+       yellow      #f2b632  fill/surface only, never text (1.73:1 on cream);
+                            charcoal on it: 9.23:1
+       yellow-tint #fbefc8  charcoal-muted text on it: 4.64:1; red-deep: 4.68:1 */
+  --color-green-deep: #2d7a4d;
+  --color-green-tint: #e6f1e8;
+  --color-yellow: #f2b632;
+  --color-yellow-tint: #fbefc8;
 
   --font-display: 'Outfit', 'Segoe UI', system-ui, sans-serif;
   --font-body: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif;
+}
+
+/*
+ * Section spacing tiers (Phase 4A, audit §8.4). Vertical padding per side at
+ * mobile / md (48rem) / lg (64rem):
+ *   tight      56 / 72 / 80px
+ *   standard   80 / 96 / 112px
+ *   breathing  80 / 112 / 128px   (the site's previous uniform value)
+ * pad-{tier} sets both sides; pad-t-/pad-b- set one side, so a section can
+ * take a different tier above and below.
+ */
+@utility pad-tight {
+  padding-block: 3.5rem;
+  @media (min-width: 48rem) {
+    padding-block: 4.5rem;
+  }
+  @media (min-width: 64rem) {
+    padding-block: 5rem;
+  }
+}
+@utility pad-t-tight {
+  padding-top: 3.5rem;
+  @media (min-width: 48rem) {
+    padding-top: 4.5rem;
+  }
+  @media (min-width: 64rem) {
+    padding-top: 5rem;
+  }
+}
+@utility pad-b-tight {
+  padding-bottom: 3.5rem;
+  @media (min-width: 48rem) {
+    padding-bottom: 4.5rem;
+  }
+  @media (min-width: 64rem) {
+    padding-bottom: 5rem;
+  }
+}
+@utility pad-standard {
+  padding-block: 5rem;
+  @media (min-width: 48rem) {
+    padding-block: 6rem;
+  }
+  @media (min-width: 64rem) {
+    padding-block: 7rem;
+  }
+}
+@utility pad-t-standard {
+  padding-top: 5rem;
+  @media (min-width: 48rem) {
+    padding-top: 6rem;
+  }
+  @media (min-width: 64rem) {
+    padding-top: 7rem;
+  }
+}
+@utility pad-b-standard {
+  padding-bottom: 5rem;
+  @media (min-width: 48rem) {
+    padding-bottom: 6rem;
+  }
+  @media (min-width: 64rem) {
+    padding-bottom: 7rem;
+  }
+}
+@utility pad-breathing {
+  padding-block: 5rem;
+  @media (min-width: 48rem) {
+    padding-block: 7rem;
+  }
+  @media (min-width: 64rem) {
+    padding-block: 8rem;
+  }
+}
+@utility pad-t-breathing {
+  padding-top: 5rem;
+  @media (min-width: 48rem) {
+    padding-top: 7rem;
+  }
+  @media (min-width: 64rem) {
+    padding-top: 8rem;
+  }
+}
+@utility pad-b-breathing {
+  padding-bottom: 5rem;
+  @media (min-width: 48rem) {
+    padding-bottom: 7rem;
+  }
+  @media (min-width: 64rem) {
+    padding-bottom: 8rem;
+  }
 }
 
 @layer base {
