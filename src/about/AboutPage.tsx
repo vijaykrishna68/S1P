@@ -9,30 +9,10 @@ import { SectionDivider } from '../components/ui/SectionDivider'
 import { TwoTrack } from '../components/ui/TwoTrack'
 import { revealStep, useScrollReveal } from '../components/ui/useScrollReveal'
 import { ImpactStat } from '../components/impact/ImpactStat'
+import { IMPACT_FIGURES } from '../components/impact/impactFigures'
 import { OriginStory } from './OriginStory'
 import { JourneyTimeline } from './JourneyTimeline'
 import { TrustInfo } from './TrustInfo'
-
-// Headline figures only (₹29L+, 55+ students) — the 58-active-members figure
-// lives in JourneyTimeline's narrative instead, per
-// Docs/PHASE2_ABOUT_SPEC.md §E. ₹29 is rounded, not ₹29.87 — see that
-// section for why a headline stat stays round while the exact figure
-// appears as supporting precision in the Journey section.
-const ABOUT_IMPACT_METRICS = [
-  {
-    value: 29,
-    prefix: '₹',
-    suffix: 'L+',
-    label: 'Disbursed cumulatively, since 2016',
-    accent: 'red' as const,
-  },
-  {
-    value: 55,
-    suffix: '+',
-    label: 'Students supported, UKG to MBBS',
-    accent: 'green' as const,
-  },
-]
 
 /**
  * Page-level component for the /about entry — see Docs/PHASE2_ABOUT_SPEC.md
@@ -167,7 +147,7 @@ export function AboutPage() {
               </p>
             </div>
             <div className="mt-14 grid grid-cols-1 gap-x-12 gap-y-12 border-t border-charcoal/15 pt-10 sm:grid-cols-2 md:mt-16">
-              {ABOUT_IMPACT_METRICS.map((metric, i) => (
+              {IMPACT_FIGURES.map((metric, i) => (
                 <ImpactStat key={metric.label} size="lg" index={i} {...metric} />
               ))}
             </div>

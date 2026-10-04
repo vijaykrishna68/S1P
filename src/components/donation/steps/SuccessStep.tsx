@@ -63,8 +63,8 @@ export function SuccessStep({ onRestart }: SuccessStepProps) {
         Thank you for choosing impact over indulgence ❤️
       </h2>
       <p className="mx-auto mt-4 max-w-[46ch] text-base leading-relaxed text-charcoal-muted">
-        Your contribution has been recorded. Every small sacrifice helps create a larger
-        opportunity.
+        We&rsquo;ve received your payment details and screenshot. Our team will review
+        your submission.
       </p>
 
       <div className="mt-8 flex flex-wrap items-center justify-center gap-4">

@@ -996,7 +996,7 @@ Current and genuine, cross-checked against `CLAUDE.md` §12:
   — the Postgres rate limiter is the only abuse mitigation currently in
   place.
 - **Placeholder content still in place:** UPI ID and phone number (both
-  overridable via `VITE_UPI_ID`/`VITE_PHONE_NUMBER`), 2 of 3 testimonials,
+  overridable via `VITE_UPI_ID`/`VITE_PHONE_NUMBER`; as of Phase 4D only the phone number is still a placeholder), testimonials (now real),
   social media links (`Footer.tsx`), and the impact figures are all
   placeholder values from the product spec, not real data.
 - **No portfolio screenshots captured** of the live deployment.

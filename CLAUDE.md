@@ -1541,11 +1541,12 @@ Honest, current, non-exhaustive:
   verification system — "verification" meaning human admin review, once that
   exists — never a payment-processing or payment-gateway system, and neither this
   file nor the README should describe it as one.
-- **Placeholder content still in place**: the UPI ID, phone number (both in
-  `donation/config.ts`, overridable via `VITE_UPI_ID`/`VITE_PHONE_NUMBER`),
-  2 of 3 testimonials, social media links (`Footer.tsx`), and the impact
-  figures are all placeholders from the product spec, not real data. See the
-  README's Content Checklist.
+- **Placeholder content still in place** (updated in Phase 4D): the phone number
+  (`donation/config.ts`, overridable via `VITE_PHONE_NUMBER`) and the social
+  media links (`Footer.tsx`). The UPI ID, testimonials and Home/About impact
+  figures are now real, client-supplied content; a `VITE_UPI_ID` set in Vercel
+  overrides the built-in UPI ID, so check it is unset or correct. See the README's
+  Content Checklist.
 - **No portfolio screenshots captured.** Automated screenshot capture wasn't
   reliably available in the development environment this project was built
   in (see the note on non-compositing browser sessions throughout this

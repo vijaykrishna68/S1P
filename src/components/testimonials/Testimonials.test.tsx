@@ -89,7 +89,11 @@ describe('Testimonials autoplay lifecycle', () => {
     const t = setup()
     t.viewport.setIntersecting(true)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Show testimonial 3 of 3' }))
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: `Show testimonial 3 of ${TESTIMONIALS.length}`,
+      }),
+    )
     t.advance(SWAP_MS + 50)
     expect(t.leadQuote()).toBe(quoteText(2))
 
@@ -139,7 +143,11 @@ describe('Testimonials under prefers-reduced-motion', () => {
 
   it('swaps quotes directly on a dot click, with no transition timers', () => {
     const t = setup({ reducedMotion: true })
-    fireEvent.click(screen.getByRole('button', { name: 'Show testimonial 2 of 3' }))
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: `Show testimonial 2 of ${TESTIMONIALS.length}`,
+      }),
+    )
 
     expect(t.leadQuote()).toBe(quoteText(1))
     expect(vi.getTimerCount()).toBe(0)
@@ -224,7 +232,11 @@ describe('Testimonials explicit pause/play control', () => {
     fireEvent.click(pauseButton())
     fireEvent.click(playButton())
 
-    fireEvent.click(screen.getByRole('button', { name: 'Show testimonial 2 of 3' }))
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: `Show testimonial 2 of ${TESTIMONIALS.length}`,
+      }),
+    )
     t.advance(SWAP_MS + 50)
     expect(t.leadQuote()).toBe(quoteText(1))
 

@@ -85,11 +85,28 @@ export function AmountStep({ onContinue }: AmountStepProps) {
           )}
           {touched && isTooHigh && (
             <span className="text-red-deep">
-              For donations above ₹{DONATION_CONFIG.maxAmount}, please give us a call at{' '}
-              <a href={`tel:${DONATION_CONFIG.phoneNumber}`} className="underline">
-                {DONATION_CONFIG.phoneNumber}
-              </a>
-              .
+              {DONATION_CONFIG.phoneNumber ? (
+                <>
+                  For donations above ₹{DONATION_CONFIG.maxAmount}, please give us a call
+                  at{' '}
+                  <a href={`tel:${DONATION_CONFIG.phoneNumber}`} className="underline">
+                    {DONATION_CONFIG.phoneNumber}
+                  </a>
+                  .
+                </>
+              ) : (
+                <>
+                  For donations above ₹{DONATION_CONFIG.maxAmount}, please get in touch
+                  with us at{' '}
+                  <a
+                    href={`mailto:${DONATION_CONFIG.contactEmail}`}
+                    className="underline"
+                  >
+                    {DONATION_CONFIG.contactEmail}
+                  </a>
+                  .
+                </>
+              )}
             </span>
           )}
           {!(touched && (isTooLow || isTooHigh)) && (
@@ -101,7 +118,7 @@ export function AmountStep({ onContinue }: AmountStepProps) {
         </p>
 
         <Button type="submit" className="mt-4 w-full">
-          Donate One Pizza
+          Continue to Payment
         </Button>
       </form>
     </div>

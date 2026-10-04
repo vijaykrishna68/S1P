@@ -1,16 +1,11 @@
 import { Container } from '../ui/Container'
 import { revealStep, useScrollReveal } from '../ui/useScrollReveal'
 import { ImpactStat } from './ImpactStat'
+import { IMPACT_FIGURES } from './impactFigures'
 
-// Figures from Docs/02UI_UX.md §4 — placeholders until real numbers are
-// confirmed (see CLAUDE.md's Open Content Decisions note). Not invented.
-const IMPACT_METRICS = [
-  { value: 50000, prefix: '₹', suffix: '+', label: 'Raised', accent: 'red' as const },
-  { value: 120, suffix: '+', label: 'Meals Funded', accent: 'green' as const },
-  { value: 30, suffix: '+', label: 'Students Supported', accent: 'green' as const },
-  { value: 200, suffix: '+', label: 'Donors Joined', accent: 'red' as const },
-]
-
+// The two real, sourced figures, shared with About (impactFigures.ts). The
+// PRD's other placeholder stats (meals, donors) were dropped in Phase 4D (D1)
+// because no source exists for them.
 export function Impact() {
   const { ref, revealProps } = useScrollReveal<HTMLDivElement>()
 
@@ -32,8 +27,8 @@ export function Impact() {
           </p>
         </div>
 
-        <div className="mt-14 grid grid-cols-2 gap-x-8 gap-y-10 border-t border-charcoal/15 pt-10 md:mt-16 md:grid-cols-4 md:gap-x-10">
-          {IMPACT_METRICS.map((metric, i) => (
+        <div className="mt-14 grid grid-cols-2 gap-x-8 gap-y-10 border-t border-charcoal/15 pt-10 md:mt-16 md:max-w-2xl md:gap-x-10">
+          {IMPACT_FIGURES.map((metric, i) => (
             <ImpactStat key={metric.label} index={i} {...metric} />
           ))}
         </div>

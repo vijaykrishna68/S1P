@@ -1,14 +1,16 @@
-// Exact content from Docs/02UI_UX.md §9 — not extended with invented questions.
+// Seeded from Docs/02UI_UX.md §9 and not extended with invented questions.
+// Phase 4D: Q1 and Q2 now reflect the client's answers (what donations fund;
+// registration status, using the facts on the About page).
 export const FAQ_ITEMS = [
   {
     question: 'Where does the money go?',
     answer:
-      'It goes toward verified individuals needing education, food, and essential support.',
+      'Mostly toward education for people who genuinely need it, and toward other essential needs when necessary.',
   },
   {
     question: 'Is this a registered charity?',
     answer:
-      'We are working toward formal registration. Transparency reports will be shared regularly.',
+      'Yes. Sacrifice 1 Pizza Welfare Trust is a registered non-profit organization for the welfare of society, Registration No. 316/2016, based in Chennai, Tamil Nadu.',
   },
   {
     question: 'Can I donate monthly?',

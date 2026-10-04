@@ -70,9 +70,8 @@ export function JourneyTimeline() {
             className="mt-4 text-base leading-relaxed text-charcoal-muted md:text-lg reveal-item"
             style={revealStep(1)}
           >
-            S1P has been funding student education since it was registered in 2016. Below
-            is what that&rsquo;s added up to, cumulatively, year by year — real
-            disbursements, not projections.
+            S1P has been funding student education since 2015. Below is what that&rsquo;s
+            added up to, cumulatively, year by year — real disbursements, not projections.
           </p>
         </div>
 

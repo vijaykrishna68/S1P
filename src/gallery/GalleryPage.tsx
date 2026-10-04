@@ -44,8 +44,8 @@ export function GalleryPage() {
                   className="mt-6 max-w-[52ch] text-base leading-relaxed text-charcoal-muted md:text-lg reveal-item"
                   style={revealStep(1)}
                 >
-                  Moments from S1P&rsquo;s journey — school visits, scholarship handovers,
-                  and the community behind them.
+                  Moments from S1P&rsquo;s journey — scholarship handovers and the
+                  community behind them.
                 </p>
               </TwoTrack>
             </div>

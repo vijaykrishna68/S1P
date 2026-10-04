@@ -13,6 +13,25 @@ const TRANSITION_MS = 300
 type Phase = 'idle' | 'exiting' | 'entering'
 
 /**
+ * Display quotes (a sentence or two) get the large editorial size; long
+ * testimonials (a paragraph) would be unreadably huge at that size, so they
+ * drop to a reading size. Wording is never shortened. 160 characters is the
+ * point where a quote stops fitting on a few lines at the large size.
+ */
+const LONG_QUOTE_CHARS = 160
+
+function quoteSize(quote: string, isLead: boolean) {
+  if (quote.length > LONG_QUOTE_CHARS) {
+    return isLead
+      ? 'text-lg leading-relaxed md:text-xl lg:text-2xl'
+      : 'text-base leading-relaxed md:text-lg'
+  }
+  return isLead
+    ? 'text-2xl leading-snug md:text-3xl lg:text-4xl'
+    : 'text-xl leading-snug md:text-2xl'
+}
+
+/**
  * Editorial crossfade, not a card carousel: outgoing quotes fade and lift
  * slightly, incoming quotes fade in from a matching offset, layout never
  * reflows. Two testimonials shown together on desktop (one on mobile). See
@@ -166,9 +185,10 @@ export function Testimonials() {
                 </div>
               )}
               <p
-                className={`font-display font-medium leading-snug tracking-tight text-charcoal ${
-                  i === 0 ? 'text-2xl md:text-3xl lg:text-4xl' : 'text-xl md:text-2xl'
-                }`}
+                className={`font-display font-medium tracking-tight text-charcoal ${quoteSize(
+                  testimonial.quote,
+                  i === 0,
+                )}`}
               >
                 “{testimonial.quote}”
               </p>

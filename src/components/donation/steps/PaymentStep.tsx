@@ -3,20 +3,11 @@ import { Button } from '../../ui/Button'
 import { useAutoFocus } from '../../ui/useAutoFocus'
 import { CopyUpiButton } from '../CopyUpiButton'
 import { DONATION_CONFIG } from '../config'
+import { buildUpiUri } from '../upiUri'
 
 interface PaymentStepProps {
   amount: number
   onPaid: () => void
-}
-
-function buildUpiUri(amount: number) {
-  const params = new URLSearchParams({
-    pa: DONATION_CONFIG.upiId,
-    pn: 'Sacrifice One Pizza',
-    cu: 'INR',
-    am: String(amount),
-  })
-  return `upi://pay?${params.toString()}`
 }
 
 /**

@@ -74,7 +74,7 @@ export function Footer() {
         </div>
 
         <p className="mt-12 border-t border-charcoal/10 pt-6 text-xs text-charcoal-muted">
-          All donations are voluntary. Transparency reports will be shared periodically.
+          All donations are voluntary.
         </p>
       </Container>
     </footer>
