@@ -615,3 +615,13 @@ Answers received after this audit. Nothing is committed.
 | D8       | Drop "school visits", keep "scholarship".                                                                        | **Done.**                                                                                                                                                                                                                                                                        |
 | D9       | "Continue to Payment".                                                                                           | **Done.**                                                                                                                                                                                                                                                                        |
 | D10–D16  | Not answered.                                                                                                    | **Not implemented.**                                                                                                                                                                                                                                                             |
+
+### Later clarification from the S1P team: ₹300 is encouraged, not a minimum
+
+₹300 is the encouraged contribution representing approximately the value of one pizza. It is not a mandatory minimum; donors may contribute any otherwise-valid amount.
+
+- The amount step now says "₹300 — about the value of one pizza — is what we encourage you to contribute. Any smaller amount is just as welcome."
+- The enforced floor is ₹1 (whole rupees), a technical limit. The ceiling stays ₹3000.
+- Updated copy that implied a ₹300 minimum: the amount hint, the validation message, the payment step ("Maximum via UPI ₹3000" only) and the Home meta description.
+- Unchanged: UPI ID, merchant parameters, flow order, testimonials, and the deferred D10, D11, D13, D14, D15 and D16.
+- Still to consider (not changed): FAQ Q4 "Is ₹300 enough?" predates this clarification, and the FAQ has no entry for "Can I give less than ₹300?".

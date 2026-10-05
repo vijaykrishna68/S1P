@@ -50,8 +50,7 @@ export function PaymentStep({ amount, onPaid }: PaymentStepProps) {
         <CopyUpiButton upiId={DONATION_CONFIG.upiId} />
 
         <p className="text-sm text-charcoal-muted">
-          Minimum ₹{DONATION_CONFIG.minAmount} &middot; Maximum via UPI ₹
-          {DONATION_CONFIG.maxAmount}
+          Maximum via UPI ₹{DONATION_CONFIG.maxAmount}
         </p>
       </div>
 

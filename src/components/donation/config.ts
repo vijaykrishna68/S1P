@@ -20,7 +20,11 @@
  * fallback: while it is empty, the above-limit message offers the contact
  * email instead. See the Content Checklist in README.md.
  */
-import { MIN_DONATION_AMOUNT, MAX_DONATION_AMOUNT } from '../../../shared/donationLimits'
+import {
+  MIN_DONATION_AMOUNT,
+  MAX_DONATION_AMOUNT,
+  SUGGESTED_DONATION_AMOUNT,
+} from '../../../shared/donationLimits'
 
 function usablePhone(value: string | undefined) {
   const phone = value?.trim() ?? ''
@@ -44,5 +48,6 @@ export const DONATION_CONFIG = {
   // About's Trust list (aboutData.ts TRUST_INFO).
   contactEmail: 's1pwtrust@gmail.com',
   minAmount: MIN_DONATION_AMOUNT,
+  suggestedAmount: SUGGESTED_DONATION_AMOUNT,
   maxAmount: MAX_DONATION_AMOUNT,
 } as const

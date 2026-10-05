@@ -40,12 +40,20 @@ describe('validateConfirmationForm', () => {
     expect(errors.address).toBe('Please enter your address.')
   })
 
-  it('flags an amount below the minimum', () => {
-    const errors = validateConfirmationForm(
-      { ...validValues, amountPaid: '299' },
-      uploadedState,
-    )
-    expect(errors.amountPaid).toMatch(/between ₹300 and ₹3000/)
+  it.each(['1', '50', '100', '200', '299', '300', '500'])(
+    'accepts %s, because ₹300 is encouraged, not a minimum',
+    (amountPaid) => {
+      const errors = validateConfirmationForm(
+        { ...validValues, amountPaid },
+        uploadedState,
+      )
+      expect(errors.amountPaid).toBeUndefined()
+    },
+  )
+
+  it.each(['0', '-50', '', '0.5'])('flags the invalid amount "%s"', (amountPaid) => {
+    const errors = validateConfirmationForm({ ...validValues, amountPaid }, uploadedState)
+    expect(errors.amountPaid).toMatch(/between ₹1 and ₹3000/)
   })
 
   it('flags an amount above the maximum', () => {
@@ -53,7 +61,7 @@ describe('validateConfirmationForm', () => {
       { ...validValues, amountPaid: '3001' },
       uploadedState,
     )
-    expect(errors.amountPaid).toMatch(/between ₹300 and ₹3000/)
+    expect(errors.amountPaid).toMatch(/between ₹1 and ₹3000/)
   })
 
   it('flags a non-numeric amount', () => {

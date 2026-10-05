@@ -20,4 +20,14 @@ describe('buildUpiUri', () => {
     expect(uri).not.toContain('+')
     expect(uri).toContain('pn=M%2FS.SACRIFICE%201%20PIZZA%20WELFARE%20TRUST')
   })
+
+  it.each([50, 100, 200, 299, 300, 3000])(
+    'passes the donor amount ₹%i into the payload unchanged',
+    (amount) => {
+      const p = new URL(
+        buildUpiUri(amount).replace('upi://pay', 'https://upi.invalid/pay'),
+      ).searchParams
+      expect(p.get('am')).toBe(String(amount))
+    },
+  )
 })

@@ -39,6 +39,10 @@ export function AmountStep({ onContinue }: AmountStepProps) {
         Give what you would normally spend on a pizza. Every contribution becomes part of
         something bigger.
       </p>
+      <p className="mt-3 max-w-[52ch] text-base leading-relaxed text-charcoal md:text-lg">
+        ₹{DONATION_CONFIG.suggestedAmount} &mdash; about the value of one pizza &mdash; is
+        what we encourage you to contribute. Any smaller amount is just as welcome.
+      </p>
 
       <form onSubmit={handleContinue} className="mt-10 max-w-sm">
         <label
@@ -65,7 +69,7 @@ export function AmountStep({ onContinue }: AmountStepProps) {
             onBlur={() => setTouched(true)}
             aria-describedby={errorId}
             aria-invalid={touched && (isTooLow || isTooHigh)}
-            placeholder="500"
+            placeholder={String(DONATION_CONFIG.suggestedAmount)}
             className={`w-full rounded-xl border bg-white py-3 pl-9 pr-4 font-display text-lg text-charcoal
               transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2
               focus-visible:ring-red/40 ${
@@ -111,8 +115,7 @@ export function AmountStep({ onContinue }: AmountStepProps) {
           )}
           {!(touched && (isTooLow || isTooHigh)) && (
             <span className="text-charcoal-muted">
-              Enter any amount from ₹{DONATION_CONFIG.minAmount} to ₹
-              {DONATION_CONFIG.maxAmount}.
+              Enter any amount up to ₹{DONATION_CONFIG.maxAmount}.
             </span>
           )}
         </p>

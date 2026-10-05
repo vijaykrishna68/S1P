@@ -8,7 +8,7 @@ hand-rolled signature animation, an explicit multi-state-machine donation
 flow, a real backend with idempotency and rate limiting, and
 accessibility/security work verified by testing rather than assumed.
 
-The premise: what you'd spend on one pizza (₹300–₹3000) can instead fund
+The premise: what you'd spend on one pizza (about ₹300) can instead fund
 someone's education, food, or essential needs, paid via UPI.
 
 **Live site:** https://sacrifice-one-pizza.vercel.app

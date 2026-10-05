@@ -15,7 +15,7 @@ listed in `CLAUDE.md`'s Phase 10 entry.
 ## 1. Project Identity
 
 **What it is:** Sacrifice One Pizza is a single-page charity donation
-website with a real backend. A donor picks an amount (₹300–₹3000), pays via
+website with a real backend. A donor picks an amount (₹1–₹3000; ₹300 is the encouraged "one pizza" amount), pays via
 UPI (India's bank-linked real-time payment system) using a client-generated
 QR code or a UPI ID, uploads a screenshot of that payment as proof, and
 submits a confirmation form. An admin later reviews submissions through a
@@ -66,7 +66,7 @@ that is a different Postgres from the production Neon project.
 
 ```
 landing page
-  → donation amount (AmountStep — live-validated, ₹300–₹3000)
+  → donation amount (AmountStep — live-validated, ₹1–₹3000)
       → above ₹3000: shown a "call us" message with a tel: link instead
   → payment instructions (PaymentStep — QR code + UPI ID + copy button)
   → "I've Paid" (advances outer step, no backend call yet)
@@ -220,7 +220,7 @@ knowing about the others' internals.
 ### Form handling and validation
 
 `validateConfirmationForm(values, uploadState)` checks name/address
-non-empty, amount within ₹300–3000 (imported from `shared/donationLimits.ts`
+non-empty, amount within ₹1–3000 (imported from `shared/donationLimits.ts`
 — the same constant the server re-validates against), and the upload
 state's status (rejecting `uploading`/`invalid`/`error`/`empty`). On a
 failed submit, focus moves to the first invalid field in a fixed priority

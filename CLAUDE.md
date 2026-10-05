@@ -9,7 +9,7 @@ here changes, update the relevant section in the same commit.
 ## 1. Project Overview
 
 **Sacrifice One Pizza** is a single-page charity website. The premise: what you'd
-spend on one pizza (₹300–₹3000) can instead fund someone's education, food, or
+spend on one pizza (about ₹300) can instead fund someone's education, food, or
 essential needs. It's a donation-first site — the whole page exists to get a visitor
 from "interesting idea" to a completed UPI donation in under a minute, without
 guilt-based messaging or poverty imagery.
@@ -251,7 +251,7 @@ inline, associated to their field via `aria-describedby`, and never color-only.
 
 ## 4. UX Rules — Donation Flow
 
-Amounts are **user-entered**, never preset buttons. Valid UPI range: **₹300–₹3000**.
+Amounts are **user-entered**, never preset buttons. Valid UPI range: **₹1–₹3000**. ₹300 is the _encouraged_ "one pizza" amount, not a minimum (Phase 4D).
 Above ₹3000: the amount field shows a message directing the donor to call a
 placeholder phone number (rendered as a real `tel:` link, so tap-to-call already
 works on mobile — only the number itself is a placeholder).
@@ -267,7 +267,7 @@ split.
 amount → payment → confirmation → success
 ```
 
-1. **amount** — donor enters an amount, validated live (₹300–₹3000); above ₹3000
+1. **amount** — donor enters an amount, validated live (₹1–₹3000); above ₹3000
    shows the call-us message instead of letting them proceed.
 2. **payment** — QR code (real, generated client-side, encoding a UPI deep link
    with the donor's amount pre-filled), UPI ID, copy-UPI button, min/max guidance,
@@ -620,7 +620,7 @@ introduce one.
   avoids the single most common "AI-generated landing page" tell.
 - **Donation amounts are user-entered, not preset buttons** — overrides the PRD
   (which specified ₹300/₹500/₹700/₹1000 preset buttons) per direct, later user
-  instruction. UPI range is ₹300–₹3000 (PRD said ₹300–₹1000; superseded).
+  instruction. UPI range was ₹300–₹3000 (PRD said ₹300–₹1000; superseded); Phase 4D later made ₹300 the encouraged amount rather than a minimum, with a floor of ₹1.
   Above-₹3000 donors are directed to call a phone number instead.
   See `Docs/02UI_UX.md` §5.1, which already reflects this.
 - **Static HTML/CSS/JS (per PRD) rejected in favor of React + TypeScript +
@@ -828,7 +828,7 @@ introduce one.
   (`db/client.ts`) — avoids opening a fresh Postgres connection on every request; a
   warm Vercel serverless instance reuses the pool across invocations.
 - **`amountPaid` stored as a whole-rupee integer, never a float or paise** — the
-  donation UI has never collected sub-rupee amounts (₹300–₹3000, no decimal input
+  donation UI has never collected sub-rupee amounts (₹1–₹3000, no decimal input
   anywhere), so paise would be a unit-conversion concern invented for a precision
   requirement that doesn't exist here.
 - **Idempotency key checked before the rate limiter and before re-verifying the
@@ -915,7 +915,7 @@ no-store` on the response, since this is a donor's proof-of-payment image,
   leading bytes of the uploaded file are checked against known PNG/JPEG/WEBP
   signatures before a donation row is ever created.
 - **`donationLimits.ts` and `screenshotLimits.ts` split into `shared/`, outside both
-  `src/` and `api/`** — both the ₹300–3000 range and the 8MB/PNG-JPEG-WEBP
+  `src/` and `api/`** — both the ₹1–3000 donation range and the 8MB/PNG-JPEG-WEBP
   screenshot constraints are now enforced independently on the client (UX) and the
   server (the check that actually matters), and needed one source of truth. They
   couldn't live inside `src/components/donation/config.ts` because that file reads

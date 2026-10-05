@@ -36,6 +36,46 @@ describe('phone number placeholder guard', () => {
   })
 })
 
+describe('amount step: ₹300 is encouraged, not a minimum', () => {
+  function enter(value: string) {
+    const onContinue = vi.fn()
+    const utils = render(<AmountStep onContinue={onContinue} />)
+    fireEvent.change(screen.getByLabelText('Amount'), { target: { value } })
+    fireEvent.click(screen.getByRole('button', { name: 'Continue to Payment' }))
+    return { onContinue, ...utils }
+  }
+
+  it('presents ₹300 as the encouraged one-pizza amount, never as a minimum', () => {
+    const { container } = render(<AmountStep onContinue={() => {}} />)
+    const text = container.textContent ?? ''
+    expect(text).toMatch(
+      /₹300\s*—\s*about the value of one pizza\s*—\s*is what we encourage you to contribute/,
+    )
+    expect(text).toMatch(/smaller amount is just as welcome/)
+    expect(text).not.toMatch(/minimum|at least ₹300|from ₹300/i)
+  })
+
+  it.each([50, 100, 200, 300, 500, 3000])('lets ₹%i proceed to payment', (amount) => {
+    const { onContinue } = enter(String(amount))
+    expect(onContinue).toHaveBeenCalledWith(amount)
+  })
+
+  it.each(['0', '-50', '-1', ''])('does not let "%s" proceed', (value) => {
+    const { onContinue } = enter(value)
+    expect(onContinue).not.toHaveBeenCalled()
+  })
+
+  it('shows no "minimum ₹300" wording when an amount below ₹300 is entered', () => {
+    const { container } = enter('50')
+    expect(container.textContent).not.toMatch(/between ₹300|minimum|at least/i)
+  })
+
+  it('rejects above the UPI ceiling', () => {
+    const { onContinue } = enter('3001')
+    expect(onContinue).not.toHaveBeenCalled()
+  })
+})
+
 describe('amount step', () => {
   it('names its action honestly', () => {
     render(<AmountStep onContinue={() => {}} />)

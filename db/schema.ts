@@ -19,7 +19,7 @@ export const donationStatusEnum = pgEnum('donation_status', [
 /**
  * amountPaid is stored as a whole-rupee integer, never a float. Paise-level
  * precision was considered and rejected: the donation UI only ever collects
- * whole rupees (₹300–₹3000, no decimal input anywhere), so paise would add a
+ * whole rupees (₹1–₹3000, no decimal input anywhere), so paise would add a
  * unit-conversion concern with no real requirement behind it. See CLAUDE.md's
  * decision log.
  */
