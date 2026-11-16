@@ -55,11 +55,7 @@ export function SuccessStep({ onRestart }: SuccessStepProps) {
         <Icon name="heart" size={26} />
       </div>
 
-      <h2
-        ref={headingRef}
-        tabIndex={-1}
-        className="heading-1 mt-6"
-      >
+      <h2 ref={headingRef} tabIndex={-1} className="heading-1 mt-6">
         Thank you for choosing impact over indulgence ❤️
       </h2>
       <p className="body mx-auto mt-4 max-w-[46ch] text-ink-2">

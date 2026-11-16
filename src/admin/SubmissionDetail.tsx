@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react'
+import { Alert } from '../components/ui/Alert'
+import { Button } from '../components/ui/Button'
+import { StatusBadge } from './StatusBadge'
 import {
   getDonation,
   updateDonationStatus,
@@ -69,55 +72,53 @@ export function SubmissionDetail({ id, onBack }: SubmissionDetailProps) {
   }
 
   return (
-    <div className="min-h-screen bg-cream px-4 py-8 md:px-8">
+    <div className="min-h-screen bg-canvas px-4 py-8 md:px-8">
       <div className="mx-auto max-w-2xl space-y-6">
         <button
           onClick={onBack}
-          className="font-semibold text-charcoal underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red/40"
+          className="inline-flex min-h-11 items-center font-bold text-ink underline-offset-4 hover:underline hover:decoration-highlight hover:decoration-2"
         >
           ← Back to donations
         </button>
 
-        {state.status === 'loading' && <p className="text-charcoal-muted">Loading…</p>}
+        {state.status === 'loading' && <p className="text-ink-2">Loading…</p>}
 
         {state.status === 'error' && (
-          <p role="alert" className="text-red-deep">
+          <Alert tone="error" title="This donation didn't load.">
             {state.message}
-          </p>
+          </Alert>
         )}
 
         {state.status === 'loaded' && (
-          <div className="space-y-6 rounded-2xl bg-white p-6 shadow-sm">
+          <div className="space-y-6 rounded-card border-2 border-line bg-elevated p-6">
             <div>
-              <h1 className="font-display text-2xl font-bold text-charcoal">
-                {state.donation.fullName}
-              </h1>
-              <p className="mt-1 text-sm text-charcoal-muted capitalize">
-                Status: {state.donation.status}
-              </p>
+              <h1 className="heading-2">{state.donation.fullName}</h1>
+              <div className="mt-2">
+                <StatusBadge status={state.donation.status} />
+              </div>
             </div>
 
             <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <dt className="text-sm text-charcoal-muted">Amount</dt>
-                <dd className="font-semibold text-charcoal">
+                <dt className="text-sm text-ink-2">Amount</dt>
+                <dd className="font-bold text-ink">
                   ₹{state.donation.amountPaid.toLocaleString('en-IN')}
                 </dd>
               </div>
               <div>
-                <dt className="text-sm text-charcoal-muted">Submitted</dt>
-                <dd className="font-semibold text-charcoal">
+                <dt className="text-sm text-ink-2">Submitted</dt>
+                <dd className="font-bold text-ink">
                   {new Date(state.donation.createdAt).toLocaleString()}
                 </dd>
               </div>
               <div className="sm:col-span-2">
-                <dt className="text-sm text-charcoal-muted">Address</dt>
-                <dd className="font-semibold text-charcoal">{state.donation.address}</dd>
+                <dt className="text-sm text-ink-2">Address</dt>
+                <dd className="font-bold text-ink">{state.donation.address}</dd>
               </div>
             </dl>
 
             <div>
-              <p className="text-sm text-charcoal-muted">Payment screenshot</p>
+              <p className="text-sm text-ink-2">Payment screenshot</p>
               {/* Routed through the authenticated screenshot endpoint, not
                   donation.screenshotUrl directly — that Blob URL is private
                   and not browser-fetchable on its own. An <img>/top-level
@@ -132,38 +133,40 @@ export function SubmissionDetail({ id, onBack }: SubmissionDetailProps) {
                   src={`/api/admin/donations/${state.donation.id}/screenshot`}
                   alt={`Payment screenshot uploaded by ${state.donation.fullName}`}
                   loading="lazy"
-                  className="mt-2 max-h-96 rounded-xl border border-charcoal/10 object-contain"
+                  className="mt-2 max-h-96 rounded-chip border-2 border-line object-contain"
                 />
               </a>
             </div>
 
-            <div className="flex flex-wrap gap-3 border-t border-charcoal/10 pt-4">
+            <div className="flex flex-wrap gap-3 border-t-2 border-line pt-4">
               {state.donation.status === 'pending' && (
                 <>
-                  <button
+                  <Button
+                    size="sm"
                     onClick={() => handleStatusChange('reviewed')}
                     disabled={updating}
-                    className="min-h-11 rounded-full bg-green-deep px-5 text-sm font-semibold text-white transition-opacity disabled:opacity-60"
                   >
                     Mark Reviewed
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="secondary"
                     onClick={() => handleStatusChange('rejected')}
                     disabled={updating}
-                    className="min-h-11 rounded-full bg-red-deep px-5 text-sm font-semibold text-white transition-opacity disabled:opacity-60"
                   >
                     Reject
-                  </button>
+                  </Button>
                 </>
               )}
               {state.donation.status !== 'pending' && (
-                <button
+                <Button
+                  size="sm"
+                  variant="secondary"
                   onClick={() => handleStatusChange('pending')}
                   disabled={updating}
-                  className="min-h-11 rounded-full border border-charcoal/15 px-5 text-sm font-semibold text-charcoal transition-opacity disabled:opacity-60"
                 >
                   Reset to Pending
-                </button>
+                </Button>
               )}
             </div>
           </div>

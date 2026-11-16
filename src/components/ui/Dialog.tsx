@@ -96,7 +96,9 @@ export function Dialog({
             <Icon name="close" />
           </button>
           <div className="mt-3 text-[17px] leading-relaxed">{children}</div>
-          {actions && <div className="mt-6 flex flex-wrap justify-end gap-3">{actions}</div>}
+          {actions && (
+            <div className="mt-6 flex flex-wrap justify-end gap-3">{actions}</div>
+          )}
         </div>
       ) : (
         <>

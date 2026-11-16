@@ -24,7 +24,10 @@ export function ClosingBand({ heading, children, action }: ClosingBandProps) {
           <h2 className="heading-1 reveal-item" style={revealStep(0)}>
             {heading}
           </h2>
-          <p className="body-lg mt-4 max-w-xl text-ink-inverse/85 reveal-item" style={revealStep(1)}>
+          <p
+            className="body-lg mt-4 max-w-xl text-ink-inverse/85 reveal-item"
+            style={revealStep(1)}
+          >
             {children}
           </p>
           <div className="mt-8 reveal-item" style={revealStep(2)}>

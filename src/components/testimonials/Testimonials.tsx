@@ -153,10 +153,7 @@ export function Testimonials() {
       }}
     >
       <Container>
-        <h2
-          ref={headingRef}
-          className={`heading-1 reveal-item ${revealProps.className}`}
-        >
+        <h2 ref={headingRef} className={`heading-1 reveal-item ${revealProps.className}`}>
           Voices From Our Community
         </h2>
 

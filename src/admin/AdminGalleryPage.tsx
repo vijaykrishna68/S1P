@@ -1,6 +1,10 @@
 import { useEffect, useState, type ChangeEvent } from 'react'
-import { CircleNotch, Trash, UploadSimple, WarningCircle } from '@phosphor-icons/react'
+import { Alert } from '../components/ui/Alert'
+import { Button } from '../components/ui/Button'
+import { Icon } from '../components/ui/Icon'
 import { Dialog } from '../components/ui/Dialog'
+import { EmptyState } from '../components/ui/EmptyState'
+import { fieldControlClasses } from '../components/donation/FormField'
 import {
   listGalleryImages,
   GalleryApiError,
@@ -97,35 +101,33 @@ export function AdminGalleryPage({ onBack }: AdminGalleryPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-cream px-4 py-8 md:px-8">
+    <div className="min-h-screen bg-canvas px-4 py-8 md:px-8">
       <div className="mx-auto max-w-5xl space-y-8">
         <div className="flex items-center justify-between">
           <button
             onClick={onBack}
-            className="font-semibold text-charcoal underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red/40"
+            className="inline-flex min-h-11 items-center font-bold text-ink underline-offset-4 hover:underline hover:decoration-highlight hover:decoration-2"
           >
             ← Back to donations
           </button>
         </div>
 
-        <h1 className="font-display text-2xl font-bold text-charcoal">Gallery</h1>
+        <h1 className="heading-1">Gallery</h1>
 
         {/* Upload */}
-        <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
-          <h2 className="font-display text-lg font-semibold text-charcoal">
-            Upload an image
-          </h2>
+        <div className="space-y-4 rounded-card border-2 border-line bg-elevated p-6">
+          <h2 className="heading-3">Upload an image</h2>
 
           {(upload.state.status === 'idle' || upload.state.status === 'invalid') && (
             <div>
               <label
                 htmlFor="gallery-file"
-                className="flex min-h-11 w-fit cursor-pointer items-center gap-2 rounded-full border-2 border-dashed
-                  border-charcoal/20 px-5 py-2.5 text-sm font-semibold text-charcoal transition-colors
-                  duration-200 hover:border-charcoal/35 has-[:focus-visible]:border-red has-[:focus-visible]:ring-2
-                  has-[:focus-visible]:ring-red/30"
+                className="flex min-h-12 w-fit cursor-pointer items-center gap-2 rounded-full border-2 border-dashed
+                  border-line-strong px-6 py-2.5 font-text text-base font-bold text-ink transition-colors
+                  duration-(--motion-duration-micro) hover:border-line-ink has-[:focus-visible]:border-line-ink
+                  has-[:focus-visible]:shadow-focus"
               >
-                <UploadSimple size={18} />
+                <Icon name="upload" />
                 Choose Image
                 <input
                   id="gallery-file"
@@ -135,16 +137,11 @@ export function AdminGalleryPage({ onBack }: AdminGalleryPageProps) {
                   onChange={handleFileChange}
                 />
               </label>
-              <p className="mt-2 text-xs text-charcoal-muted">
-                PNG, JPG, or WEBP, up to 5MB.
-              </p>
+              <p className="mt-2 text-[13px] text-ink-2">PNG, JPG, or WEBP, up to 5MB.</p>
               {upload.state.status === 'invalid' && (
-                <p
-                  role="alert"
-                  className="mt-2 flex items-center gap-1.5 text-sm text-red-deep"
-                >
-                  <WarningCircle size={16} /> {upload.state.message}
-                </p>
+                <Alert tone="error" className="mt-3">
+                  {upload.state.message}
+                </Alert>
               )}
             </div>
           )}
@@ -156,61 +153,46 @@ export function AdminGalleryPage({ onBack }: AdminGalleryPageProps) {
               <img
                 src={upload.state.previewUrl}
                 alt="Preview of the selected image"
-                className="h-32 w-32 shrink-0 rounded-xl border border-charcoal/12 object-cover"
+                className="h-32 w-32 shrink-0 rounded-chip border-2 border-line object-cover"
               />
               <div className="flex-1 space-y-3">
-                <p className="text-sm text-charcoal-muted">
+                <p className="text-sm text-ink-2">
                   {upload.state.file.name} · {formatBytes(upload.state.file.size)}
                 </p>
                 <label className="block">
-                  <span className="text-sm font-medium text-charcoal">
-                    Caption (optional)
-                  </span>
+                  <span className="text-base font-bold text-ink">Caption (optional)</span>
                   <input
                     type="text"
                     value={caption}
                     onChange={(e) => setCaption(e.target.value)}
                     maxLength={200}
                     disabled={upload.state.status === 'uploading'}
-                    className="mt-1 w-full rounded-xl border border-charcoal/15 bg-white px-4 py-2.5 text-charcoal
-                      transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2
-                      focus-visible:ring-red/40"
+                    className={`mt-1 ${fieldControlClasses}`}
                   />
                 </label>
 
                 {upload.state.status === 'error' && (
-                  <p
-                    role="alert"
-                    className="flex items-center gap-1.5 text-sm text-red-deep"
-                  >
-                    <WarningCircle size={16} /> {upload.state.message}
-                  </p>
+                  <Alert tone="error">{upload.state.message}</Alert>
                 )}
 
                 <div className="flex gap-3">
-                  <button
+                  <Button
                     onClick={() => upload.upload(caption)}
-                    disabled={upload.state.status === 'uploading'}
-                    className="flex min-h-11 items-center gap-2 rounded-full bg-red-deep px-5 text-sm font-semibold
-                      text-white transition-opacity disabled:opacity-60"
+                    busy={upload.state.status === 'uploading'}
                   >
-                    {upload.state.status === 'uploading' && (
-                      <CircleNotch size={16} className="animate-spin" />
-                    )}
                     {upload.state.status === 'uploading'
                       ? 'Uploading…'
                       : upload.state.status === 'error'
                         ? 'Retry Upload'
                         : 'Upload'}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="secondary"
                     onClick={upload.cancel}
                     disabled={upload.state.status === 'uploading'}
-                    className="min-h-11 rounded-full border border-charcoal/15 px-5 text-sm font-semibold
-                      text-charcoal transition-opacity disabled:opacity-60"
                   >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -219,24 +201,22 @@ export function AdminGalleryPage({ onBack }: AdminGalleryPageProps) {
 
         {/* Existing images */}
         <div>
-          <h2 className="font-display text-lg font-semibold text-charcoal">
-            Existing images
-          </h2>
+          <h2 className="heading-3">Existing images</h2>
 
-          {images.status === 'loading' && (
-            <p className="mt-4 text-charcoal-muted">Loading…</p>
-          )}
+          {images.status === 'loading' && <p className="mt-4 text-ink-2">Loading…</p>}
 
           {images.status === 'error' && (
-            <p role="alert" className="mt-4 text-red-deep">
+            <Alert tone="error" title="The images didn't load." className="mt-4">
               {images.message}
-            </p>
+            </Alert>
           )}
 
           {images.status === 'loaded' && images.items.length === 0 && (
-            <p className="mt-4 text-charcoal-muted">
-              No images yet — upload one above to get started.
-            </p>
+            <EmptyState
+              compact
+              title="No images yet"
+              body="Upload one above to get started."
+            />
           )}
 
           {images.status === 'loaded' && images.items.length > 0 && (
@@ -247,16 +227,15 @@ export function AdminGalleryPage({ onBack }: AdminGalleryPageProps) {
                     src={image.imageUrl}
                     alt={image.caption || "Photo from Sacrifice One Pizza's gallery"}
                     loading="lazy"
-                    className="aspect-square w-full rounded-xl bg-cream-soft object-cover"
+                    className="aspect-square w-full rounded-chip bg-surface object-cover"
                   />
                   <button
                     onClick={() => setDeleteState({ status: 'confirming', image })}
                     aria-label={`Delete image${image.caption ? `: ${image.caption}` : ''}`}
                     className="absolute right-2 top-2 flex size-11 items-center justify-center rounded-full
-                      bg-white/90 text-charcoal-muted transition-colors duration-200 hover:bg-white hover:text-red-deep
-                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red/40"
+                      bg-elevated text-ink transition-colors duration-(--motion-duration-micro) hover:bg-error-soft hover:text-error"
                   >
-                    <Trash size={18} />
+                    <Icon name="trash" />
                   </button>
                 </li>
               ))}
@@ -269,38 +248,34 @@ export function AdminGalleryPage({ onBack }: AdminGalleryPageProps) {
         open={deleteState.status !== 'idle'}
         onClose={() => setDeleteState({ status: 'idle' })}
         title="Delete this image?"
-      >
-        {deleteState.status !== 'idle' && (
-          <div className="w-[min(90vw,420px)] space-y-4 rounded-2xl bg-white p-6">
-            <p className="text-charcoal">
-              Delete this image from the gallery? This can&rsquo;t be undone.
-            </p>
-            {deleteState.status === 'error' && (
-              <p role="alert" className="text-sm text-red-deep">
-                {deleteState.message}
-              </p>
-            )}
-            <div className="flex justify-end gap-3">
-              <button
+        tone="destructive"
+        actions={
+          deleteState.status !== 'idle' && (
+            <>
+              <Button
+                variant="secondary"
                 onClick={() => setDeleteState({ status: 'idle' })}
                 disabled={deleteState.status === 'deleting'}
-                className="min-h-11 rounded-full border border-charcoal/15 px-5 text-sm font-semibold text-charcoal
-                  transition-opacity disabled:opacity-60"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="destructive"
                 onClick={confirmDelete}
-                disabled={deleteState.status === 'deleting'}
-                className="flex min-h-11 items-center gap-2 rounded-full bg-red-deep px-5 text-sm font-semibold
-                  text-white transition-opacity disabled:opacity-60"
+                busy={deleteState.status === 'deleting'}
               >
-                {deleteState.status === 'deleting' && (
-                  <CircleNotch size={16} className="animate-spin" />
-                )}
-                {deleteState.status === 'deleting' ? 'Deleting…' : 'Delete'}
-              </button>
-            </div>
+                {deleteState.status === 'deleting' ? 'Deleting…' : 'Delete image'}
+              </Button>
+            </>
+          )
+        }
+      >
+        {deleteState.status !== 'idle' && (
+          <div className="space-y-3">
+            <p>Delete this image from the gallery? This can&rsquo;t be undone.</p>
+            {deleteState.status === 'error' && (
+              <Alert tone="error">{deleteState.message}</Alert>
+            )}
           </div>
         )}
       </Dialog>

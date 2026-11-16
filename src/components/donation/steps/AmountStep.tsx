@@ -29,11 +29,7 @@ export function AmountStep({ onContinue }: AmountStepProps) {
 
   return (
     <div>
-      <h2
-        ref={headingRef}
-        tabIndex={-1}
-        className="heading-1"
-      >
+      <h2 ref={headingRef} tabIndex={-1} className="heading-1">
         Donate One Pizza
       </h2>
       <p className="body-lg mt-4 max-w-[52ch] text-ink-2">
@@ -46,10 +42,7 @@ export function AmountStep({ onContinue }: AmountStepProps) {
       </p>
 
       <form onSubmit={handleContinue} className="mt-10 max-w-sm">
-        <label
-          htmlFor={inputId}
-          className="block font-text text-base font-bold text-ink"
-        >
+        <label htmlFor={inputId} className="block font-text text-base font-bold text-ink">
           Amount
         </label>
         <div className="relative mt-2">
@@ -88,7 +81,10 @@ export function AmountStep({ onContinue }: AmountStepProps) {
                 <>
                   For donations above ₹{DONATION_CONFIG.maxAmount}, please give us a call
                   at{' '}
-                  <a href={`tel:${DONATION_CONFIG.phoneNumber}`} className="underline decoration-2 underline-offset-2">
+                  <a
+                    href={`tel:${DONATION_CONFIG.phoneNumber}`}
+                    className="underline decoration-2 underline-offset-2"
+                  >
                     {DONATION_CONFIG.phoneNumber}
                   </a>
                   .

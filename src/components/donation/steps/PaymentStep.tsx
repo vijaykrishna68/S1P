@@ -21,11 +21,7 @@ export function PaymentStep({ amount, onPaid }: PaymentStepProps) {
 
   return (
     <div>
-      <h2
-        ref={headingRef}
-        tabIndex={-1}
-        className="heading-1"
-      >
+      <h2 ref={headingRef} tabIndex={-1} className="heading-1">
         Scan to pay ₹{amount.toLocaleString('en-IN')}
       </h2>
       <p className="body mt-4 max-w-[52ch] text-ink-2">
@@ -49,9 +45,7 @@ export function PaymentStep({ amount, onPaid }: PaymentStepProps) {
 
         <CopyUpiButton upiId={DONATION_CONFIG.upiId} />
 
-        <p className="text-sm text-ink-2">
-          Maximum via UPI ₹{DONATION_CONFIG.maxAmount}
-        </p>
+        <p className="text-sm text-ink-2">Maximum via UPI ₹{DONATION_CONFIG.maxAmount}</p>
       </div>
 
       <div className="mt-10 border-t-2 border-line pt-8 text-center">

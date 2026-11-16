@@ -1,11 +1,10 @@
 import { useState, type FormEvent } from 'react'
+import { Alert } from '../components/ui/Alert'
 import { Button } from '../components/ui/Button'
-import { FormField } from '../components/donation/FormField'
+import { FormField, fieldControlClasses } from '../components/donation/FormField'
 import { login, ApiError } from './api'
 
-const inputClasses =
-  'w-full rounded-xl border border-charcoal/15 bg-white px-4 py-3 text-charcoal ' +
-  'transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red/40'
+const inputClasses = fieldControlClasses
 
 interface LoginPageProps {
   onSuccess: (email: string) => void
@@ -34,15 +33,15 @@ export function LoginPage({ onSuccess }: LoginPageProps) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-cream px-4">
+    <div className="flex min-h-screen items-center justify-center bg-canvas px-4">
       <form
         onSubmit={handleSubmit}
         noValidate
-        className="w-full max-w-sm space-y-6 rounded-2xl bg-white p-8 shadow-sm"
+        className="w-full max-w-sm space-y-6 rounded-card border-2 border-line bg-elevated p-8"
       >
-        <h1 className="font-display text-2xl font-bold text-charcoal">Admin Sign In</h1>
+        <h1 className="heading-2">Admin Sign In</h1>
 
-        <FormField id="email" label="Email">
+        <FormField id="email" label="Email" requirement="Required">
           <input
             id="email"
             type="email"
@@ -54,7 +53,7 @@ export function LoginPage({ onSuccess }: LoginPageProps) {
           />
         </FormField>
 
-        <FormField id="password" label="Password">
+        <FormField id="password" label="Password" requirement="Required">
           <input
             id="password"
             type="password"
@@ -66,13 +65,9 @@ export function LoginPage({ onSuccess }: LoginPageProps) {
           />
         </FormField>
 
-        {error && (
-          <p role="alert" className="text-sm text-red-deep">
-            {error}
-          </p>
-        )}
+        {error && <Alert tone="error">{error}</Alert>}
 
-        <Button type="submit" disabled={submitting} className="w-full">
+        <Button type="submit" busy={submitting} fullWidth>
           {submitting ? 'Signing in…' : 'Sign In'}
         </Button>
       </form>

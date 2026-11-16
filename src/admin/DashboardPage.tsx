@@ -1,4 +1,8 @@
 import { useEffect, useState } from 'react'
+import { Alert } from '../components/ui/Alert'
+import { Button } from '../components/ui/Button'
+import { AdminTable } from './AdminTable'
+import { StatusBadge } from './StatusBadge'
 import {
   listDonations,
   ApiError,
@@ -77,26 +81,20 @@ export function DashboardPage({
     state.status === 'loaded' ? Math.max(1, Math.ceil(state.total / PAGE_SIZE)) : 1
 
   return (
-    <div className="min-h-screen bg-cream px-4 py-8 md:px-8">
+    <div className="min-h-screen bg-canvas px-4 py-8 md:px-8">
       <div className="mx-auto max-w-5xl space-y-8">
-        <header className="flex items-center justify-between">
+        <header className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="font-display text-2xl font-bold text-charcoal">Donations</h1>
-            <p className="text-sm text-charcoal-muted">Signed in as {email}</p>
+            <h1 className="heading-1">Donations</h1>
+            <p className="body-sm text-ink-2">Signed in as {email}</p>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={onOpenGallery}
-              className="min-h-11 rounded-full border border-charcoal/15 px-5 text-sm font-semibold text-charcoal transition-colors hover:bg-cream-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red/40"
-            >
+            <Button variant="secondary" size="sm" onClick={onOpenGallery}>
               Gallery
-            </button>
-            <button
-              onClick={onLogout}
-              className="min-h-11 rounded-full border border-charcoal/15 px-5 text-sm font-semibold text-charcoal transition-colors hover:bg-cream-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red/40"
-            >
+            </Button>
+            <Button variant="secondary" size="sm" onClick={onLogout}>
               Log Out
-            </button>
+            </Button>
           </div>
         </header>
 
@@ -123,37 +121,33 @@ export function DashboardPage({
           aria-label="Filter by status"
         >
           {STATUS_OPTIONS.map((option) => (
-            <button
+            <Button
               key={option}
+              size="sm"
+              variant={statusFilter === option ? 'primary' : 'secondary'}
               onClick={() => {
                 setState({ status: 'loading' })
                 setStatusFilter(option)
                 setPage(1)
               }}
               aria-current={statusFilter === option}
-              className={`min-h-11 rounded-full px-4 text-sm font-semibold capitalize transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red/40 ${
-                statusFilter === option
-                  ? 'bg-red-deep text-white'
-                  : 'bg-white text-charcoal hover:bg-cream-soft'
-              }`}
+              className="capitalize"
             >
               {option}
-            </button>
+            </Button>
           ))}
         </div>
 
-        {state.status === 'loading' && (
-          <p className="text-charcoal-muted">Loading donations…</p>
-        )}
+        {state.status === 'loading' && <p className="text-ink-2">Loading donations…</p>}
 
         {state.status === 'error' && (
-          <p role="alert" className="text-red-deep">
+          <Alert tone="error" title="The donations didn't load.">
             {state.message}
-          </p>
+          </Alert>
         )}
 
         {state.status === 'loaded' && state.items.length === 0 && (
-          <p className="text-charcoal-muted">
+          <p className="text-ink-2">
             No donations{' '}
             {statusFilter === 'all' ? 'yet' : `with status "${statusFilter}"`}.
           </p>
@@ -161,64 +155,57 @@ export function DashboardPage({
 
         {state.status === 'loaded' && state.items.length > 0 && (
           <>
-            <div className="overflow-x-auto rounded-2xl bg-white shadow-sm">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-cream-soft text-charcoal-muted">
-                  <tr>
-                    <th className="px-4 py-3 font-semibold">Donor</th>
-                    <th className="px-4 py-3 font-semibold">Amount</th>
-                    <th className="px-4 py-3 font-semibold">Date</th>
-                    <th className="px-4 py-3 font-semibold">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {state.items.map((donation) => (
-                    <tr key={donation.id} className="border-t border-charcoal/10">
-                      <td className="px-4 py-3">
-                        <button
-                          onClick={() => onSelectDonation(donation.id)}
-                          className="font-semibold text-charcoal underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red/40"
-                        >
-                          {donation.fullName}
-                        </button>
-                      </td>
-                      <td className="px-4 py-3">
-                        ₹{donation.amountPaid.toLocaleString('en-IN')}
-                      </td>
-                      <td className="px-4 py-3">
-                        {new Date(donation.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-4 py-3 capitalize">{donation.status}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <AdminTable
+              caption="Donations"
+              columns={[
+                { key: 'donor', label: 'Donor' },
+                { key: 'amount', label: 'Amount', align: 'end' },
+                { key: 'date', label: 'Date' },
+                { key: 'status', label: 'Status' },
+              ]}
+              rows={state.items.map((donation) => ({
+                donor: (
+                  <button
+                    onClick={() => onSelectDonation(donation.id)}
+                    className="min-h-11 text-left font-bold underline-offset-4 hover:underline hover:decoration-highlight hover:decoration-2"
+                  >
+                    {donation.fullName}
+                  </button>
+                ),
+                amount: `₹${donation.amountPaid.toLocaleString('en-IN')}`,
+                date: new Date(donation.createdAt).toLocaleDateString(),
+                status: <StatusBadge status={donation.status} />,
+              }))}
+            />
 
-            <div className="flex items-center justify-between text-sm text-charcoal-muted">
-              <button
+            <div className="flex items-center justify-between text-sm text-ink-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                icon="arrow-left"
                 onClick={() => {
                   setState({ status: 'loading' })
                   setPage((p) => Math.max(1, p - 1))
                 }}
                 disabled={page <= 1}
-                className="min-h-11 rounded-full border border-charcoal/15 px-4 disabled:opacity-40"
               >
                 Previous
-              </button>
+              </Button>
               <span>
                 Page {page} of {totalPages}
               </span>
-              <button
+              <Button
+                variant="secondary"
+                size="sm"
+                iconEnd="arrow-right"
                 onClick={() => {
                   setState({ status: 'loading' })
                   setPage((p) => Math.min(totalPages, p + 1))
                 }}
                 disabled={page >= totalPages}
-                className="min-h-11 rounded-full border border-charcoal/15 px-4 disabled:opacity-40"
               >
                 Next
-              </button>
+              </Button>
             </div>
           </>
         )}
@@ -229,9 +216,9 @@ export function DashboardPage({
 
 function SummaryTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-white p-5 shadow-sm">
-      <p className="text-sm text-charcoal-muted">{label}</p>
-      <p className="mt-1 font-display text-2xl font-bold text-charcoal">{value}</p>
+    <div className="rounded-card border-2 border-line bg-elevated p-5">
+      <p className="text-sm text-ink-2">{label}</p>
+      <p className="figure-md mt-1 text-ink">{value}</p>
     </div>
   )
 }

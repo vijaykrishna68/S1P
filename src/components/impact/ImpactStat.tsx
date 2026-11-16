@@ -58,9 +58,7 @@ export function ImpactStat({
           </svg>
         </span>
       </div>
-      <p
-        className={`tabular text-ink ${NUMERAL[size]}`}
-      >
+      <p className={`tabular text-ink ${NUMERAL[size]}`}>
         {/* Screen readers get the finished figure once; the animated digits
             below are hidden from them so "37" is never announced mid-count. */}
         <span className="sr-only">{finalText}</span>

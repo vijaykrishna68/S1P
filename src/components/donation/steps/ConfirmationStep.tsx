@@ -80,11 +80,7 @@ export function ConfirmationStep({ initialAmount, onSuccess }: ConfirmationStepP
 
   return (
     <div>
-      <h2
-        ref={headingRef}
-        tabIndex={-1}
-        className="heading-1"
-      >
+      <h2 ref={headingRef} tabIndex={-1} className="heading-1">
         Payment done? Tell us who to thank.
       </h2>
 

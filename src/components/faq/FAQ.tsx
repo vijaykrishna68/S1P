@@ -50,7 +50,9 @@ export function FAQ() {
                       aria-hidden="true"
                       className={`flex size-8 shrink-0 items-center justify-center rounded-full border-2 border-line-ink
                         transition-[background-color,rotate] duration-(--motion-duration-standard) ease-spring ${
-                          isOpen ? 'rotate-45 bg-highlight text-crust' : 'bg-elevated text-ink'
+                          isOpen
+                            ? 'rotate-45 bg-highlight text-crust'
+                            : 'bg-elevated text-ink'
                         }`}
                     >
                       <Icon name="plus" size={16} />

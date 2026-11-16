@@ -39,8 +39,8 @@ export function AdminApp() {
 
   if (auth.status === 'checking') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-cream">
-        <p className="text-charcoal-muted">Loading…</p>
+      <div className="flex min-h-screen items-center justify-center bg-canvas">
+        <p className="text-ink-2">Loading…</p>
       </div>
     )
   }
