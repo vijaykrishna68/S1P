@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { Heart } from '@phosphor-icons/react'
 import { Button } from '../../ui/Button'
+import { Icon } from '../../ui/Icon'
 import { useAutoFocus } from '../../ui/useAutoFocus'
 
 interface SuccessStepProps {
@@ -51,18 +51,18 @@ export function SuccessStep({ onRestart }: SuccessStepProps) {
 
   return (
     <div className="text-center">
-      <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-cream-soft">
-        <Heart size={26} weight="fill" className="text-red" />
+      <div className="mx-auto flex size-14 items-center justify-center rounded-full border-[3px] border-line-ink bg-highlight text-crust">
+        <Icon name="heart" size={26} />
       </div>
 
       <h2
         ref={headingRef}
         tabIndex={-1}
-        className="mt-6 font-display text-2xl font-bold tracking-tight text-charcoal md:text-3xl"
+        className="heading-1 mt-6"
       >
         Thank you for choosing impact over indulgence ❤️
       </h2>
-      <p className="mx-auto mt-4 max-w-[46ch] text-base leading-relaxed text-charcoal-muted">
+      <p className="body mx-auto mt-4 max-w-[46ch] text-ink-2">
         We&rsquo;ve received your payment details and screenshot. Our team will review
         your submission.
       </p>
@@ -77,9 +77,8 @@ export function SuccessStep({ onRestart }: SuccessStepProps) {
         <button
           type="button"
           onClick={handleShare}
-          className="pressable inline-grid min-h-11 items-center rounded-full border border-charcoal/15 px-6 py-3
-            font-display text-[15px] font-semibold text-charcoal
-            hover:border-charcoal/30 hover:bg-cream-soft"
+          className="pressable inline-grid min-h-12 items-center rounded-full border-2 border-line-ink bg-elevated px-7 py-3
+            font-text text-base font-bold text-ink hover:bg-surface"
         >
           <span className={`col-start-1 row-start-1 ${linkCopied ? 'invisible' : ''}`}>
             Share the Mission

@@ -1,11 +1,5 @@
 import { useState, type ChangeEvent, type DragEvent } from 'react'
-import {
-  ArrowsClockwise,
-  CircleNotch,
-  Trash,
-  UploadSimple,
-  WarningCircle,
-} from '@phosphor-icons/react'
+import { Icon } from '../ui/Icon'
 import type { UploadState } from './types'
 
 interface ScreenshotUploaderProps {
@@ -51,33 +45,33 @@ export function ScreenshotUploader({
   if (state.status === 'uploaded') {
     return (
       <div className="space-y-2">
-        <div className="flex items-center gap-4 rounded-xl border border-charcoal/12 bg-white p-3">
+        <div className="flex items-center gap-4 rounded-card border-2 border-line-strong bg-elevated p-3">
           <img
             src={state.previewUrl}
             alt="Preview of the uploaded payment screenshot"
-            className="h-16 w-16 shrink-0 rounded-lg object-cover"
+            className="h-16 w-16 shrink-0 rounded-chip object-cover"
           />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-charcoal">{state.fileName}</p>
-            <p className="text-xs text-charcoal-muted">Ready to submit</p>
+            <p className="truncate text-sm font-bold text-ink">{state.fileName}</p>
+            <p className="text-[13px] text-ink-2">Ready to submit</p>
           </div>
           <div className="flex shrink-0 items-center gap-1">
             <label
               htmlFor={inputId}
               className="pressable flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full
-                text-charcoal-muted hover:bg-cream-soft hover:text-charcoal"
+                text-ink hover:bg-surface"
               aria-label="Replace screenshot"
             >
-              <ArrowsClockwise size={18} />
+              <Icon name="upload" size={20} />
             </label>
             <button
               type="button"
               onClick={onRemoveFile}
-              className="pressable flex min-h-11 min-w-11 items-center justify-center rounded-full text-charcoal-muted
-                hover:bg-cream-soft hover:text-red"
+              className="pressable flex min-h-11 min-w-11 items-center justify-center rounded-full text-ink
+                hover:bg-error-soft hover:text-error"
               aria-label="Remove screenshot"
             >
-              <Trash size={18} />
+              <Icon name="trash" size={20} />
             </button>
           </div>
           <input
@@ -101,14 +95,14 @@ export function ScreenshotUploader({
         }}
         onDragLeave={() => setIsDragOver(false)}
         onDrop={handleDrop}
-        className={`rounded-xl border-2 border-dashed p-6 text-center transition-colors duration-200
-          has-[:focus-visible]:border-red has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-red/30
+        className={`rounded-card border-2 border-dashed p-6 text-center transition-colors duration-(--motion-duration-micro)
+          has-[:focus-visible]:border-line-ink has-[:focus-visible]:shadow-focus
           ${
             isDragOver
-              ? 'border-red bg-cream-soft'
+              ? 'border-line-ink bg-highlight-soft'
               : message
-                ? 'border-red/50 bg-white'
-                : 'border-charcoal/20 bg-white hover:border-charcoal/35'
+                ? 'border-error bg-elevated'
+                : 'border-line-strong bg-elevated hover:border-line-ink'
           }`}
       >
         <label
@@ -116,21 +110,22 @@ export function ScreenshotUploader({
           className="flex cursor-pointer flex-col items-center gap-2.5"
         >
           {state.status === 'uploading' ? (
-            <CircleNotch
-              size={26}
-              className="motion-pending animate-spin text-charcoal-muted"
+            <Icon
+              name="spinner"
+              size={28}
+              className="motion-pending animate-spin text-ink-2"
             />
           ) : message ? (
-            <WarningCircle size={26} className="text-red" />
+            <Icon name="alert-circle" size={28} className="text-error" />
           ) : (
-            <UploadSimple size={26} className="text-charcoal-muted" />
+            <Icon name="upload" size={28} className="text-ink-2" />
           )}
 
-          <span className="font-display text-sm font-semibold text-charcoal">
+          <span className="font-text text-base font-bold text-ink">
             {state.status === 'uploading' ? 'Uploading…' : 'Upload payment screenshot'}
           </span>
           {state.status !== 'uploading' && (
-            <span className="max-w-xs text-xs text-charcoal-muted">
+            <span className="max-w-xs text-[13px] text-ink-2">
               Add a screenshot of your completed UPI payment. PNG, JPG, or WEBP, up to
               8MB.
             </span>
@@ -147,7 +142,12 @@ export function ScreenshotUploader({
         </label>
       </div>
 
-      {message && <p className="text-sm text-red-deep">{message}</p>}
+      {message && (
+        <p className="flex items-start gap-1.5 text-sm font-bold text-error">
+          <Icon name="alert-circle" size={16} className="mt-0.5" />
+          <span>{message}</span>
+        </p>
+      )}
     </div>
   )
 }

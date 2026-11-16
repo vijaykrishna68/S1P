@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Check, Copy } from '@phosphor-icons/react'
+import { Icon } from '../ui/Icon'
 
 interface CopyUpiButtonProps {
   upiId: string
@@ -38,21 +38,21 @@ export function CopyUpiButton({ upiId }: CopyUpiButtonProps) {
       <button
         type="button"
         onClick={handleCopy}
-        className="pressable inline-flex min-h-11 items-center gap-2 rounded-full border border-charcoal/15
-          px-5 py-2.5 font-display text-sm font-semibold text-charcoal
-          hover:border-charcoal/30 hover:bg-cream-soft"
+        className="pressable inline-flex min-h-10 items-center gap-2 rounded-full border-2 border-line-ink bg-elevated
+          px-5 py-2 font-text text-[15px] font-bold text-ink hover:bg-surface"
       >
         <span className="relative size-4 shrink-0" aria-hidden="true">
-          <Copy
+          <Icon
+            name="copy"
             size={16}
             className={`absolute inset-0 transition-opacity duration-(--duration-fast) ease-state ${
               copied ? 'opacity-0' : 'opacity-100'
             }`}
           />
-          <Check
+          <Icon
+            name="check"
             size={16}
-            weight="bold"
-            className={`absolute inset-0 text-green-deep transition-opacity duration-(--duration-fast) ease-state ${
+            className={`absolute inset-0 text-success transition-opacity duration-(--duration-fast) ease-state ${
               copied ? 'opacity-100' : 'opacity-0'
             }`}
           />

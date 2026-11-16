@@ -2,6 +2,7 @@ import { useId, useState, type FormEvent } from 'react'
 import { Button } from '../../ui/Button'
 import { useAutoFocus } from '../../ui/useAutoFocus'
 import { DONATION_CONFIG } from '../config'
+import { fieldControlClasses } from '../FormField'
 
 interface AmountStepProps {
   onContinue: (amount: number) => void
@@ -31,15 +32,15 @@ export function AmountStep({ onContinue }: AmountStepProps) {
       <h2
         ref={headingRef}
         tabIndex={-1}
-        className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl"
+        className="heading-1"
       >
         Donate One Pizza
       </h2>
-      <p className="mt-4 max-w-[52ch] text-base leading-relaxed text-charcoal-muted md:text-lg">
+      <p className="body-lg mt-4 max-w-[52ch] text-ink-2">
         Give what you would normally spend on a pizza. Every contribution becomes part of
         something bigger.
       </p>
-      <p className="mt-3 max-w-[52ch] text-base leading-relaxed text-charcoal md:text-lg">
+      <p className="body-lg mt-3 max-w-[52ch]">
         ₹{DONATION_CONFIG.suggestedAmount} &mdash; about the value of one pizza &mdash; is
         what we encourage you to contribute. Any smaller amount is just as welcome.
       </p>
@@ -47,14 +48,14 @@ export function AmountStep({ onContinue }: AmountStepProps) {
       <form onSubmit={handleContinue} className="mt-10 max-w-sm">
         <label
           htmlFor={inputId}
-          className="block font-display text-sm font-semibold text-charcoal"
+          className="block font-text text-base font-bold text-ink"
         >
           Amount
         </label>
         <div className="relative mt-2">
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-display text-lg text-charcoal-muted"
+            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-display text-lg text-ink-2"
           >
             ₹
           </span>
@@ -70,30 +71,24 @@ export function AmountStep({ onContinue }: AmountStepProps) {
             aria-describedby={errorId}
             aria-invalid={touched && (isTooLow || isTooHigh)}
             placeholder={String(DONATION_CONFIG.suggestedAmount)}
-            className={`w-full rounded-xl border bg-white py-3 pl-9 pr-4 font-display text-lg text-charcoal
-              transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2
-              focus-visible:ring-red/40 ${
-                touched && (isTooLow || isTooHigh)
-                  ? 'border-red/60'
-                  : 'border-charcoal/15 focus:border-charcoal/30'
-              }`}
+            className={`${fieldControlClasses} pl-9 font-display`}
           />
         </div>
 
         <p id={errorId} className="mt-2 min-h-5 text-sm">
           {touched && isTooLow && (
-            <span className="text-red-deep">
+            <span className="font-bold text-error">
               Please enter an amount between ₹{DONATION_CONFIG.minAmount} and ₹
               {DONATION_CONFIG.maxAmount}.
             </span>
           )}
           {touched && isTooHigh && (
-            <span className="text-red-deep">
+            <span className="font-bold text-error">
               {DONATION_CONFIG.phoneNumber ? (
                 <>
                   For donations above ₹{DONATION_CONFIG.maxAmount}, please give us a call
                   at{' '}
-                  <a href={`tel:${DONATION_CONFIG.phoneNumber}`} className="underline">
+                  <a href={`tel:${DONATION_CONFIG.phoneNumber}`} className="underline decoration-2 underline-offset-2">
                     {DONATION_CONFIG.phoneNumber}
                   </a>
                   .
@@ -104,7 +99,7 @@ export function AmountStep({ onContinue }: AmountStepProps) {
                   with us at{' '}
                   <a
                     href={`mailto:${DONATION_CONFIG.contactEmail}`}
-                    className="underline"
+                    className="underline decoration-2 underline-offset-2"
                   >
                     {DONATION_CONFIG.contactEmail}
                   </a>
@@ -114,13 +109,13 @@ export function AmountStep({ onContinue }: AmountStepProps) {
             </span>
           )}
           {!(touched && (isTooLow || isTooHigh)) && (
-            <span className="text-charcoal-muted">
+            <span className="text-ink-2">
               Enter any amount up to ₹{DONATION_CONFIG.maxAmount}.
             </span>
           )}
         </p>
 
-        <Button type="submit" className="mt-4 w-full">
+        <Button type="submit" size="lg" fullWidth className="mt-4">
           Continue to Payment
         </Button>
       </form>

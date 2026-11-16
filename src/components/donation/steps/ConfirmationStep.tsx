@@ -1,7 +1,8 @@
 import { useReducer, useRef, type FormEvent } from 'react'
+import { Alert } from '../../ui/Alert'
 import { Button } from '../../ui/Button'
 import { useAutoFocus } from '../../ui/useAutoFocus'
-import { FormField } from '../FormField'
+import { FormField, fieldControlClasses } from '../FormField'
 import { ScreenshotUploader } from '../ScreenshotUploader'
 import { useScreenshotUpload } from '../useScreenshotUpload'
 import { submitDonation } from '../donationService'
@@ -16,10 +17,7 @@ interface ConfirmationStepProps {
   onSuccess: () => void
 }
 
-const inputClasses =
-  'w-full rounded-xl border border-charcoal/15 bg-white px-4 py-3 text-charcoal ' +
-  'transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 ' +
-  'focus-visible:ring-red/40 focus:border-charcoal/30 aria-[invalid=true]:border-red/60'
+const inputClasses = fieldControlClasses
 
 // Priority order for moving focus to the first invalid field after a failed
 // submit attempt — screen reader and keyboard users get taken straight to
@@ -85,13 +83,18 @@ export function ConfirmationStep({ initialAmount, onSuccess }: ConfirmationStepP
       <h2
         ref={headingRef}
         tabIndex={-1}
-        className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl"
+        className="heading-1"
       >
         Payment done? Tell us who to thank.
       </h2>
 
       <form onSubmit={handleSubmit} noValidate className="mt-8 max-w-md space-y-6">
-        <FormField id="fullName" label="Full Name" error={form.errors.fullName}>
+        <FormField
+          id="fullName"
+          label="Full Name"
+          requirement="Required"
+          error={form.errors.fullName}
+        >
           <input
             id="fullName"
             type="text"
@@ -112,7 +115,12 @@ export function ConfirmationStep({ initialAmount, onSuccess }: ConfirmationStepP
           />
         </FormField>
 
-        <FormField id="address" label="Address" error={form.errors.address}>
+        <FormField
+          id="address"
+          label="Address"
+          requirement="Required"
+          error={form.errors.address}
+        >
           <textarea
             id="address"
             rows={3}
@@ -129,11 +137,16 @@ export function ConfirmationStep({ initialAmount, onSuccess }: ConfirmationStepP
           />
         </FormField>
 
-        <FormField id="amountPaid" label="Amount Paid" error={form.errors.amountPaid}>
+        <FormField
+          id="amountPaid"
+          label="Amount Paid"
+          requirement="Required"
+          error={form.errors.amountPaid}
+        >
           <div className="relative">
             <span
               aria-hidden="true"
-              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-charcoal-muted"
+              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-2"
             >
               ₹
             </span>
@@ -167,12 +180,12 @@ export function ConfirmationStep({ initialAmount, onSuccess }: ConfirmationStepP
         </FormField>
 
         {form.submission === 'error' && (
-          <p role="alert" className="text-sm text-red-deep">
+          <Alert tone="error" title="We couldn't submit your confirmation.">
             {form.submissionMessage}
-          </p>
+          </Alert>
         )}
 
-        <Button type="submit" busy={isSubmitting} className="w-full">
+        <Button type="submit" size="lg" busy={isSubmitting} fullWidth>
           {isSubmitting ? 'Submitting…' : 'Confirm Donation'}
         </Button>
       </form>

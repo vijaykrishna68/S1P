@@ -21,8 +21,8 @@ export function DonationSection() {
         {/* Panel framing at lg+ only: a bounded task area instead of a narrow
             column floating in empty cream. Below lg the column is unframed. */}
         <div
-          className="mx-auto max-w-xl lg:max-w-3xl lg:rounded-3xl lg:border lg:border-charcoal/10
-            lg:bg-white/55 lg:px-16 lg:py-14"
+          className="mx-auto max-w-xl lg:max-w-3xl lg:rounded-slab lg:border-2 lg:border-line
+            lg:bg-elevated lg:px-16 lg:py-14"
         >
           <div className="mx-auto max-w-xl">
             {/* Keying by step remounts this wrapper on every transition, which
