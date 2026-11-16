@@ -3,3 +3,7 @@ dist
 # hand-authored, and reformatting it would make future `drizzle-kit generate`
 # diffs noisy for no benefit.
 db/migrations
+
+# Design-system source kit (reference material) and the file generated from its tokens.json
+design-system
+src/styles/tokens.css

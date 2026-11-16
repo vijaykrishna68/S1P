@@ -1,16 +1,81 @@
 @import 'tailwindcss';
 
-/* Self-hosted fonts — see CLAUDE.md §3 (Typography). Only the weights actually
-   used are imported to keep the bundle lean. */
-@import '@fontsource/outfit/500.css';
-@import '@fontsource/outfit/600.css';
-@import '@fontsource/outfit/700.css';
-@import '@fontsource/plus-jakarta-sans/400.css';
-@import '@fontsource/plus-jakarta-sans/500.css';
-@import '@fontsource/plus-jakarta-sans/600.css';
+/* S1P design tokens, generated from design-system/tokens/tokens.json by
+   scripts/build-tokens.ts (`npm run tokens`). Light theme on :root, dark theme
+   on [data-theme='dark']. Also declares the self-hosted Sora and Manrope
+   @font-face rules (src/assets/fonts). */
+@import './tokens.css';
 
-/* Design tokens — see CLAUDE.md §3 (Colors). Tailwind v4 theme extension via
-   CSS custom properties, referenced as e.g. bg-cream, text-charcoal, etc. */
+/*
+ * Semantic tokens exposed as Tailwind utilities (bg-canvas, text-ink,
+ * bg-action, rounded-card, shadow-offset, ease-spring ...).
+ * `inline` makes each utility read the CSS variable at runtime instead of
+ * copying its value, so the utilities follow [data-theme] automatically.
+ */
+@theme inline {
+  --color-canvas: var(--color-background-canvas);
+  --color-surface: var(--color-background-surface);
+  --color-elevated: var(--color-background-elevated);
+  --color-story: var(--color-background-story);
+  --color-inverse: var(--color-background-inverse);
+  --color-highlight: var(--color-brand-highlight);
+  --color-highlight-soft: var(--color-background-highlight);
+
+  --color-ink: var(--color-text-primary);
+  --color-ink-2: var(--color-text-secondary);
+  --color-ink-inverse: var(--color-text-inverse);
+  --color-ink-brand: var(--color-text-brand);
+  --color-ink-on-primary: var(--color-text-on-primary);
+
+  --color-action: var(--color-action-primary);
+  --color-action-hover: var(--color-action-primary-hover);
+  --color-action-pressed: var(--color-action-primary-pressed);
+  --color-action-2: var(--color-action-secondary);
+  --color-action-2-hover: var(--color-action-secondary-hover);
+  --color-action-off: var(--color-action-disabled);
+
+  --color-line: var(--color-border-subtle);
+  --color-line-strong: var(--color-border-strong);
+  --color-line-ink: var(--color-border-ink);
+
+  --color-success: var(--color-feedback-success);
+  --color-success-soft: var(--color-feedback-success-soft);
+  --color-warning: var(--color-feedback-warning);
+  --color-warning-soft: var(--color-feedback-warning-soft);
+  --color-error: var(--color-feedback-error);
+  --color-error-soft: var(--color-feedback-error-soft);
+  --color-info: var(--color-feedback-information);
+  --color-info-soft: var(--color-feedback-information-soft);
+  --color-plate: var(--color-illustration-plate);
+
+  --radius-ticket: var(--radius-ticket);
+  --radius-input: var(--radius-input);
+  --radius-chip: var(--radius-chip);
+  --radius-card: var(--radius-card);
+  --radius-slab: var(--radius-slab);
+
+  --font-display: var(--font-display);
+  --font-text: var(--font-text);
+  --font-mono: var(--font-mono);
+
+  --shadow-offset: var(--shadow-offset);
+  --shadow-offset-sm: var(--shadow-offset-sm);
+  --shadow-float: var(--shadow-float);
+  --shadow-focus: var(--focus-ring);
+
+  --ease-standard: var(--motion-ease-standard);
+  --ease-exit: var(--motion-ease-exit);
+  --ease-emphasized: var(--motion-ease-emphasized);
+  --ease-spring: var(--motion-ease-spring);
+}
+
+/*
+ * Legacy Phase 4A-4D theme. Still referenced by components that have not been
+ * ported yet (bg-cream, text-charcoal, text-red ...); each entry goes once
+ * `grep` shows no remaining use (Phase 5E cleanup). Fonts are already the new
+ * ones: font-display is Sora (from tokens.css) and the old body family now
+ * resolves to Manrope.
+ */
 @theme {
   --color-cream: #fff8f2;
   --color-cream-soft: #fdede3;
@@ -18,39 +83,18 @@
   --color-charcoal-muted: #6b6b6b;
   --color-red: #e63946;
   --color-red-deep: #c92c3a;
-  /* White text at 15px/600 on --color-red is 4.17:1 — under the 4.5:1 AA
-     minimum for normal-size text (checked via Lighthouse + computed relative
-     luminance, not eyeballed). This darker shade is only for a hover/active
-     state one step past --color-red-deep; --color-red-deep itself is now the
-     resting fill for solid buttons carrying white text — see CLAUDE.md's
-     Decision Log. */
   --color-red-darkest: #9f232e;
-  /* Success-state fills only (e.g. a confirmation badge background). It is
-     2.0:1 on cream, so it must never carry text or icons — use green-deep. */
   --color-green: #2ecc71;
-  /* Phase 4A secondary accents (Docs/PHASE4A_VISUAL_SYSTEM_AUDIT.md §4).
-     Contrast computed from WCAG relative luminance, not estimated:
-       green-deep  #2d7a4d  4.99:1 on cream, 4.60:1 on cream-soft, 5.25:1 as a
-                            white-text fill. (The audit's ≈#2f7d4f measured only
-                            4.42:1 on cream-soft, under AA, so it was nudged.)
-       green-tint  #e6f1e8  charcoal-muted text on it: 4.60:1
-       yellow      #f2b632  fill/surface only, never text (1.73:1 on cream);
-                            charcoal on it: 9.23:1
-       yellow-tint #fbefc8  charcoal-muted text on it: 4.64:1; red-deep: 4.68:1 */
   --color-green-deep: #2d7a4d;
   --color-green-tint: #e6f1e8;
   --color-yellow: #f2b632;
   --color-yellow-tint: #fbefc8;
 
-  /* Phase 4B motion easings (Docs/PHASE4B_INTERACTION_AUDIT.md §5). Defined in
-     @theme so they also exist as utilities (ease-out-expo, ease-state,
-     ease-exit). Durations and distances live in :root below. */
-  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-state: cubic-bezier(0, 0, 0.2, 1);
-  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  /* Phase 4B easing names, now aliases of the S1P motion tokens. */
+  --ease-out-expo: var(--motion-ease-emphasized);
+  --ease-state: var(--motion-ease-standard);
 
-  --font-display: 'Outfit', 'Segoe UI', system-ui, sans-serif;
-  --font-body: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif;
+  --font-body: var(--font-text);
 }
 
 /*
@@ -145,34 +189,39 @@
 }
 
 /*
- * Phase 4B motion tokens. Plain custom properties (not @theme) so they are
- * always emitted. Every new transition picks from these; a literal duration
- * or easing in a component needs a written reason.
- *   durations: fast 150 · base 200 · medium 300 · slow 500 · count 1100
- *   distances: sm 4 · md 8 · lg 12   (the primary button's 2px lift is the
- *   one other distance)
- * The hero's own 700ms entrance and its loop are locked and do not use these.
+ * Motion durations and distances. The S1P tokens (--motion-*, from
+ * tokens.css) are the source; the Phase 4B names below are aliases so existing
+ * components pick up the new timing without edits, and go away as components
+ * are ported. Every new transition should use the --motion-* tokens directly.
+ *   fast -> micro 140 · base -> standard 220 · medium -> emphasized 360 ·
+ *   slow -> entrance 560 · shift-md -> distance-sm 8 · shift-lg -> distance-md 24
+ * --duration-count stays a local value: the docs specify a 1.1s count-up and
+ * the token set has no equivalent. --shift-sm (4px arrow nudge) has none either.
  */
 :root {
-  --duration-fast: 150ms;
-  --duration-base: 200ms;
-  --duration-medium: 300ms;
-  --duration-slow: 500ms;
+  --duration-fast: var(--motion-duration-micro);
+  --duration-base: var(--motion-duration-standard);
+  --duration-medium: var(--motion-duration-emphasized);
+  --duration-slow: var(--motion-duration-entrance);
   --duration-count: 1100ms;
   --shift-sm: 4px;
-  --shift-md: 8px;
-  --shift-lg: 12px;
+  --shift-md: var(--motion-distance-sm);
+  --shift-lg: var(--motion-distance-md);
 }
 
 @layer base {
   html {
-    background-color: var(--color-cream);
+    background-color: var(--color-background-canvas);
     color-scheme: light;
     /* The sticky header is 4.5rem tall; in-page anchors land clear of it. */
     scroll-padding-top: 5rem;
     /* Reserve the scrollbar's width so locking page scroll behind a modal
        dialog doesn't make the layout jump sideways. */
     scrollbar-gutter: stable;
+  }
+
+  html[data-theme='dark'] {
+    color-scheme: dark;
   }
 
   @media (prefers-reduced-motion: no-preference) {
@@ -182,9 +231,11 @@
   }
 
   body {
-    font-family: var(--font-body);
-    color: var(--color-charcoal);
-    background-color: var(--color-cream);
+    font-family: var(--font-text);
+    font-weight: 500;
+    color: var(--color-text-primary);
+    background-color: var(--color-background-canvas);
+    -webkit-font-smoothing: antialiased;
   }
 
   h1,
@@ -193,13 +244,49 @@
     font-family: var(--font-display);
   }
 
-  /* Visible, deliberate focus ring everywhere — never suppressed.
-     See CLAUDE.md §8 (Accessibility Rules). */
-  :focus-visible {
-    outline: 2px solid var(--color-red);
-    outline-offset: 3px;
-    border-radius: 2px;
+  /* Figures read as columns, never jitter while counting. */
+  .tabular,
+  .figure-xl,
+  .figure-md {
+    font-variant-numeric: tabular-nums;
   }
+
+  /* Visible, deliberate focus ring everywhere: a 2px gap in the ground colour,
+     then a 3px crust ring (gold in dark and on .s1-inverse bands). Never
+     suppressed. The transparent outline keeps it visible in forced-colours
+     mode. See CLAUDE.md §8. */
+  :focus-visible {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    box-shadow: var(--focus-ring);
+  }
+
+  /* Dark bands (footer, closing call to action): ring on a crust gap, in gold. */
+  .s1-inverse :focus-visible {
+    box-shadow:
+      0 0 0 2px var(--palette-crust-900),
+      0 0 0 5px var(--palette-gold-400);
+  }
+}
+
+/*
+ * Fluid display sizes. The tokens hold the desktop maximum; these are the
+ * responsive rules from each type token's usage note.
+ */
+.display-hero {
+  font-size: clamp(44px, 5.2vw + 12px, 72px);
+}
+.display-page {
+  font-size: clamp(38px, 4vw + 10px, 56px);
+}
+.heading-1 {
+  font-size: clamp(30px, 2.4vw + 14px, 40px);
+}
+.heading-2 {
+  font-size: clamp(24px, 1.2vw + 16px, 28px);
+}
+.figure-xl {
+  font-size: clamp(44px, 4vw + 16px, 64px);
 }
 
 /*
@@ -394,5 +481,16 @@ html:has(dialog[open]) {
     transition-duration: 0.01ms !important;
     transition-delay: 0ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/*
+ * Reduced motion, part two: pending spinners keep turning, but slowly, so
+ * "something is happening" survives without a fast spin.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .motion-pending.animate-spin {
+    animation-duration: 2.4s !important;
+    animation-iteration-count: infinite !important;
   }
 }

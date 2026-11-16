@@ -51,6 +51,9 @@ jobs:
       - name: Format check
         run: npm run format:check
 
+      - name: Design tokens up to date
+        run: npm run tokens:check
+
       # Doubles as a migration-drift check: a migration file that doesn't
       # actually apply cleanly to a real Postgres fails the build here,
       # before it ever reaches Neon.

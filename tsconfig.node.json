@@ -19,5 +19,10 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["vite.config.ts", "vitest.setup.ts", "vitest.integration.config.ts"]
+  "include": [
+    "vite.config.ts",
+    "vitest.setup.ts",
+    "vitest.integration.config.ts",
+    "scripts/build-tokens.ts"
+  ]
 }
