@@ -1,0 +1,77 @@
+<!-- @dsCard group="Pages" height=3600 width=1280 subtitle="Desktop 1280 — the homepage narrative" page -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>HomepageDesktop — preview</title><style>
+.pg { background: var(--color-background-canvas); }
+.wrap { max-width: var(--layout-max); margin: 0 auto; padding: 0 var(--layout-margin-desktop); box-sizing: border-box; }
+.band { padding: var(--space-24) 0; }
+.band--surface { background: var(--color-background-surface); }
+.band--story { background: var(--color-background-story); border-radius: var(--radius-slab) var(--radius-slab) 0 0; }
+.sec-head { display: grid; gap: var(--space-4); max-width: var(--layout-text); margin-bottom: var(--space-12); }
+.sec-head .eyebrow { color: var(--color-text-brand); }
+.sec-head p.body-lg { color: var(--color-text-secondary); }
+.split { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 6fr); gap: var(--space-12); align-items: center; }
+.split--art-left > :first-child { order: -1; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-6); counter-reset: s; }
+.steps li { position: relative; display: grid; gap: var(--space-3); align-content: start; padding: var(--space-8) var(--space-6) var(--space-6); background: var(--color-background-elevated); border-radius: var(--radius-card); }
+.steps li::before { counter-increment: s; content: counter(s); position: absolute; top: -18px; left: var(--space-6); width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; background: var(--palette-gold-400); color: var(--palette-crust-900); border: var(--border-sticker) solid var(--palette-crust-900); font: 800 18px/1 var(--font-display); }
+.steps img { width: 72px; height: 72px; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-6); }
+.cta-band { padding: var(--space-16) 0; }
+.cta-inner { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--space-10); align-items: center; }
+.cta-inner .display-page { color: var(--color-text-inverse); }
+.cta-inner p { color: var(--color-text-inverse); opacity: .86; margin-top: var(--space-4); max-width: 44ch; }
+.footer { padding: var(--space-12) 0; display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-6); color: var(--color-text-secondary); }
+.footer a { color: var(--color-text-primary); }
+.note { margin-top: var(--space-4); }
+@media (max-width: 900px) {
+  .wrap { padding: 0 var(--layout-margin-mobile); }
+  .band { padding: var(--space-16) 0; }
+  .split, .cta-inner { grid-template-columns: 1fr; gap: var(--space-8); }
+  .steps, .stats { grid-template-columns: 1fr; gap: var(--space-8); }
+  .sec-head { margin-bottom: var(--space-8); }
+}
+</style></head>
+<body>
+<div id="root" class=""></div>
+<script>
+var S = window.S1P, h = React.createElement, useState = React.useState;
+var E = S, items = [{ label: 'About', href: '#' }, { label: 'Our impact', href: '#' }, { label: 'Gallery', href: '#' }, { label: 'FAQ', href: '#' }];
+function Motif(p) { return h('div', { style: { width: 72, height: 72 } }, h(E.Icon, { name: p.n, size: 72, className: 'motif' })); }
+var gallery = []; for (var i = 1; i <= 6; i++) gallery.push({ caption: '[Activity ' + i + ']', date: '[Month year]', alt: '[What the photo shows]' });
+function Home() {
+  return h('div', { className: 'pg' },
+    h(E.NavBar, { items: items, ctaLabel: 'Contribute' }),
+    h(E.HeroSection, { eyebrow: 'Sacrifice One Pizza', title: h(React.Fragment, null, 'Give up one slice. ', h('em', null, 'Share'), ' a meal.'), lead: '[Mission statement from the current S1P site — one or two sentences.]', primaryLabel: 'Contribute now', secondaryLabel: 'See our impact' }),
+    h('section', { className: 'band band--story' }, h('div', { className: 'wrap split' },
+      h('div', null, h('div', { className: 'sec-head', style: { marginBottom: 0 } },
+        h('p', { className: 'eyebrow' }, 'Why it matters'),
+        h('h2', { className: 'heading-1' }, '[Why S1P exists, in one line]'),
+        h('p', { className: 'body-lg' }, '[Two or three sentences from the organisation’s own origin story. No figures here unless they are verified.]'),
+        h('div', null, h(E.Button, { variant: 'tertiary', iconEnd: 'arrow-right' }, 'Read our story')))),
+      h(E.Illustration, { name: 'contribution-pass-it-on', plate: false }))),
+    h('section', { className: 'band' }, h('div', { className: 'wrap' },
+      h('div', { className: 'sec-head' }, h('p', { className: 'eyebrow' }, 'What we’ve done'), h('h2', { className: 'heading-1' }, 'Every figure here is one we can show you.'), h('p', { className: 'body-lg' }, 'Totals since [start year]. Definitions and sources are on the Impact page.')),
+      h('div', { className: 'stats' },
+        h(E.ImpactStat, { value: '[000]', label: '[Verified metric]', period: '[Since year]', status: 'placeholder', tone: 'tomato' }),
+        h(E.ImpactStat, { value: '[000]', label: '[Verified metric]', period: '[Since year]', status: 'placeholder', tone: 'basil' }),
+        h(E.ImpactStat, { value: '[000]', label: '[Verified metric]', period: '[Since year]', status: 'placeholder', tone: 'gold' })))),
+    h('section', { className: 'band band--surface' }, h('div', { className: 'wrap' },
+      h('div', { className: 'sec-head' }, h('p', { className: 'eyebrow' }, 'From our gallery'), h('h2', { className: 'heading-1' }, 'Real days, real tables.')),
+      h(E.GalleryGrid, { items: gallery }),
+      h('div', { style: { marginTop: 32 } }, h(E.Button, { variant: 'secondary', iconEnd: 'arrow-right' }, 'Open the gallery')))),
+    h('section', { className: 'band' }, h('div', { className: 'wrap split split--art-left' },
+      h('div', null, h('div', { className: 'sec-head', style: { marginBottom: 24 } }, h('p', { className: 'eyebrow' }, 'How you can help'), h('h2', { className: 'heading-1' }, 'Small, regular, shared.')),
+        h('ol', { className: 'steps', style: { gridTemplateColumns: '1fr' } },
+          h('li', null, h('h3', { className: 'heading-3' }, 'Choose an amount'), h('p', { className: 'body-sm s1-muted' }, '[How contributing works — from the existing flow.]')),
+          h('li', null, h('h3', { className: 'heading-3' }, 'Pay securely'), h('p', { className: 'body-sm s1-muted' }, '[Payment provider and receipt details, as the site states them.]')))),
+      h(E.Illustration, { name: 'impact-many-hands', plate: false }))),
+    h('section', { className: 'cta-band s1-inverse' }, h('div', { className: 'wrap cta-inner' },
+      h('div', null, h('h2', { className: 'display-page' }, 'Set one slice aside.'), h('p', { className: 'body-lg' }, '[One reassuring line about where contributions go — verified wording.]')),
+      h('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 12 } }, h(E.Button, { size: 'lg', iconEnd: 'arrow-right' }, 'Contribute now'), h(E.Button, { size: 'lg', variant: 'secondary', style: { color: 'var(--color-text-inverse)', borderColor: 'var(--color-text-inverse)' } }, 'Ask a question')))),
+    h('footer', { className: 'wrap footer body-sm' }, h('span', null, '© [Year] Sacrifice One Pizza · [registration details if any]'), h('span', null, h('a', { href: '#' }, 'Contact'), ' · ', h('a', { href: '#' }, 'Privacy'))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(Home));
+</script>
+</body>
+</html>

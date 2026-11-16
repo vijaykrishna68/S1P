@@ -1,0 +1,58 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>S1P</title>
+<style>
+  html, body { margin:0; height:100%; }
+  body { background:var(--color-background-canvas); color:var(--color-text-primary); font-family:var(--font-text); overflow:hidden; }
+  .cover { position:relative; height:288px; overflow:hidden; }
+  .art { position:absolute; top:0; left:480px; width:480px; height:288px; overflow:hidden; }
+  .art svg { display:block; width:480px; height:288px; }
+  .tomato { fill:var(--color-brand-primary); }
+  .rose { fill:var(--palette-rose-100); }
+  .ink { fill:var(--color-background-inverse); }
+  .gold { fill:var(--palette-gold-400); }
+  .basil { fill:var(--color-brand-secondary); }
+  .cheese { fill:var(--palette-mozzarella); }
+  .slab { rx:var(--radius-slab); }
+  .pill-gold { rx:28px; }
+  .pill-basil { rx:8px; }
+  .words { position:absolute; left:var(--space-8); bottom:var(--space-8); max-width:440px; }
+  .name { margin:0; font-family:var(--font-display); font-size:120px; line-height:.92; font-weight:800; letter-spacing:-.04em; color:var(--color-text-primary); }
+  .tag { margin:var(--space-3) 0 0 6px; font-size:14px; line-height:20px; font-weight:600; color:var(--color-text-secondary); }
+</style>
+</head>
+<body>
+<div class="cover">
+<div class="art" aria-hidden="true">
+<svg viewBox="0 0 480 288" width="480" height="288">
+<!--
+  blocks      color-brand-primary 168×264 slab bled off the top (the identity, largest) · palette-rose-100 120×152 (the story tint) · color-background-inverse 176×216 bleeding right (the ink; cream in dark so it never sinks into the ground) · palette-gold-400 120×56 pill · color-brand-secondary 72×16 pill once (basil is an accent) — ≈38% of 960×288
+  arrangement one tall tomato slab with satellites, bottoms on one line space-12 above the edge, space-4 gutters
+  pattern     the literal motif: mozzarella dots (cheese, 12 units at a space-12 pitch) across the tomato slab, and the signature pizza with one slice missing cut into the ink slab
+  scales      gutters space-4; pitch space-12; slab corners radius-slab; pills rx half their short side; disc ring = border-sticker × the motif ratio
+-->
+<rect class="tomato slab" x="16" y="-40" width="168" height="280" rx="36"/>
+<rect class="rose slab" x="200" y="88" width="120" height="152" rx="36"/>
+<rect class="gold pill-gold" x="200" y="16" width="120" height="56" rx="28"/>
+<rect class="ink slab" x="336" y="24" width="176" height="216" rx="36"/>
+<rect class="basil pill-basil" x="16" y="256" width="72" height="16" rx="8"/>
+<circle class="cheese" cx="52" cy="28" r="8"/><circle class="cheese" cx="100" cy="28" r="5"/><circle class="cheese" cx="148" cy="28" r="9"/>
+<circle class="cheese" cx="76" cy="76" r="7"/><circle class="cheese" cx="124" cy="76" r="10"/>
+<circle class="cheese" cx="52" cy="124" r="10"/><circle class="cheese" cx="100" cy="124" r="6"/><circle class="cheese" cx="148" cy="124" r="8"/>
+<circle class="cheese" cx="76" cy="172" r="9"/><circle class="cheese" cx="124" cy="172" r="6"/>
+<circle class="cheese" cx="52" cy="216" r="6"/><circle class="cheese" cx="148" cy="216" r="8"/>
+<path class="gold" d="M424,132 L370.4,109.8 A58,58 0 1 0 401.8,78.4 Z"/>
+<path class="tomato" d="M424,132 L381,110.6 A48,48 0 1 0 402.6,89 Z"/>
+<circle class="cheese" cx="440" cy="110" r="6"/><circle class="cheese" cx="452" cy="150" r="5"/><circle class="cheese" cx="416" cy="162" r="6"/><circle class="cheese" cx="392" cy="140" r="4"/>
+</svg>
+</div>
+<div class="words">
+<h1 class="name">S1P</h1>
+<p class="tag">Sacrifice One Pizza — one slice, shared.</p>
+</div>
+</div>
+</body>
+</html>

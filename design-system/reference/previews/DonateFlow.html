@@ -1,0 +1,53 @@
+<!-- @dsCard group="Pages" height=820 width=1200 subtitle="The contribution journey — click through every state" page -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DonateFlow — preview</title><style>
+.flow { max-width: 1120px; margin: 0 auto; padding: var(--space-6) var(--layout-margin-desktop) var(--space-16); box-sizing: border-box; }
+.switch { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px; margin-bottom: var(--space-8); border-radius: var(--radius-card); border: var(--border-hair) dashed var(--color-border-strong); }
+.flow-grid { display: grid; grid-template-columns: minmax(0, 560px) minmax(0, 380px); gap: var(--space-12); justify-content: space-between; align-items: start; }
+.flow-step { display: grid; gap: var(--space-6); }
+.flow-side { position: sticky; top: 24px; display: grid; gap: var(--space-5); }
+@media (max-width: 860px) { .flow-grid { grid-template-columns: 1fr; } .flow-side { position: static; order: -1; } .flow-side .s1-illo { display: none; } .flow { padding: var(--space-4) var(--layout-margin-mobile) var(--space-12); } }
+</style></head>
+<body>
+<div id="root" class=""></div>
+<script>
+var S = window.S1P, h = React.createElement, useState = React.useState;
+var E = S;
+var STATES = [['choose', 'Choose amount'], ['details', 'Your details'], ['processing', 'Processing'], ['success', 'Success'], ['failed', 'Payment failed']];
+function Flow() {
+  var s = useState('choose'), st = s[0], set = s[1];
+  var a = useState(1000), amt = a[0], setAmt = a[1];
+  var fmt = function (v) { return '₹' + (typeof v === 'number' ? v.toLocaleString('en-IN') : v); };
+  var summary = h(E.ContributionSummary, { rows: [{ label: 'Contribution', value: fmt(amt) }, { label: 'Frequency', value: 'One time' }], total: fmt(amt), note: 'Payment is handled by [payment provider]. Receipt details follow once the payment is confirmed.' });
+  var form;
+  if (st === 'choose') form = h('div', { className: 'flow-step' },
+    h(E.AmountSelector, { label: 'Choose an amount', currency: '₹', amounts: [250, 500, 1000, 2500], value: amt, onChange: setAmt, hint: 'Example amounts — replace with S1P’s approved amounts.' }),
+    h(E.Button, { size: 'lg', fullWidth: true, iconEnd: 'arrow-right', onClick: function () { set('details'); } }, 'Continue'));
+  if (st === 'details' || st === 'processing' || st === 'failed') form = h('div', { className: 'flow-step' },
+    st === 'failed' ? h(E.Alert, { tone: 'error', title: 'The payment didn’t go through.', action: h(E.Button, { size: 'sm', variant: 'secondary', onClick: function () { set('processing'); setTimeout(function () { set('success'); }, 1800); } }, 'Try again') }, 'Your details are still here. [Only say “nothing was charged” if the payment system confirms it.]') : null,
+    h('h2', { className: 'heading-3' }, 'Your details'),
+    h(E.TextField, { label: 'Full name', required: true, defaultValue: 'Asha R', autoComplete: 'name' }),
+    h(E.TextField, { label: 'Email', required: true, type: 'email', defaultValue: 'name@example.com', hint: 'We send the receipt here.' }),
+    h(E.Checkbox, { label: 'Email me updates about S1P’s work', hint: 'Optional. Unsubscribe anytime.' }),
+    h(E.Button, { size: 'lg', fullWidth: true, icon: 'lock', loading: st === 'processing', loadingText: 'Processing your contribution…', onClick: function () { set('processing'); setTimeout(function () { set('failed'); }, 1800); } }, 'Contribute ' + fmt(amt)),
+    h(E.Button, { variant: 'tertiary', icon: 'arrow-left', onClick: function () { set('choose'); } }, 'Change amount'));
+  if (st === 'success') form = h('div', { className: 'flow-step' },
+    h(E.Illustration, { name: 'success-celebrate', label: 'A person celebrating in front of a golden sunburst' }),
+    h('h2', { className: 'heading-1', tabIndex: -1 }, 'Thank you, Asha.'),
+    h(E.Alert, { tone: 'success', title: 'Your contribution of ' + fmt(amt) + ' was received.' }, 'A receipt is on its way to name@example.com. [Wording must match what the payment system confirms.]'),
+    h('div', { style: { display: 'flex', gap: 12, flexWrap: 'wrap' } }, h(E.Button, { variant: 'secondary', iconEnd: 'arrow-right' }, 'See our impact'), h(E.Button, { variant: 'tertiary', onClick: function () { set('choose'); } }, 'Back to start')));
+  return h('div', { className: 'flow' },
+    h('div', { className: 'switch', role: 'group', 'aria-label': 'Preview state' }, h('span', { className: 's1-demo-label', style: { margin: 0 } }, 'Preview state'),
+      STATES.map(function (x) { return h(E.Button, { key: x[0], size: 'sm', variant: st === x[0] ? 'primary' : 'secondary', onClick: function () { set(x[0]); } }, x[1]); })),
+    h('div', { className: 'flow-grid' },
+      h('div', { className: 'flow-main' },
+        h('p', { className: 'eyebrow', style: { color: 'var(--color-text-brand)' } }, st === 'success' ? 'Done' : (st === 'choose' ? 'Step 1 of 2' : 'Step 2 of 2')),
+        st !== 'success' ? h('h1', { className: 'display-page', style: { margin: '12px 0 32px' } }, 'Contribute to S1P') : null,
+        form),
+      st !== 'success' ? h('aside', { className: 'flow-side' }, h(E.Illustration, { name: 'contribution-pass-it-on', decorative: true, animate: 'off' }), summary) : null));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(Flow));
+</script>
+</body>
+</html>

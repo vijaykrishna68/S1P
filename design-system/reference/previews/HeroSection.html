@@ -1,0 +1,18 @@
+<!-- @dsCard group="Brand" height=640 width=1240 -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>HeroSection — preview</title></head>
+<body>
+<div id="root" class=""></div>
+<script>
+var S = window.S1P, h = React.createElement, useState = React.useState;
+ReactDOM.createRoot(document.getElementById('root')).render(h(S.HeroSection, {
+  eyebrow: 'Sacrifice One Pizza',
+  title: h(React.Fragment, null, 'Give up one slice. ', h('em', null, 'Share'), ' a meal.'),
+  lead: '[Mission statement — one or two sentences, using the wording from the current S1P site.]',
+  primaryLabel: 'Contribute now', secondaryLabel: 'See our impact',
+  note: 'Draft headline for review — the lead line is a placeholder.'
+}));
+</script>
+</body>
+</html>

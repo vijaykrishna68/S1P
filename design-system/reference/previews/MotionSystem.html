@@ -1,0 +1,55 @@
+<!-- @dsCard group="Pages" height=1180 width=1200 subtitle="Durations, easing and the illustration entrance — replayable" page -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>MotionSystem — preview</title><style>
+.lab { padding: var(--space-8); display: grid; gap: var(--space-10); }
+.lab-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; }
+.lab section { display: grid; gap: var(--space-4); }
+.durs { display: grid; gap: 10px; }
+.dur { display: grid; grid-template-columns: 110px 70px 1fr; align-items: center; gap: 12px; }
+.eases { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.ease { display: grid; gap: 6px; padding: 16px; background: var(--color-background-elevated); border-radius: var(--radius-card); }
+.track { container-type: inline-size; height: 28px; border-radius: 999px; background: var(--color-background-surface); position: relative; }
+.dot { width: 28px; height: 28px; border-radius: 50%; background: var(--color-brand-primary); border: 3px solid var(--palette-crust-900); box-sizing: border-box; }
+.dot--gold { background: var(--palette-gold-400); }
+.seqs { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 20px; align-items: start; }
+.seqs figure { display: grid; gap: 8px; }
+</style></head>
+<body>
+<div id="root" class=""></div>
+<script>
+var S = window.S1P, h = React.createElement, useState = React.useState;
+var E = S;
+var DUR = [['instant', 80], ['micro', 140], ['standard', 220], ['emphasized', 360], ['entrance', 560], ['story', 900], ['cinematic', 1400]];
+var EASE = [['standard', [0.2, 0, 0, 1]], ['exit', [0.4, 0, 1, 1]], ['emphasized', [0.2, 0.9, 0.1, 1]], ['spring', [0.34, 1.56, 0.64, 1]]];
+function Curve(p) {
+  var c = p.c, W = 120, H = 80, y = function (v) { return H - v * H * 0.7 - H * 0.15; };
+  var d = 'M0,' + y(0) + ' C' + c[0] * W + ',' + y(c[1]) + ' ' + c[2] * W + ',' + y(c[3]) + ' ' + W + ',' + y(1);
+  return h('svg', { viewBox: '-4 -4 128 88', width: 128, height: 88, 'aria-hidden': 'true' },
+    h('path', { d: 'M0,' + y(0) + ' L' + W + ',' + y(1), stroke: 'var(--color-border-subtle)', strokeWidth: 2, fill: 'none', strokeDasharray: '3 4' }),
+    h('path', { d: d, stroke: 'var(--color-brand-primary)', strokeWidth: 3.5, fill: 'none', strokeLinecap: 'round' }));
+}
+function Lab() {
+  var k = useState(0), key = k[0], setKey = k[1];
+  var g = useState(false), go = g[0], setGo = g[1];
+  function play() { setGo(false); setKey(key + 1); setTimeout(function () { setGo(true); }, 40); }
+  React.useEffect(function () { setTimeout(function () { setGo(true); }, 300); }, []);
+  return h('div', { className: 'lab' },
+    h('div', { className: 'lab-head' }, h('div', null, h('p', { className: 'eyebrow', style: { color: 'var(--color-text-brand)' } }, 'Motion system'), h('h1', { className: 'heading-1' }, 'Choreographed, then quiet.')), h(E.Button, { icon: 'arrow-left', variant: 'secondary', onClick: play }, 'Replay all')),
+    h('section', null, h('h2', { className: 'heading-3' }, 'Durations'), h('div', { className: 'durs' }, DUR.map(function (d) {
+      return h('div', { key: d[0], className: 'dur' }, h('span', { className: 'label' }, d[0]), h('span', { className: 'caption s1-muted' }, d[1] + 'ms'),
+        h('div', { className: 'track' }, h('div', { className: 'dot', style: { transition: go ? 'transform ' + d[1] + 'ms var(--motion-ease-standard)' : 'none', transform: go ? 'translateX(calc(100cqw - 28px))' : 'none' } })));
+    }))),
+    h('section', null, h('h2', { className: 'heading-3' }, 'Easing'), h('div', { className: 'eases' }, EASE.map(function (e) {
+      return h('div', { key: e[0], className: 'ease' }, h(Curve, { c: e[1] }), h('span', { className: 'label' }, e[0]), h('code', { className: 'code s1-muted' }, 'cubic-bezier(' + e[1].join(', ') + ')'),
+        h('div', { className: 'track' }, h('div', { className: 'dot dot--gold', style: { transition: go ? 'transform 900ms var(--motion-ease-' + e[0] + ')' : 'none', transform: go ? 'translateX(calc(100cqw - 28px))' : 'none' } })));
+    }))),
+    h('section', null, h('h2', { className: 'heading-3' }, 'Illustration entrance'), h('div', { className: 'seqs' },
+      h('figure', null, h(E.Illustration, { name: 'hero-shared-table', replayKey: key }), h('figcaption', { className: 'caption s1-muted' }, 'Hero: rises motion-distance-md and fades in over motion-duration-entrance, once, on load.')),
+      h('figure', null, h(E.Illustration, { name: 'success-celebrate', replayKey: key }), h('figcaption', { className: 'caption s1-muted' }, 'Success: the same entrance, shown only after the payment system confirms.')),
+      h('figure', null, h(E.Illustration, { name: 'impact-many-hands', replayKey: key }), h('figcaption', { className: 'caption s1-muted' }, 'Impact: enters as its section scrolls into view; never replays on scroll-back.')))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(Lab));
+</script>
+</body>
+</html>

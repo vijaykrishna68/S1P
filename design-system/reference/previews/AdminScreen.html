@@ -1,0 +1,48 @@
+<!-- @dsCard group="Pages" height=980 width=1280 subtitle="Admin — the same system, turned down" page -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>AdminScreen — preview</title><style>
+.adm { display: grid; grid-template-columns: 232px 1fr; min-height: 900px; }
+.adm-side { padding: var(--space-6) var(--space-4); background: var(--color-background-surface); border-right: var(--border-hair) solid var(--color-border-subtle); display: grid; align-content: start; gap: var(--space-8); }
+.adm-side ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.adm-link { display: flex; align-items: center; min-height: 40px; padding: 0 var(--space-3); border-radius: var(--radius-input); color: var(--color-text-primary); text-decoration: none; font: 650 14px/1.2 var(--font-text); }
+.adm-link:hover { background: var(--color-background-canvas); }
+.adm-link[aria-current="page"] { background: var(--color-background-elevated); box-shadow: inset 3px 0 0 var(--color-action-primary); }
+.adm-main { padding: var(--space-8); display: grid; gap: var(--space-6); align-content: start; min-width: 0; }
+.adm-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: var(--space-4); }
+.adm-actions, .adm-tools { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: end; }
+.adm-row { display: inline-flex; gap: 4px; align-items: center; }
+.adm .s1-empty-art { max-width: 200px; }
+</style></head>
+<body>
+<div id="root" class=""></div>
+<script>
+var S = window.S1P, h = React.createElement, useState = React.useState;
+var E = S, Pub = E.PublishStatus;
+function Admin() {
+  var d = useState(false), open = d[0], setOpen = d[1];
+  var nav = ['Dashboard', 'Gallery', 'Impact figures', 'Contributions', 'Pages', 'Settings'];
+  return h('div', { className: 'adm' },
+    h('aside', { className: 'adm-side' },
+      h(E.Wordmark, null),
+      h('nav', { 'aria-label': 'Admin' }, h('ul', null, nav.map(function (n, i) { return h('li', { key: n }, h('a', { href: '#', className: 'adm-link', 'aria-current': i === 1 ? 'page' : undefined }, n)); })))),
+    h('main', { className: 'adm-main' },
+      h('div', { className: 'adm-head' },
+        h('div', null, h('p', { className: 'caption s1-muted' }, 'Admin / Gallery'), h('h1', { className: 'heading-1' }, 'Gallery')),
+        h('div', { className: 'adm-actions' }, h(Pub, { state: 'saved', label: 'All changes saved' }), h(E.Button, { variant: 'secondary', icon: 'eye', size: 'sm' }, 'Preview site'), h(E.Button, { icon: 'upload', size: 'sm' }, 'Upload photos'))),
+      h(E.Alert, { tone: 'warning', title: '1 photo failed to upload.' }, '“[Untitled upload]” is larger than [limit]. Resize it and retry.'),
+      h('div', { className: 'adm-tools' }, h('div', { style: { flex: '1 1 260px', maxWidth: 360 } }, h(E.TextField, { label: 'Search photos', placeholder: 'Caption or date' })), h('div', { style: { flex: '0 1 220px' } }, h(E.Select, { label: 'Status', options: [{ value: 'all', label: 'All' }, { value: 'pub', label: 'Published' }, { value: 'draft', label: 'Draft' }] }))),
+      h(E.AdminTable, { caption: 'Gallery photos', columns: [{ key: 't', label: 'Caption' }, { key: 'd', label: 'Event date' }, { key: 'alt', label: 'Alt text' }, { key: 's', label: 'Status' }, { key: 'a', label: 'Actions', align: 'end' }],
+        rows: [
+          { t: '[Event caption]', d: '[dd Mon yyyy]', alt: h(E.Badge, { tone: 'success', icon: 'check' }, 'Added'), s: h(Pub, { state: 'published' }), a: h('span', { className: 'adm-row' }, h(E.Button, { size: 'sm', variant: 'tertiary', icon: 'edit', label: 'Edit' }), h(E.Button, { size: 'sm', variant: 'tertiary', icon: 'trash', label: 'Delete', onClick: function () { setOpen(true); } })) },
+          { t: '[Event caption]', d: '[dd Mon yyyy]', alt: h(E.Badge, { tone: 'warning', icon: 'alert-triangle' }, 'Missing'), s: h(Pub, { state: 'draft' }), a: h('span', { className: 'adm-row' }, h(E.Button, { size: 'sm', variant: 'tertiary', icon: 'edit', label: 'Edit' }), h(E.Button, { size: 'sm', variant: 'secondary' }, 'Publish')) },
+          { t: '[Event caption]', d: '[dd Mon yyyy]', alt: h(E.Badge, { tone: 'success', icon: 'check' }, 'Added'), s: h(Pub, { state: 'pending' }), a: h('span', { className: 'adm-row' }, h(E.Button, { size: 'sm', variant: 'tertiary', icon: 'edit', label: 'Edit' })) },
+          { t: '[Untitled upload]', d: '—', alt: '—', s: h(Pub, { state: 'failed' }), a: h('span', { className: 'adm-row' }, h(E.Button, { size: 'sm', variant: 'secondary' }, 'Retry')) }
+        ] }),
+      h(E.EmptyState, { compact: false, title: 'No impact figures for [year] yet', body: 'Add the verified figures for this year. They stay in draft until you publish them.', action: h(E.Button, { size: 'sm', icon: 'plus' }, 'Add figure'), animate: 'off' }),
+      h(E.Dialog, { open: open, onClose: function () { setOpen(false); }, tone: 'destructive', title: 'Delete this photo?', actions: [h(E.Button, { key: 'k', variant: 'secondary', onClick: function () { setOpen(false); } }, 'Keep photo'), h(E.Button, { key: 'd', variant: 'destructive', icon: 'trash', onClick: function () { setOpen(false); } }, 'Delete photo')] }, h('p', { className: 'body' }, 'It will be removed from the public gallery. This can’t be undone.'))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(Admin));
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+<!-- @dsCard group="Impact & stories" height=300 -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ImpactStat — preview</title></head>
+<body>
+<div id="root" class="s1-stack"></div>
+<script>
+var S = window.S1P, h = React.createElement, useState = React.useState;
+ReactDOM.createRoot(document.getElementById('root')).render(h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 16 } },
+  h(S.ImpactStat, { value: '12,480', countTo: 12480, label: 'Example — counts up once', period: 'Demo value', exact: true, tone: 'tomato' }),
+  h(S.ImpactStat, { value: '[000]', label: '[Verified metric label]', period: '[Period]', source: '[Source]', status: 'placeholder', tone: 'basil' }),
+  h(S.ImpactStat, { value: '[000]', label: '[Verified metric label]', period: '[Period]', status: 'placeholder', rounded: true, tone: 'gold' })));
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+<!-- @dsCard group="Feedback" height=230 -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Skeleton — preview</title></head>
+<body>
+<div id="root" class="s1-stack"></div>
+<script>
+var S = window.S1P, h = React.createElement, useState = React.useState;
+ReactDOM.createRoot(document.getElementById('root')).render(h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 } }, h(S.Skeleton, { media: true, lines: 2 }), h(S.Skeleton, { media: true, lines: 2 }), h(S.Skeleton, { lines: 4 })));
+</script>
+</body>
+</html>

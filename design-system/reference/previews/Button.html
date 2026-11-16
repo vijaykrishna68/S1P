@@ -1,0 +1,22 @@
+<!-- @dsCard group="Actions" height=260 -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Button — preview</title></head>
+<body>
+<div id="root" class="s1-stack"></div>
+<script>
+var S = window.S1P, h = React.createElement, useState = React.useState;
+function Row(p) { return h('div', null, h('p', { className: 's1-demo-label' }, p.label), h('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' } }, p.children)); }
+function Live() {
+  var s = useState('idle'), st = s[0], set = s[1];
+  function go() { set('loading'); setTimeout(function () { set('success'); setTimeout(function () { set('idle'); }, 1600); }, 1400); }
+  return h(S.Button, { loading: st === 'loading', success: st === 'success', loadingText: 'Processing…', successText: 'Contribution received', onClick: st === 'idle' ? go : undefined, iconEnd: 'arrow-right' }, 'Contribute now');
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+  h(Row, { label: 'Variants' }, h(S.Button, { iconEnd: 'arrow-right' }, 'Contribute now'), h(S.Button, { variant: 'secondary' }, 'See our impact'), h(S.Button, { variant: 'tertiary' }, 'Read the story'), h(S.Button, { variant: 'destructive', icon: 'trash' }, 'Delete photo')),
+  h(Row, { label: 'Sizes, icon-only, disabled' }, h(S.Button, { size: 'lg' }, 'Large'), h(S.Button, null, 'Medium'), h(S.Button, { size: 'sm' }, 'Small'), h(S.Button, { variant: 'secondary', icon: 'menu', label: 'Open menu' }), h(S.Button, { disabled: true }, 'Contribute now')),
+  h(Row, { label: 'Lifecycle — click it: default → loading → success' }, h(Live), h(S.Button, { loading: true, loadingText: 'Processing…' }, 'x'), h(S.Button, { success: true, successText: 'Saved' }, 'x'))
+));
+</script>
+</body>
+</html>

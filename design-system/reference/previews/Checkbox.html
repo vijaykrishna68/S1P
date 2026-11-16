@@ -1,0 +1,14 @@
+<!-- @dsCard group="Forms" height=230 -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Checkbox — preview</title></head>
+<body>
+<div id="root" class="s1-stack"></div>
+<script>
+var S = window.S1P, h = React.createElement, useState = React.useState;
+ReactDOM.createRoot(document.getElementById('root')).render(h('div', { style: { display: 'grid', gap: 16, maxWidth: 560 } },
+  h(S.Checkbox, { label: 'Email me updates about S1P’s work', defaultChecked: true, hint: 'At most [frequency]. Unsubscribe anytime.' }),
+  h(S.Checkbox, { label: 'I confirm the details above are correct', error: 'Please confirm before continuing.' })));
+</script>
+</body>
+</html>

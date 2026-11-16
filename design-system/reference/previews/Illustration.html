@@ -1,0 +1,21 @@
+<!-- @dsCard group="Brand" height=600 width=960 -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Illustration — preview</title></head>
+<body>
+<div id="root" class="s1-stack"></div>
+<script>
+var S = window.S1P, h = React.createElement, useState = React.useState;
+function Demo() {
+  var s = useState('hero-shared-table'), n = s[0], set = s[1];
+  var k = useState(0), key = k[0], setKey = k[1];
+  return h('div', { style: { display: 'grid', gridTemplateColumns: '220px 1fr', gap: 24, alignItems: 'start' } },
+    h('div', { style: { display: 'grid', gap: 8 } }, S.scenes.map(function (x) {
+      return h(S.Button, { key: x, size: 'sm', variant: x === n ? 'primary' : 'secondary', onClick: function () { set(x); setKey(key + 1); } }, x);
+    }), h(S.Button, { size: 'sm', variant: 'tertiary', icon: 'arrow-left', onClick: function () { setKey(key + 1); } }, 'Replay entrance')),
+    h(S.Illustration, { name: n, key: n + key }));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
+</script>
+</body>
+</html>
