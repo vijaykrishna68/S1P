@@ -13,10 +13,11 @@ interface ImpactStatProps {
   index?: number
 }
 
-const ACCENT_BAR = { red: 'bg-red', green: 'bg-green-deep' } as const
+/** red = giving side, green = outcomes: tomato and basil discs. */
+const ACCENT_MARK = { red: 'text-brand-pill', green: 'text-success' } as const
 const NUMERAL = {
-  md: 'text-4xl md:text-5xl',
-  lg: 'text-5xl md:text-6xl lg:text-7xl',
+  md: 'figure-md',
+  lg: 'figure-xl',
 } as const
 const STAGGER_MS = 80
 
@@ -40,21 +41,25 @@ export function ImpactStat({
 
   return (
     <div ref={ref} className="text-center md:text-left">
-      {/* Marker slot: a short rule today (Phase 4C may replace it with a small
-          proportion mark). It draws in as the count begins. */}
+      {/* The slice-disc mark: the pizza with one slice missing (the brand's
+          signature). It pops in as the count begins. */}
       <div
         data-illustration-slot="impact-stat-marker"
         aria-hidden="true"
-        className="mb-4 flex h-3 items-center justify-center md:justify-start"
+        className="mb-4 flex h-8 items-center justify-center md:justify-start"
       >
         <span
-          className={`block h-0.5 w-8 origin-left rounded-full transition-transform duration-(--duration-medium) ease-out-expo ${
-            ACCENT_BAR[accent]
+          className={`block origin-left transition-transform duration-(--motion-duration-standard) ease-spring ${
+            ACCENT_MARK[accent]
           } ${started ? 'scale-x-100' : 'scale-x-0'}`}
-        />
+        >
+          <svg viewBox="0 0 32 32" width="32" height="32" fill="currentColor">
+            <path d="M16 16V2a14 14 0 1 1-12.12 7z" />
+          </svg>
+        </span>
       </div>
       <p
-        className={`font-display font-bold tracking-tight text-charcoal ${NUMERAL[size]}`}
+        className={`tabular text-ink ${NUMERAL[size]}`}
       >
         {/* Screen readers get the finished figure once; the animated digits
             below are hidden from them so "37" is never announced mid-count. */}
@@ -69,7 +74,7 @@ export function ImpactStat({
           </span>
         </span>
       </p>
-      <p className="mt-2 text-sm text-charcoal-muted md:text-base">{label}</p>
+      <p className="body mt-2 text-ink-2">{label}</p>
     </div>
   )
 }

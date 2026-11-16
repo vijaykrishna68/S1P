@@ -1,5 +1,5 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
-import { Pause, Play } from '@phosphor-icons/react'
+import { Icon } from '../ui/Icon'
 import { Container } from '../ui/Container'
 import { useScrollReveal } from '../ui/useScrollReveal'
 import { usePrefersReducedMotion } from '../ui/usePrefersReducedMotion'
@@ -143,7 +143,7 @@ export function Testimonials() {
     <section
       ref={sectionRef}
       id="testimonials"
-      className="bg-yellow-tint pad-breathing"
+      className="bg-story pad-breathing"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onFocus={() => setIsHovered(true)}
@@ -155,7 +155,7 @@ export function Testimonials() {
       <Container>
         <h2
           ref={headingRef}
-          className={`font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl reveal-item ${revealProps.className}`}
+          className={`heading-1 reveal-item ${revealProps.className}`}
         >
           Voices From Our Community
         </h2>
@@ -174,18 +174,18 @@ export function Testimonials() {
               style={{ transitionDelay: i === 1 && phase !== 'exiting' ? '60ms' : '0ms' }}
             >
               {i === 0 && (
-                // Quote-anchor slot: a short rule today; Phase 4C may replace
-                // it with a mark built from the hero's core + outline motif.
-                <div
-                  data-illustration-slot="quote-anchor"
-                  aria-hidden="true"
-                  className="mb-6 flex h-3 items-center"
-                >
-                  <span className="block h-0.5 w-10 rounded-full bg-red" />
+                // The tomato quote sticker: an ink-bordered disc with a quote mark.
+                <div aria-hidden="true" className="mb-6 flex items-center">
+                  <span
+                    className="flex size-12 items-center justify-center rounded-full border-[3px] border-line-ink
+                      bg-brand-pill pt-2 font-display text-4xl font-bold leading-none text-white shadow-offset-sm"
+                  >
+                    &ldquo;
+                  </span>
                 </div>
               )}
               <p
-                className={`font-display font-medium tracking-tight text-charcoal ${quoteSize(
+                className={`font-display font-semibold tracking-tight text-ink ${quoteSize(
                   testimonial.quote,
                   i === 0,
                 )}`}
@@ -196,7 +196,7 @@ export function Testimonials() {
                   sectioning elements that suppress it), it would still map
                   to the page's contentinfo landmark role, creating a second
                   "footer" alongside the real one. */}
-              <p className="mt-4 text-sm text-charcoal-muted">
+              <p className="mt-4 text-[15px] font-bold text-ink-2">
                 {testimonial.attribution}
               </p>
             </blockquote>
@@ -235,10 +235,10 @@ export function Testimonials() {
                       project-wide transform/opacity-only motion rule. */}
                   <span
                     aria-hidden="true"
-                    className={`h-1.5 w-6 origin-left rounded-full transition-[scale,background-color] duration-(--duration-base) ease-state ${
+                    className={`h-1.5 w-6 origin-left rounded-full transition-[scale,background-color] duration-(--motion-duration-standard) ease-standard ${
                       i === index
-                        ? 'scale-x-100 bg-red'
-                        : 'scale-x-[0.25] bg-charcoal/20 group-hover:bg-charcoal/35'
+                        ? 'scale-x-100 bg-action'
+                        : 'scale-x-[0.25] bg-line-strong group-hover:bg-line-ink'
                     }`}
                   />
                 </button>
@@ -259,12 +259,12 @@ export function Testimonials() {
                   isPlaying ? 'Pause testimonial autoplay' : 'Start testimonial autoplay'
                 }
                 className="pressable ml-2 flex size-11 items-center justify-center rounded-full
-                  text-charcoal-muted hover:bg-charcoal/5 hover:text-charcoal"
+                  text-ink hover:bg-elevated"
               >
                 {isPlaying ? (
-                  <Pause size={16} weight="fill" aria-hidden="true" />
+                  <Icon name="pause" size={20} />
                 ) : (
-                  <Play size={16} weight="fill" aria-hidden="true" />
+                  <Icon name="play" size={20} />
                 )}
               </button>
             )}

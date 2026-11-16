@@ -1,5 +1,5 @@
-import { InstagramLogo, LinkedinLogo, XLogo } from '@phosphor-icons/react'
 import { Container } from '../ui/Container'
+import { Wordmark } from '../ui/Wordmark'
 
 // Root-relative for the same cross-page reason as Header's NAV_LINKS — see
 // Docs/PHASE1_IA_PROPOSAL.md §H. "About" now points at the real About page
@@ -12,68 +12,38 @@ const FOOTER_LINKS = [
   { label: 'FAQ', href: '/#faq' },
 ]
 
-// Placeholder hrefs — no real social profiles exist yet. See CLAUDE.md.
-const SOCIAL_LINKS = [
-  { label: 'Instagram', href: '#', Icon: InstagramLogo },
-  { label: 'X (Twitter)', href: '#', Icon: XLogo },
-  { label: 'LinkedIn', href: '#', Icon: LinkedinLogo },
-]
-
-/**
- * Restrained by design — same type system and spacing rhythm as the rest of
- * the page, no separate footer "design system" of its own icons-in-circles
- * or extra decoration.
- */
 export function Footer() {
   return (
-    <footer className="border-t border-charcoal/10 py-14 md:py-16">
+    <footer className="s1-inverse bg-inverse py-14 text-ink-inverse md:py-16">
       <Container>
         <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
           <div>
-            <p className="font-display text-lg font-bold tracking-tight text-charcoal">
-              Sacrifice One Pizza
-            </p>
-            <p className="mt-2 text-sm text-charcoal-muted">
+            <Wordmark inverse />
+            <p className="body-sm mt-2 text-ink-inverse/80">
               Skip One Pizza. Feed a Future.
             </p>
-            <p className="mt-6 font-display text-sm font-semibold text-charcoal">
+            <p className="mt-6 font-display text-base font-semibold">
               Make it your monthly ritual.
             </p>
           </div>
 
-          <div className="flex flex-col gap-8 sm:flex-row sm:gap-16">
-            <nav aria-label="Footer">
-              <ul className="flex flex-col gap-3">
-                {FOOTER_LINKS.map((link) => (
-                  <li key={link.href}>
-                    <a
-                      href={link.href}
-                      className="text-sm text-charcoal-muted transition-colors duration-200 hover:text-charcoal"
-                    >
-                      {link.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-
-            <div className="flex gap-3">
-              {SOCIAL_LINKS.map(({ label, href, Icon }) => (
-                <a
-                  key={label}
-                  href={href}
-                  aria-label={label}
-                  className="flex size-11 items-center justify-center rounded-full text-charcoal-muted
-                    transition-colors duration-200 hover:bg-cream-soft hover:text-charcoal"
-                >
-                  <Icon size={18} />
-                </a>
+          <nav aria-label="Footer">
+            <ul className="flex flex-col gap-1">
+              {FOOTER_LINKS.map((link) => (
+                <li key={link.href}>
+                  <a
+                    href={link.href}
+                    className="nav inline-flex min-h-11 items-center underline-offset-4 hover:underline hover:decoration-highlight hover:decoration-2"
+                  >
+                    {link.label}
+                  </a>
+                </li>
               ))}
-            </div>
-          </div>
+            </ul>
+          </nav>
         </div>
 
-        <p className="mt-12 border-t border-charcoal/10 pt-6 text-xs text-charcoal-muted">
+        <p className="caption mt-12 border-t-2 border-ink-inverse/20 pt-6 text-ink-inverse/80">
           All donations are voluntary.
         </p>
       </Container>

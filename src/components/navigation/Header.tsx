@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { List, X } from '@phosphor-icons/react'
+import { Icon } from '../ui/Icon'
+import { Wordmark } from '../ui/Wordmark'
 import { Container } from '../ui/Container'
 import { Button } from '../ui/Button'
 
@@ -89,19 +90,14 @@ export function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-40 transition-[background-color,border-color] duration-(--duration-medium) ease-state ${
+      className={`sticky top-0 z-40 transition-[background-color,border-color] duration-(--motion-duration-emphasized) ease-standard ${
         isScrolled
-          ? 'border-b border-charcoal/10 bg-cream/90 backdrop-blur-[2px]'
+          ? 'border-b-2 border-line bg-canvas'
           : 'border-b border-transparent bg-transparent'
       }`}
     >
       <Container className="flex h-[4.5rem] items-center justify-between">
-        <a
-          href="/"
-          className="font-display text-lg font-bold tracking-tight text-charcoal"
-        >
-          Sacrifice One Pizza
-        </a>
+        <Wordmark />
 
         <nav aria-label="Primary" className="hidden items-center gap-8 lg:flex">
           {NAV_LINKS.map((link) => {
@@ -111,16 +107,16 @@ export function Header() {
                 key={link.href}
                 href={link.href}
                 aria-current={current ? 'page' : undefined}
-                className={`group relative py-1 font-display text-sm font-medium
-                  transition-colors duration-(--duration-base) ease-state hover:text-charcoal ${
-                    current ? 'text-charcoal' : 'text-charcoal-muted'
-                  }`}
+                className={`nav group relative flex min-h-11 items-center py-1 text-ink
+                  transition-colors duration-(--motion-duration-micro) ease-standard`}
               >
                 {link.label}
                 <span
-                  className={`absolute inset-x-0 -bottom-0.5 h-px origin-left bg-red
-                    transition-transform duration-(--duration-base) ease-state ${
-                      current ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                  className={`absolute inset-x-0 bottom-1.5 h-[3px] origin-left rounded-full
+                    transition-transform duration-(--motion-duration-standard) ease-standard ${
+                      current
+                        ? 'scale-x-100 bg-action'
+                        : 'scale-x-0 bg-highlight group-hover:scale-x-100'
                     }`}
                   aria-hidden="true"
                 />
@@ -130,30 +126,34 @@ export function Header() {
         </nav>
 
         <div className="hidden lg:block">
-          <Button href="/#donate">Donate One Pizza</Button>
+          <Button href="/#donate" size="sm">
+            Donate One Pizza
+          </Button>
         </div>
 
         <button
           ref={menuToggleRef}
           type="button"
-          className="pressable flex size-11 items-center justify-center rounded-full text-charcoal
-            hover:bg-cream-soft lg:hidden"
+          className="pressable flex size-11 items-center justify-center rounded-full text-ink
+            hover:bg-surface lg:hidden"
           aria-expanded={isMenuOpen}
           aria-controls={menuId}
           aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
           onClick={() => setIsMenuOpen((open) => !open)}
         >
           {/* The two icons crossfade in place instead of swapping abruptly. */}
-          <span className="relative block size-[22px]" aria-hidden="true">
-            <List
-              size={22}
-              className={`absolute inset-0 transition-opacity duration-(--duration-fast) ease-state ${
+          <span className="relative block size-6" aria-hidden="true">
+            <Icon
+              name="menu"
+              size={24}
+              className={`absolute inset-0 transition-opacity duration-(--motion-duration-micro) ease-standard ${
                 isMenuOpen ? 'opacity-0' : 'opacity-100'
               }`}
             />
-            <X
-              size={22}
-              className={`absolute inset-0 transition-opacity duration-(--duration-fast) ease-state ${
+            <Icon
+              name="close"
+              size={24}
+              className={`absolute inset-0 transition-opacity duration-(--motion-duration-micro) ease-standard ${
                 isMenuOpen ? 'opacity-100' : 'opacity-0'
               }`}
             />
@@ -165,21 +165,21 @@ export function Header() {
         ref={menuPanelRef}
         className={`grid transition-[grid-template-rows] lg:hidden ${
           isMenuOpen
-            ? 'grid-rows-[1fr] duration-(--duration-medium) ease-out-expo'
-            : 'grid-rows-[0fr] duration-(--duration-fast) ease-exit'
+            ? 'grid-rows-[1fr] duration-(--motion-duration-emphasized) ease-emphasized'
+            : 'grid-rows-[0fr] duration-(--motion-duration-micro) ease-exit'
         }`}
       >
         <nav
           id={menuId}
           aria-label="Mobile"
           inert={!isMenuOpen}
-          className="overflow-hidden bg-cream"
+          className="overflow-hidden bg-canvas"
         >
           <div
-            className={`border-t border-charcoal/10 transition-[opacity,translate] ${
+            className={`border-t-2 border-line shadow-float transition-[opacity,translate] ${
               isMenuOpen
-                ? 'translate-y-0 opacity-100 duration-(--duration-medium) ease-out-expo'
-                : 'opacity-0 duration-(--duration-fast) ease-exit motion-safe:-translate-y-2'
+                ? 'translate-y-0 opacity-100 duration-(--motion-duration-emphasized) ease-emphasized'
+                : 'opacity-0 duration-(--motion-duration-micro) ease-exit motion-safe:-translate-y-2'
             }`}
           >
             <Container className="flex flex-col gap-1 py-4">
@@ -189,9 +189,9 @@ export function Header() {
                   href={link.href}
                   aria-current={isCurrentPage(link.href) ? 'page' : undefined}
                   onClick={() => setIsMenuOpen(false)}
-                  className="rounded-lg px-3 py-3 font-display text-base font-medium text-charcoal
-                    transition-colors duration-(--duration-base) ease-state hover:bg-cream-soft
-                    aria-[current=page]:bg-cream-soft aria-[current=page]:shadow-[inset_2px_0_0_var(--color-red)]"
+                  className="min-h-12 rounded-chip px-3 py-3 font-text text-[19px] font-bold text-ink
+                    transition-colors duration-(--motion-duration-micro) ease-standard hover:bg-surface
+                    aria-[current=page]:bg-surface aria-[current=page]:shadow-[inset_3px_0_0_var(--color-action-primary)]"
                 >
                   {link.label}
                 </a>
@@ -199,7 +199,8 @@ export function Header() {
               <div className="pt-2">
                 <Button
                   href="/#donate"
-                  className="w-full"
+                  size="lg"
+                  fullWidth
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Donate One Pizza

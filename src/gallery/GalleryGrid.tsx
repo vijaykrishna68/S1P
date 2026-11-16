@@ -1,7 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { Alert } from '../components/ui/Alert'
+import { Button } from '../components/ui/Button'
 import { Dialog } from '../components/ui/Dialog'
-import { EchoMark } from '../components/mission/EchoMark'
-import { GalleryTile } from './GalleryTile'
+import { EmptyState } from '../components/ui/EmptyState'
+import { Skeleton } from '../components/ui/Skeleton'
+import { GalleryTile, type TileShape } from './GalleryTile'
 import { listGalleryImages, GalleryApiError, type GalleryImage } from './galleryApi'
 
 type LoadState =
@@ -18,9 +21,10 @@ const DEFAULT_ALT = "Photo from Sacrifice One Pizza's gallery"
  */
 export function GalleryGrid() {
   const [state, setState] = useState<LoadState>({ status: 'loading' })
-  // The image stays set after the viewer closes so its content doesn't vanish
+  const [attempt, setAttempt] = useState(0)
+  // The index stays set after the viewer closes so its content doesn't vanish
   // while the dialog is still fading out; `viewerOpen` drives open/close.
-  const [viewerImage, setViewerImage] = useState<GalleryImage | null>(null)
+  const [viewerIndex, setViewerIndex] = useState(0)
   const [viewerOpen, setViewerOpen] = useState(false)
 
   useEffect(() => {
@@ -46,63 +50,74 @@ export function GalleryGrid() {
     return () => {
       cancelled = true
     }
+  }, [attempt])
+
+  const retry = useCallback(() => {
+    setState({ status: 'loading' })
+    setAttempt((n) => n + 1)
   }, [])
 
   if (state.status === 'loading') {
     return (
-      <div
-        role="status"
-        className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4"
-      >
+      <div role="status">
         <span className="sr-only">Loading gallery</span>
-        {Array.from({ length: 8 }).map((_, i) => (
-          // Pending-state indicator: a gentle pulse that stops when data arrives
-          // and, by design, keeps running under reduced motion (CLAUDE.md §3).
-          <div
-            key={i}
-            aria-hidden="true"
-            className="skeleton-pulse motion-pending aspect-square rounded-xl bg-cream-soft"
-          />
-        ))}
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Skeleton key={i} media lines={1} />
+          ))}
+        </div>
       </div>
     )
   }
 
   if (state.status === 'error') {
     return (
-      <p role="alert" className="text-charcoal-muted">
+      <Alert
+        tone="error"
+        title="The gallery didn't load."
+        action={
+          <Button variant="secondary" size="sm" onClick={retry}>
+            Try again
+          </Button>
+        }
+      >
         {state.message}
-      </p>
+      </Alert>
     )
   }
 
   if (state.items.length === 0) {
     return (
-      // Quiet-mark slot (Tier A): the plain EchoMark (Phase 4C S8), kept distinct
-      // from the viewfinder in the hero above it. Not a spot illustration, so it
-      // stays inside the per-page spot-illustration budget alongside the closing band.
-      <div
-        data-illustration-slot="gallery-empty-state"
-        className="mx-auto flex max-w-2xl flex-col items-center gap-6 rounded-2xl bg-yellow-tint px-6 py-14 text-center"
-      >
-        <EchoMark className="h-24 w-24 md:h-28 md:w-28" />
-        <p className="max-w-[40ch] text-charcoal-muted">
-          Photos from our journey are on their way. Check back soon.
-        </p>
-      </div>
+      <EmptyState
+        title="Photos are on their way"
+        body="Photos from our journey are on their way. Check back soon."
+      />
     )
   }
 
+  const { items } = state
+  const current = items[viewerIndex]
+  const altFor = (image: GalleryImage) => image.caption || DEFAULT_ALT
+  // Editorial rhythm: every sixth tile is a 2×2 feature, and one in six is tall.
+  const shapeFor = (i: number): TileShape =>
+    i % 6 === 0 ? 'feature' : i % 6 === 3 ? 'tall' : 'normal'
+  const step = (delta: number) =>
+    setViewerIndex((i) => (i + delta + items.length) % items.length)
+
   return (
     <>
-      <ul className="fade-in grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
-        {state.items.map((image) => (
-          <li key={image.id}>
+      <ul className="fade-in grid grid-flow-dense grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+        {items.map((image, i) => (
+          <li
+            key={image.id}
+            className={shapeFor(i) === 'feature' ? 'col-span-2 md:row-span-1' : ''}
+          >
             <GalleryTile
               image={image}
-              alt={image.caption || DEFAULT_ALT}
-              onOpen={(opened) => {
-                setViewerImage(opened)
+              alt={altFor(image)}
+              shape={shapeFor(i)}
+              onOpen={() => {
+                setViewerIndex(i)
                 setViewerOpen(true)
               }}
             />
@@ -113,20 +128,36 @@ export function GalleryGrid() {
       <Dialog
         open={viewerOpen}
         onClose={() => setViewerOpen(false)}
-        title={viewerImage?.caption || DEFAULT_ALT}
+        title={current ? altFor(current) : DEFAULT_ALT}
       >
-        {viewerImage && (
+        {current && (
           <figure>
             <img
-              src={viewerImage.imageUrl}
-              alt={viewerImage.caption || DEFAULT_ALT}
-              className="max-h-[80vh] w-full rounded-2xl object-contain"
+              src={current.imageUrl}
+              alt={altFor(current)}
+              className="max-h-[75vh] w-full rounded-card object-contain"
             />
-            {viewerImage.caption && (
-              <figcaption className="mt-3 text-center text-sm text-white">
-                {viewerImage.caption}
-              </figcaption>
-            )}
+            <figcaption className="mt-3 flex items-center justify-between gap-3 text-white">
+              <Button
+                variant="secondary"
+                size="sm"
+                icon="arrow-left"
+                onClick={() => step(-1)}
+                disabled={items.length < 2}
+              >
+                Previous
+              </Button>
+              <span className="caption text-center">{current.caption}</span>
+              <Button
+                variant="secondary"
+                size="sm"
+                iconEnd="arrow-right"
+                onClick={() => step(1)}
+                disabled={items.length < 2}
+              >
+                Next
+              </Button>
+            </figcaption>
           </figure>
         )}
       </Dialog>

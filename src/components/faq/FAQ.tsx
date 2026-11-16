@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus } from '@phosphor-icons/react'
+import { Icon } from '../ui/Icon'
 import { Container } from '../ui/Container'
 import { useScrollReveal } from '../ui/useScrollReveal'
 import { FAQ_ITEMS } from './faqData'
@@ -20,12 +20,12 @@ export function FAQ() {
       <Container className="grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.4fr)] lg:gap-16">
         <h2
           ref={headingRef}
-          className={`font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl lg:self-start reveal-item ${revealProps.className}`}
+          className={`heading-1 lg:self-start reveal-item ${revealProps.className}`}
         >
           Questions You Might Have
         </h2>
 
-        <div className="divide-y divide-charcoal/10 border-y border-charcoal/10">
+        <div className="divide-y-2 divide-line border-y-2 border-line">
           {FAQ_ITEMS.map((item, i) => {
             const isOpen = openIndex === i
             const buttonId = `faq-button-${i}`
@@ -40,23 +40,26 @@ export function FAQ() {
                     aria-expanded={isOpen}
                     aria-controls={panelId}
                     onClick={() => setOpenIndex(isOpen ? null : i)}
-                    className="flex w-full items-center justify-between gap-6 py-5 text-left
-                      font-display text-base font-semibold text-charcoal transition-colors
-                      duration-(--duration-base) ease-state hover:text-red md:py-6 md:text-lg"
+                    className="flex min-h-14 w-full items-center justify-between gap-6 py-5 text-left
+                      font-display text-lg font-semibold text-ink transition-colors
+                      duration-(--motion-duration-micro) ease-standard hover:text-ink-brand md:py-6"
                   >
                     {item.question}
-                    <Plus
-                      size={18}
-                      weight="bold"
-                      className={`shrink-0 text-charcoal-muted transition-transform duration-(--duration-base) ease-state ${
-                        isOpen ? 'rotate-45' : ''
-                      }`}
-                    />
+                    {/* The plus turns into a gold x when open. */}
+                    <span
+                      aria-hidden="true"
+                      className={`flex size-8 shrink-0 items-center justify-center rounded-full border-2 border-line-ink
+                        transition-[background-color,rotate] duration-(--motion-duration-standard) ease-spring ${
+                          isOpen ? 'rotate-45 bg-highlight text-crust' : 'bg-elevated text-ink'
+                        }`}
+                    >
+                      <Icon name="plus" size={16} />
+                    </span>
                   </button>
                 </h3>
                 <div
                   id={panelId}
-                  className="grid transition-[grid-template-rows] duration-(--duration-medium) ease-out-expo"
+                  className="grid transition-[grid-template-rows] duration-(--motion-duration-emphasized) ease-emphasized"
                   style={{ gridTemplateRows: isOpen ? '1fr' : '0fr' }}
                 >
                   {/* inert while closed: the clipped answer leaves the tab order
@@ -65,10 +68,10 @@ export function FAQ() {
                       opening and out immediately on close. */}
                   <div className="overflow-hidden" inert={!isOpen}>
                     <p
-                      className={`pb-5 pr-10 leading-relaxed text-charcoal-muted transition-opacity ease-state md:pb-6 ${
+                      className={`body pb-5 pr-10 text-ink-2 transition-opacity ease-standard md:pb-6 ${
                         isOpen
-                          ? 'opacity-100 delay-75 duration-(--duration-base)'
-                          : 'opacity-0 duration-(--duration-fast)'
+                          ? 'opacity-100 delay-75 duration-(--motion-duration-standard)'
+                          : 'opacity-0 duration-(--motion-duration-micro)'
                       }`}
                     >
                       {item.answer}

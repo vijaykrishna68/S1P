@@ -49,6 +49,7 @@
   --color-plate: var(--color-illustration-plate);
   /* Primitives that must not change with the theme: crust ink on gold stickers. */
   --color-crust: var(--palette-crust-900);
+  --color-brand-pill: var(--palette-tomato-600);
 
   --radius-ticket: var(--radius-ticket);
   --radius-input: var(--radius-input);
@@ -367,6 +368,21 @@
  */
 .skeleton-pulse {
   animation: skeleton-pulse 2.4s ease-in-out infinite;
+}
+
+/* Appears after 300ms so a fast load never flashes a skeleton. Under reduced
+   motion the global rule shows it at once, which is fine: no movement. */
+.skeleton-delayed {
+  animation: skeleton-appear var(--motion-duration-micro) linear 300ms both;
+}
+
+@keyframes skeleton-appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes skeleton-pulse {
