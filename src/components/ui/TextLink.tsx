@@ -1,27 +1,29 @@
 import type { AnchorHTMLAttributes, ReactNode } from 'react'
-import { ArrowRight } from '@phosphor-icons/react'
+import { Icon } from './Icon'
 
 interface TextLinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   children: ReactNode
 }
 
 /**
- * Secondary text-link CTA (e.g. "See How It Helps"). The arrow nudges right
- * on hover; movement stays small and the label never changes, per
- * CLAUDE.md's motion philosophy (feedback, not decoration).
+ * Secondary text-link action (e.g. "See How It Helps"). Underline is gold and
+ * thickens on hover; the arrow nudges right. Movement stays small and the label
+ * never changes: feedback, not decoration.
  */
 export function TextLink({ children, className = '', ...props }: TextLinkProps) {
   return (
     <a
-      className={`group inline-flex min-h-11 items-center gap-1.5 font-display text-[15px]
-        font-semibold text-charcoal transition-colors duration-(--duration-base) ease-state hover:text-red ${className}`}
+      className={`group inline-flex min-h-11 items-center gap-1.5 font-text text-base font-bold
+        text-ink underline decoration-highlight decoration-2 underline-offset-4
+        transition-colors duration-(--motion-duration-micro) ease-standard
+        hover:text-ink-brand hover:decoration-4 ${className}`}
       {...props}
     >
       {children}
-      <ArrowRight
-        size={17}
-        weight="bold"
-        className="transition-transform duration-(--duration-base) ease-state motion-safe:group-hover:translate-x-1"
+      <Icon
+        name="arrow-right"
+        size={20}
+        className="transition-transform duration-(--motion-duration-standard) ease-standard motion-safe:group-hover:translate-x-1"
       />
     </a>
   )
