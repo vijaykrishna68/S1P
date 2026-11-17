@@ -57,19 +57,13 @@ export function JourneyTimeline() {
   const lastMemberCount = ACTIVE_MEMBERS[ACTIVE_MEMBERS.length - 1]
 
   return (
-    <section className="pad-standard">
+    <section className="py-12 md:py-16">
       <Container>
         <div ref={ref} className={`max-w-2xl ${revealProps.className}`}>
-          <h2
-            className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl reveal-item"
-            style={revealStep(0)}
-          >
+          <h2 className="heading-1 reveal-item" style={revealStep(0)}>
             Our Journey
           </h2>
-          <p
-            className="mt-4 text-base leading-relaxed text-charcoal-muted md:text-lg reveal-item"
-            style={revealStep(1)}
-          >
+          <p className="mt-4 body-lg text-ink-2 reveal-item" style={revealStep(1)}>
             S1P has been funding student education since 2015. Below is what that&rsquo;s
             added up to, cumulatively, year by year — real disbursements, not projections.
           </p>
@@ -85,11 +79,11 @@ export function JourneyTimeline() {
             aria-hidden="true"
             focusable="false"
           >
-            <path d={areaPath} fill="var(--color-red)" opacity={0.12} />
+            <path d={areaPath} fill="var(--color-action-primary)" opacity={0.12} />
             <path
               d={linePath}
               fill="none"
-              stroke="var(--color-red-deep)"
+              stroke="var(--color-action-primary)"
               strokeWidth={2.5}
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -100,7 +94,7 @@ export function JourneyTimeline() {
                 cx={p.x}
                 cy={p.y}
                 r={p.year === lastCumulative.year ? 4.5 : 3}
-                fill="var(--color-red-deep)"
+                fill="var(--color-action-primary)"
               />
             ))}
             {points
@@ -112,9 +106,9 @@ export function JourneyTimeline() {
                   y={BASELINE_Y + 22}
                   textAnchor="middle"
                   style={{
-                    fontFamily: 'var(--font-body)',
+                    fontFamily: 'var(--font-text)',
                     fontSize: 13,
-                    fill: 'var(--color-charcoal-muted)',
+                    fill: 'var(--color-text-secondary)',
                   }}
                 >
                   {p.year}
@@ -122,17 +116,17 @@ export function JourneyTimeline() {
               ))}
           </svg>
 
-          <div className="lg:border-l lg:border-charcoal/10 lg:pl-10">
+          <div className="lg:border-l-2 lg:border-line lg:pl-10">
             {/* Visible text equivalent for the chart above — not just an
               sr-only summary, since stating the trend in words is useful to
               every reader, not only assistive tech. */}
-            <p className="text-sm italic text-charcoal-muted">
+            <p className="text-sm italic text-ink-2">
               Cumulative disbursement grew from ₹{firstCumulative.lakhs}L in{' '}
               {firstCumulative.year} to ₹{lastCumulative.lakhs}L in {lastCumulative.year}{' '}
               — including ₹{latestYearly.lakhs}L disbursed in {latestYearly.year} alone.
             </p>
 
-            <p className="mt-6 text-base leading-relaxed text-charcoal-muted md:text-lg">
+            <p className="mt-6 body-lg text-ink-2">
               Alongside that, the community carrying it forward has grown too —{' '}
               {lastMemberCount.count} active members in {lastMemberCount.year}, up from{' '}
               {firstMemberCount.count} in {firstMemberCount.year}.

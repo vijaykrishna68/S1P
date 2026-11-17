@@ -1,45 +1,40 @@
 import { Container } from '../ui/Container'
-import { TwoTrack } from '../ui/TwoTrack'
+import { Illustration } from '../ui/Illustration'
 import { revealStep, useScrollReveal } from '../ui/useScrollReveal'
-import { EchoMark } from './EchoMark'
 
 /**
- * Left-aligned editorial text with the hero's own mark opposite it (audit
- * D7). The mark is the existing static EchoMark, scaled up so it actually
- * anchors the section; it never moves, so the hero stays the page's only
- * ambient animation. Stacks text-first below lg. See CLAUDE.md's Phase 2
- * design-consistency notes.
+ * Story band (rose, with a rounded top): copy left, the pass-it-on scene right.
+ * Stacks text-first below lg.
  */
 export function Mission() {
   const { ref, revealProps } = useScrollReveal<HTMLDivElement>()
 
   return (
-    <section id="mission" className="pad-t-tight pad-b-standard">
+    <section id="mission" className="rounded-t-slab bg-story py-16 md:py-24">
       <Container>
-        <div ref={ref} className={revealProps.className}>
-          <TwoTrack
-            aside={<EchoMark className="h-40 w-40 md:h-56 md:w-56 lg:h-72 lg:w-72" />}
-          >
-            <h2
-              className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl reveal-item"
-              style={revealStep(0)}
-            >
+        <div
+          ref={ref}
+          className={`grid items-center gap-10 lg:grid-cols-12 lg:gap-12 ${revealProps.className}`}
+        >
+          <div className="lg:col-span-7">
+            <h2 className="heading-1 reveal-item" style={revealStep(0)}>
               Why One Pizza Matters
             </h2>
 
-            <p
-              className="mt-6 text-base leading-relaxed text-charcoal-muted md:text-lg reveal-item"
-              style={revealStep(1)}
-            >
+            <p className="body-lg mt-6 max-w-[60ch] reveal-item" style={revealStep(1)}>
               Every year, students drop out not because they lack talent, but because they
               lack small financial support. Sometimes ₹500 can cover books. Sometimes ₹700
               can fund a month of meals.
             </p>
 
-            <p className="mt-12 font-display text-2xl font-semibold leading-snug tracking-tight text-charcoal md:mt-16 md:text-3xl">
+            <p className="heading-2 mt-10 max-w-[28ch] md:mt-12">
               What feels small to us can be life-changing to someone else.
             </p>
-          </TwoTrack>
+          </div>
+
+          <div className="mx-auto w-full max-w-[520px] lg:col-span-5">
+            <Illustration name="contribution-pass-it-on" plate={false} />
+          </div>
         </div>
       </Container>
     </section>

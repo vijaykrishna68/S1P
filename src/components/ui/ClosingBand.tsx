@@ -18,7 +18,7 @@ export function ClosingBand({ heading, children, action }: ClosingBandProps) {
   const { ref, revealProps } = useScrollReveal<HTMLDivElement>()
 
   return (
-    <section className="s1-inverse bg-inverse pad-standard text-ink-inverse">
+    <section className="s1-inverse bg-inverse py-16 md:py-24 text-ink-inverse">
       <Container>
         <div ref={ref} className={`max-w-2xl ${revealProps.className}`}>
           <h2 className="heading-1 reveal-item" style={revealStep(0)}>

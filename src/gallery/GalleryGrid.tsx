@@ -3,6 +3,7 @@ import { Alert } from '../components/ui/Alert'
 import { Button } from '../components/ui/Button'
 import { Dialog } from '../components/ui/Dialog'
 import { EmptyState } from '../components/ui/EmptyState'
+import { Illustration } from '../components/ui/Illustration'
 import { Skeleton } from '../components/ui/Skeleton'
 import { GalleryTile, type TileShape } from './GalleryTile'
 import { listGalleryImages, GalleryApiError, type GalleryImage } from './galleryApi'
@@ -72,17 +73,22 @@ export function GalleryGrid() {
 
   if (state.status === 'error') {
     return (
-      <Alert
-        tone="error"
-        title="The gallery didn't load."
-        action={
-          <Button variant="secondary" size="sm" onClick={retry}>
-            Try again
-          </Button>
-        }
-      >
-        {state.message}
-      </Alert>
+      <div className="space-y-6">
+        <div className="mx-auto max-w-[260px]">
+          <Illustration name="error-try-again" decorative animate="off" plate={false} />
+        </div>
+        <Alert
+          tone="error"
+          title="The gallery didn't load."
+          action={
+            <Button variant="secondary" size="sm" onClick={retry}>
+              Try again
+            </Button>
+          }
+        >
+          {state.message}
+        </Alert>
+      </div>
     )
   }
 
@@ -91,6 +97,7 @@ export function GalleryGrid() {
       <EmptyState
         title="Photos are on their way"
         body="Photos from our journey are on their way. Check back soon."
+        illustration={<Illustration name="empty-plate" decorative plate={false} />}
       />
     )
   }

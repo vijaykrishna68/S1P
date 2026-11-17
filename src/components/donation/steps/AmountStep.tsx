@@ -1,6 +1,5 @@
 import { useId, useState, type FormEvent } from 'react'
 import { Button } from '../../ui/Button'
-import { useAutoFocus } from '../../ui/useAutoFocus'
 import { DONATION_CONFIG } from '../config'
 import { fieldControlClasses } from '../FormField'
 
@@ -8,8 +7,13 @@ interface AmountStepProps {
   onContinue: (amount: number) => void
 }
 
+/**
+ * The first step is on the page from load, so it must not take focus on mount:
+ * doing so scrolled every visitor from the top of the page straight down to this
+ * section. (Later steps still focus their heading when they replace the previous
+ * step; see useAutoFocus.)
+ */
 export function AmountStep({ onContinue }: AmountStepProps) {
-  const headingRef = useAutoFocus<HTMLHeadingElement>()
   const [rawValue, setRawValue] = useState('')
   const [touched, setTouched] = useState(false)
   const inputId = useId()
@@ -29,9 +33,7 @@ export function AmountStep({ onContinue }: AmountStepProps) {
 
   return (
     <div>
-      <h2 ref={headingRef} tabIndex={-1} className="heading-1">
-        Donate One Pizza
-      </h2>
+      <h2 className="heading-1">Donate One Pizza</h2>
       <p className="body-lg mt-4 max-w-[52ch] text-ink-2">
         Give what you would normally spend on a pizza. Every contribution becomes part of
         something bigger.

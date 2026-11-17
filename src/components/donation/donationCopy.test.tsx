@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { mockIntersectionObserver, mockReducedMotion } from '../../test/motionMocks'
 import { Footer } from '../layout/Footer'
 import { AmountStep } from './steps/AmountStep'
 import { SuccessStep } from './steps/SuccessStep'
@@ -98,6 +99,9 @@ describe('amount step', () => {
 
 describe('success state', () => {
   it('confirms receipt for review without claiming a verified donation', () => {
+    // The celebrate scene uses matchMedia and IntersectionObserver.
+    mockReducedMotion(false)
+    mockIntersectionObserver()
     const { container } = render(<SuccessStep onRestart={() => {}} />)
     const text = container.textContent ?? ''
     expect(text).toMatch(/received your payment details and screenshot/i)

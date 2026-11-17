@@ -4,6 +4,7 @@ import { Button } from '../components/ui/Button'
 import { Icon } from '../components/ui/Icon'
 import { Dialog } from '../components/ui/Dialog'
 import { EmptyState } from '../components/ui/EmptyState'
+import { Illustration } from '../components/ui/Illustration'
 import { fieldControlClasses } from '../components/donation/FormField'
 import {
   listGalleryImages,
@@ -216,6 +217,11 @@ export function AdminGalleryPage({ onBack }: AdminGalleryPageProps) {
               compact
               title="No images yet"
               body="Upload one above to get started."
+              illustration={
+                <div className="w-[200px]">
+                  <Illustration name="empty-plate" decorative animate="off" />
+                </div>
+              }
             />
           )}
 

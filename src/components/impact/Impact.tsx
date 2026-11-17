@@ -10,24 +10,18 @@ export function Impact() {
   const { ref, revealProps } = useScrollReveal<HTMLDivElement>()
 
   return (
-    <section id="impact" className="bg-cream-soft pad-standard">
+    <section id="impact" className="pt-16 pb-8 md:pt-24 md:pb-12">
       <Container>
         <div ref={ref} className={`max-w-2xl ${revealProps.className}`}>
-          <h2
-            className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl reveal-item"
-            style={revealStep(0)}
-          >
+          <h2 className="heading-1 reveal-item" style={revealStep(0)}>
             Small Sacrifices. Big Change.
           </h2>
-          <p
-            className="mt-4 text-base leading-relaxed text-charcoal-muted md:text-lg reveal-item"
-            style={revealStep(1)}
-          >
+          <p className="body-lg mt-4 text-ink-2 reveal-item" style={revealStep(1)}>
             This is what happens when people choose purpose over one meal out.
           </p>
         </div>
 
-        <div className="mt-14 grid grid-cols-2 gap-x-8 gap-y-10 border-t border-charcoal/15 pt-10 md:mt-16 md:max-w-2xl md:gap-x-10">
+        <div className="mt-12 grid grid-cols-1 gap-x-10 gap-y-10 border-t-2 border-line pt-10 sm:grid-cols-2 md:mt-16 md:max-w-3xl">
           {IMPACT_FIGURES.map((metric, i) => (
             <ImpactStat key={metric.label} index={i} {...metric} />
           ))}

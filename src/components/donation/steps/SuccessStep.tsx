@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '../../ui/Button'
-import { Icon } from '../../ui/Icon'
+import { Illustration } from '../../ui/Illustration'
 import { useAutoFocus } from '../../ui/useAutoFocus'
 
 interface SuccessStepProps {
@@ -51,11 +51,13 @@ export function SuccessStep({ onRestart }: SuccessStepProps) {
 
   return (
     <div className="text-center">
-      <div className="mx-auto flex size-14 items-center justify-center rounded-full border-[3px] border-line-ink bg-highlight text-crust">
-        <Icon name="heart" size={26} />
+      {/* Shown only once the confirmation API has succeeded: this step is only
+          rendered after SUBMISSION_SUCCEEDED. */}
+      <div className="mx-auto max-w-[280px]">
+        <Illustration name="success-celebrate" plate={false} />
       </div>
 
-      <h2 ref={headingRef} tabIndex={-1} className="heading-1 mt-6">
+      <h2 ref={headingRef} tabIndex={-1} className="heading-1 mt-8">
         Thank you for choosing impact over indulgence ❤️
       </h2>
       <p className="body mx-auto mt-4 max-w-[46ch] text-ink-2">

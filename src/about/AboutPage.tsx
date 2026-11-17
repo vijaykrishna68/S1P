@@ -3,10 +3,6 @@ import { Footer } from '../components/layout/Footer'
 import { Container } from '../components/ui/Container'
 import { Button } from '../components/ui/Button'
 import { ClosingBand } from '../components/ui/ClosingBand'
-import { IllustrationSlot } from '../components/ui/IllustrationSlot'
-import { EchoMark } from '../components/mission/EchoMark'
-import { SectionDivider } from '../components/ui/SectionDivider'
-import { TwoTrack } from '../components/ui/TwoTrack'
 import { revealStep, useScrollReveal } from '../components/ui/useScrollReveal'
 import { ImpactStat } from '../components/impact/ImpactStat'
 import { IMPACT_FIGURES } from '../components/impact/impactFigures'
@@ -40,60 +36,41 @@ export function AboutPage() {
       <main>
         <div id="scroll-sentinel" aria-hidden="true" style={{ height: 1 }} />
 
-        <section className="pad-t-breathing pad-b-standard">
+        <section className="py-16 md:py-24">
           <Container>
-            <div ref={heroRef} className={heroReveal.className}>
-              <TwoTrack
-                aside={
-                  <IllustrationSlot name="about-hero-mark">
-                    <EchoMark className="h-56 w-56" />
-                  </IllustrationSlot>
-                }
+            <div ref={heroRef} className={`max-w-3xl ${heroReveal.className}`}>
+              <h1 className="display-page reveal-item" style={revealStep(0)}>
+                It started with a pizza order that never happened.
+              </h1>
+              <p
+                className="body-lg mt-6 max-w-[52ch] text-ink-2 reveal-item"
+                style={revealStep(1)}
               >
-                <h1
-                  className="font-display text-4xl font-bold leading-[1.1] tracking-tight text-charcoal md:text-5xl reveal-item"
-                  style={revealStep(0)}
-                >
-                  It started with a pizza order that never happened.
-                </h1>
-                <p
-                  className="mt-6 max-w-[52ch] text-base leading-relaxed text-charcoal-muted md:text-lg reveal-item"
-                  style={revealStep(1)}
-                >
-                  Sacrifice 1 Pizza (S1P) is a Chennai-based trust that turns everyday
-                  choices — like skipping a pizza — into real educational support for
-                  students who need it.
-                </p>
-                <p
-                  className="mt-6 font-display text-sm font-semibold uppercase tracking-wide text-charcoal-muted reveal-item"
-                  style={revealStep(2)}
-                >
-                  Registered Trust · No. 316/2016
-                </p>
-              </TwoTrack>
+                Sacrifice 1 Pizza (S1P) is a Chennai-based trust that turns everyday
+                choices — like skipping a pizza — into real educational support for
+                students who need it.
+              </p>
+              <p
+                className="eyebrow mt-6 uppercase text-ink-brand reveal-item"
+                style={revealStep(2)}
+              >
+                Registered Trust · No. 316/2016
+              </p>
             </div>
           </Container>
         </section>
 
-        <SectionDivider />
-
-        <section className="pad-tight">
+        <section className="py-12 md:py-16">
           <Container>
             <div
               ref={whatItIsRef}
               className={`grid gap-6 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.4fr)] lg:gap-16 ${whatItIsReveal.className}`}
             >
-              <h2
-                className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl reveal-item"
-                style={revealStep(0)}
-              >
+              <h2 className="heading-1 reveal-item" style={revealStep(0)}>
                 What S1P Is
               </h2>
               <div className="max-w-2xl">
-                <p
-                  className="text-base leading-relaxed text-charcoal-muted md:text-lg reveal-item"
-                  style={revealStep(1)}
-                >
+                <p className="body-lg text-ink-2 reveal-item" style={revealStep(1)}>
                   Sacrifice 1 Pizza Welfare Trust is a registered non-profit that funds
                   education for underprivileged students — from UKG through MBBS. Some
                   students receive one-time help with a specific need; others are
@@ -101,7 +78,7 @@ export function AboutPage() {
                   they started. Every rupee comes from people who decided that what
                   they&rsquo;d spend on one pizza could do something better.
                 </p>
-                <p className="mt-6 text-sm uppercase tracking-wide text-charcoal-muted">
+                <p className="eyebrow mt-6 uppercase text-ink-2">
                   Non-profit · Education-focused · Community-funded
                 </p>
               </div>
@@ -111,14 +88,14 @@ export function AboutPage() {
 
         <OriginStory />
 
-        <section className="py-16 md:py-20">
+        <section className="py-12 md:py-16">
           <Container>
             <div
               ref={whyEducationRef}
               className={`max-w-2xl ${whyEducationReveal.className}`}
             >
               <h2 className="sr-only">Why Education</h2>
-              <p className="font-display text-2xl font-semibold leading-snug tracking-tight text-charcoal md:text-3xl">
+              <p className="heading-2">
                 Every one of those eight small things solved a problem for a single day.
                 Education solves one for a lifetime. That&rsquo;s why S1P exists — to fund
                 school fees, books, and support for students who&rsquo;d otherwise have to
@@ -130,23 +107,17 @@ export function AboutPage() {
 
         <JourneyTimeline />
 
-        <section className="bg-cream-soft pad-standard">
+        <section className="bg-surface py-16 md:py-24">
           <Container>
             <div ref={impactRef} className={`max-w-2xl ${impactReveal.className}`}>
-              <h2
-                className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl reveal-item"
-                style={revealStep(0)}
-              >
+              <h2 className="heading-1 reveal-item" style={revealStep(0)}>
                 What It&rsquo;s Added Up To
               </h2>
-              <p
-                className="mt-4 text-base leading-relaxed text-charcoal-muted md:text-lg reveal-item"
-                style={revealStep(1)}
-              >
+              <p className="mt-4 body-lg text-ink-2 reveal-item" style={revealStep(1)}>
                 None of this is hypothetical — here&rsquo;s the total, so far:
               </p>
             </div>
-            <div className="mt-14 grid grid-cols-1 gap-x-12 gap-y-12 border-t border-charcoal/15 pt-10 sm:grid-cols-2 md:mt-16">
+            <div className="mt-14 grid grid-cols-1 gap-x-12 gap-y-12 border-t-2 border-line pt-10 sm:grid-cols-2 md:mt-16">
               {IMPACT_FIGURES.map((metric, i) => (
                 <ImpactStat key={metric.label} size="lg" index={i} {...metric} />
               ))}

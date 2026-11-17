@@ -3,10 +3,6 @@ import { Footer } from '../components/layout/Footer'
 import { Container } from '../components/ui/Container'
 import { Button } from '../components/ui/Button'
 import { ClosingBand } from '../components/ui/ClosingBand'
-import { ViewfinderMark } from '../components/illustrations/ViewfinderMark'
-import { IllustrationSlot } from '../components/ui/IllustrationSlot'
-import { SectionDivider } from '../components/ui/SectionDivider'
-import { TwoTrack } from '../components/ui/TwoTrack'
 import { revealStep, useScrollReveal } from '../components/ui/useScrollReveal'
 import { GalleryGrid } from './GalleryGrid'
 
@@ -24,37 +20,24 @@ export function GalleryPage() {
       <main>
         <div id="scroll-sentinel" aria-hidden="true" style={{ height: 1 }} />
 
-        <section className="pad-t-standard pad-b-tight">
+        <section className="pt-16 pb-8 md:pt-24 md:pb-12">
           <Container>
-            <div ref={heroRef} className={heroReveal.className}>
-              <TwoTrack
-                aside={
-                  <IllustrationSlot name="gallery-hero-mark">
-                    <ViewfinderMark />
-                  </IllustrationSlot>
-                }
+            <div ref={heroRef} className={`max-w-3xl ${heroReveal.className}`}>
+              <h1 className="display-page reveal-item" style={revealStep(0)}>
+                Our Gallery
+              </h1>
+              <p
+                className="body-lg mt-6 max-w-[52ch] text-ink-2 reveal-item"
+                style={revealStep(1)}
               >
-                <h1
-                  className="font-display text-4xl font-bold leading-[1.1] tracking-tight text-charcoal md:text-5xl reveal-item"
-                  style={revealStep(0)}
-                >
-                  Our Gallery
-                </h1>
-                <p
-                  className="mt-6 max-w-[52ch] text-base leading-relaxed text-charcoal-muted md:text-lg reveal-item"
-                  style={revealStep(1)}
-                >
-                  Moments from S1P&rsquo;s journey — scholarship handovers and the
-                  community behind them.
-                </p>
-              </TwoTrack>
+                Moments from S1P&rsquo;s journey — scholarship handovers and the community
+                behind them.
+              </p>
             </div>
           </Container>
         </section>
 
-        <SectionDivider className="mb-8 md:mb-10" />
-
-        <section className="pad-b-standard">
+        <section className="pb-16 md:pb-24">
           <Container>
             <GalleryGrid />
           </Container>

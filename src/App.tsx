@@ -6,7 +6,6 @@ import { DonationSection } from './components/donation/DonationSection'
 import { Testimonials } from './components/testimonials/Testimonials'
 import { FAQ } from './components/faq/FAQ'
 import { Footer } from './components/layout/Footer'
-import { SectionDivider } from './components/ui/SectionDivider'
 
 function App() {
   return (
@@ -15,7 +14,6 @@ function App() {
       <main>
         <div id="scroll-sentinel" aria-hidden="true" style={{ height: 1 }} />
         <Hero />
-        <SectionDivider />
         <Mission />
         <Impact />
         <DonationSection />

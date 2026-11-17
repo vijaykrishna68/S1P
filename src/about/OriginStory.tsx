@@ -1,6 +1,6 @@
 import { Container } from '../components/ui/Container'
 import { revealStep, useScrollReveal } from '../components/ui/useScrollReveal'
-import { EightSlicesMark } from './EightSlicesMark'
+import { Illustration } from '../components/ui/Illustration'
 import { ORIGIN_STORY_PARAGRAPHS } from './aboutData'
 
 /**
@@ -13,20 +13,17 @@ export function OriginStory() {
   const { ref, revealProps } = useScrollReveal<HTMLDivElement>()
 
   return (
-    <section className="bg-cream-soft py-20 md:py-28 lg:py-32">
+    <section className="rounded-t-slab bg-story py-16 md:py-24">
       <Container>
         <div
           ref={ref}
-          className={`grid gap-10 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-20 ${revealProps.className}`}
+          className={`grid gap-10 lg:grid-cols-12 lg:items-center lg:gap-12 ${revealProps.className}`}
         >
-          <div className="max-w-2xl">
-            <h2
-              className="font-display text-3xl font-bold tracking-tight text-charcoal md:text-4xl reveal-item"
-              style={revealStep(0)}
-            >
+          <div className="max-w-2xl lg:col-span-7">
+            <h2 className="heading-1 reveal-item" style={revealStep(0)}>
               The Story That Started It
             </h2>
-            <div className="mt-6 space-y-5 text-base leading-relaxed text-charcoal-muted md:text-lg">
+            <div className="mt-6 body-lg space-y-5 text-ink-2">
               {ORIGIN_STORY_PARAGRAPHS.map((paragraph, i) => (
                 <p
                   key={i}
@@ -39,8 +36,8 @@ export function OriginStory() {
             </div>
           </div>
 
-          <div className="flex justify-center lg:justify-end">
-            <EightSlicesMark />
+          <div className="mx-auto w-full max-w-[520px] lg:col-span-5">
+            <Illustration name="set-aside-slice" />
           </div>
         </div>
       </Container>

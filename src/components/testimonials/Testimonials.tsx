@@ -143,7 +143,7 @@ export function Testimonials() {
     <section
       ref={sectionRef}
       id="testimonials"
-      className="bg-story pad-breathing"
+      className="bg-story py-16 md:py-24"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onFocus={() => setIsHovered(true)}
