@@ -512,3 +512,33 @@ html:has(dialog[open]) {
     animation-iteration-count: infinite !important;
   }
 }
+
+/*
+ * Illustration (components/ui/Illustration.tsx). The plate is the cream ground
+ * behind every scene; with plate={false} it is transparent on light grounds but
+ * always shown in dark theme, where the art's crust lines would vanish.
+ * Entrance: visible by default; the component arms it (data-illo="armed"), then
+ * it rises once when 35% visible (data-illo="in"). Never armed under reduced
+ * motion, so nothing here needs a reduced-motion override.
+ */
+.illo-plate,
+.illo-plate-dark {
+  border-radius: var(--radius-slab);
+}
+.illo-plate {
+  background-color: var(--color-illustration-plate);
+}
+[data-theme='dark'] .illo-plate-dark {
+  background-color: var(--color-illustration-plate);
+}
+.illo[data-illo='armed'] {
+  opacity: 0;
+  transform: translateY(var(--motion-distance-md));
+}
+.illo[data-illo='in'] {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--motion-duration-entrance) var(--motion-ease-emphasized),
+    transform var(--motion-duration-entrance) var(--motion-ease-emphasized);
+}
