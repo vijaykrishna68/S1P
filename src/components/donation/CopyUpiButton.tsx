@@ -45,14 +45,14 @@ export function CopyUpiButton({ upiId }: CopyUpiButtonProps) {
           <Icon
             name="copy"
             size={16}
-            className={`absolute inset-0 transition-opacity duration-(--duration-fast) ease-state ${
+            className={`absolute inset-0 transition-opacity duration-(--motion-duration-micro) ease-standard ${
               copied ? 'opacity-0' : 'opacity-100'
             }`}
           />
           <Icon
             name="check"
             size={16}
-            className={`absolute inset-0 text-success transition-opacity duration-(--duration-fast) ease-state ${
+            className={`absolute inset-0 text-success transition-opacity duration-(--motion-duration-micro) ease-standard ${
               copied ? 'opacity-100' : 'opacity-0'
             }`}
           />

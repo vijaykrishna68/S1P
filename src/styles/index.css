@@ -72,55 +72,6 @@
   --ease-spring: var(--motion-ease-spring);
 }
 
-/*
- * Legacy Phase 4A-4D theme. Still referenced by components that have not been
- * ported yet (bg-cream, text-charcoal, text-red ...); each entry goes once
- * `grep` shows no remaining use (Phase 5E cleanup). Fonts are already the new
- * ones: font-display is Sora (from tokens.css) and the old body family now
- * resolves to Manrope.
- */
-@theme {
-  --color-cream: #fff8f2;
-  --color-cream-soft: #fdede3;
-  --color-charcoal: #1d1d1f;
-  --color-charcoal-muted: #6b6b6b;
-  --color-red: #e63946;
-  --color-red-deep: #c92c3a;
-  --color-red-darkest: #9f232e;
-  --color-green: #2ecc71;
-  --color-green-deep: #2d7a4d;
-  --color-green-tint: #e6f1e8;
-  --color-yellow: #f2b632;
-  --color-yellow-tint: #fbefc8;
-
-  /* Phase 4B easing names, now aliases of the S1P motion tokens. */
-  --ease-out-expo: var(--motion-ease-emphasized);
-  --ease-state: var(--motion-ease-standard);
-
-  --font-body: var(--font-text);
-}
-
-/*
- * Motion durations and distances. The S1P tokens (--motion-*, from
- * tokens.css) are the source; the Phase 4B names below are aliases so existing
- * components pick up the new timing without edits, and go away as components
- * are ported. Every new transition should use the --motion-* tokens directly.
- *   fast -> micro 140 · base -> standard 220 · medium -> emphasized 360 ·
- *   slow -> entrance 560 · shift-md -> distance-sm 8 · shift-lg -> distance-md 24
- * --duration-count stays a local value: the docs specify a 1.1s count-up and
- * the token set has no equivalent. --shift-sm (4px arrow nudge) has none either.
- */
-:root {
-  --duration-fast: var(--motion-duration-micro);
-  --duration-base: var(--motion-duration-standard);
-  --duration-medium: var(--motion-duration-emphasized);
-  --duration-slow: var(--motion-duration-entrance);
-  --duration-count: 1100ms;
-  --shift-sm: 4px;
-  --shift-md: var(--motion-distance-sm);
-  --shift-lg: var(--motion-distance-md);
-}
-
 @layer base {
   html {
     background-color: var(--color-background-canvas);
@@ -218,15 +169,15 @@
   .reveal .reveal-item,
   .reveal.reveal-item {
     transition:
-      opacity var(--duration-slow) var(--ease-out-expo),
-      transform var(--duration-slow) var(--ease-out-expo);
+      opacity var(--motion-duration-entrance) var(--motion-ease-emphasized),
+      transform var(--motion-duration-entrance) var(--motion-ease-emphasized);
     transition-delay: calc(var(--reveal-step, 0) * 60ms);
   }
 
   .reveal:not(.reveal-visible):not(:focus-within) .reveal-item,
   .reveal.reveal-item:not(.reveal-visible):not(:focus-within) {
     opacity: 0;
-    transform: translateY(var(--shift-lg));
+    transform: translateY(var(--motion-distance-md));
   }
 }
 
@@ -238,14 +189,15 @@
  */
 @media (prefers-reduced-motion: no-preference) {
   .step-enter {
-    animation: step-enter var(--duration-medium) var(--ease-out-expo) both;
+    animation: step-enter var(--motion-duration-emphasized) var(--motion-ease-emphasized)
+      both;
   }
 }
 
 @keyframes step-enter {
   from {
     opacity: 0;
-    transform: translateY(var(--shift-md));
+    transform: translateY(var(--motion-distance-sm));
   }
   to {
     opacity: 1;
@@ -256,7 +208,7 @@
 /* Whole-grid crossfade when the gallery's data arrives. */
 @media (prefers-reduced-motion: no-preference) {
   .fade-in {
-    animation: fade-in var(--duration-fast) var(--ease-state) both;
+    animation: fade-in var(--motion-duration-micro) var(--motion-ease-standard) both;
   }
 }
 
@@ -306,15 +258,16 @@
 
 /*
  * Shared pressed-state feedback for compact controls (icon buttons, copy and
- * share buttons, dialog close). Colour changes ease at --duration-base; a
- * press scales to .97 for --duration-fast, only when motion is allowed.
+ * share buttons, dialog close). Colour changes ease at --motion-duration-standard; a
+ * press scales to .97 for --motion-duration-micro, only when motion is allowed.
  * Don't combine with transition-colors/duration-* classes on the same element.
  */
 @utility pressable {
   transition-property: color, background-color, border-color, transform;
   transition-duration:
-    var(--duration-base), var(--duration-base), var(--duration-base), var(--duration-fast);
-  transition-timing-function: var(--ease-state);
+    var(--motion-duration-standard), var(--motion-duration-standard),
+    var(--motion-duration-standard), var(--motion-duration-micro);
+  transition-timing-function: var(--motion-ease-standard);
 
   @media (prefers-reduced-motion: no-preference) {
     &:active {
@@ -327,27 +280,27 @@
  * Native <dialog> open/close (image viewer, admin delete confirmation).
  * Pure CSS using @starting-style + allow-discrete transitions; browsers
  * without support simply open and close instantly. Open: fade + scale from
- * .97 over --duration-medium. Close: shorter and sharper. Background page
+ * .97 over --motion-duration-emphasized. Close: shorter and sharper. Background page
  * scroll is locked while any dialog is open.
  */
 dialog.dialog-motion {
   opacity: 0;
   transform: scale(0.97);
   transition:
-    opacity var(--duration-fast) var(--ease-exit),
-    transform var(--duration-fast) var(--ease-exit),
-    overlay var(--duration-fast) allow-discrete,
-    display var(--duration-fast) allow-discrete;
+    opacity var(--motion-duration-micro) var(--motion-ease-exit),
+    transform var(--motion-duration-micro) var(--motion-ease-exit),
+    overlay var(--motion-duration-micro) allow-discrete,
+    display var(--motion-duration-micro) allow-discrete;
 }
 
 dialog.dialog-motion[open] {
   opacity: 1;
   transform: scale(1);
   transition:
-    opacity var(--duration-medium) var(--ease-out-expo),
-    transform var(--duration-medium) var(--ease-out-expo),
-    overlay var(--duration-medium) allow-discrete,
-    display var(--duration-medium) allow-discrete;
+    opacity var(--motion-duration-emphasized) var(--motion-ease-emphasized),
+    transform var(--motion-duration-emphasized) var(--motion-ease-emphasized),
+    overlay var(--motion-duration-emphasized) allow-discrete,
+    display var(--motion-duration-emphasized) allow-discrete;
 }
 
 @starting-style {
@@ -360,17 +313,17 @@ dialog.dialog-motion[open] {
 dialog.dialog-motion::backdrop {
   opacity: 0;
   transition:
-    opacity var(--duration-fast) var(--ease-exit),
-    overlay var(--duration-fast) allow-discrete,
-    display var(--duration-fast) allow-discrete;
+    opacity var(--motion-duration-micro) var(--motion-ease-exit),
+    overlay var(--motion-duration-micro) allow-discrete,
+    display var(--motion-duration-micro) allow-discrete;
 }
 
 dialog.dialog-motion[open]::backdrop {
   opacity: 1;
   transition:
-    opacity var(--duration-medium) var(--ease-out-expo),
-    overlay var(--duration-medium) allow-discrete,
-    display var(--duration-medium) allow-discrete;
+    opacity var(--motion-duration-emphasized) var(--motion-ease-emphasized),
+    overlay var(--motion-duration-emphasized) allow-discrete,
+    display var(--motion-duration-emphasized) allow-discrete;
 }
 
 @starting-style {

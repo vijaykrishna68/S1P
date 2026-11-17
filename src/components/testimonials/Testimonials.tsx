@@ -6,9 +6,9 @@ import { usePrefersReducedMotion } from '../ui/usePrefersReducedMotion'
 import { TESTIMONIALS } from './testimonialsData'
 
 const AUTOPLAY_MS = 7000
-// Must match --duration-medium (300ms) in styles/index.css: the exit
+// Must match --motion-duration-emphasized (360ms) in styles/tokens.css: the exit
 // transition has to finish before the quotes are swapped.
-const TRANSITION_MS = 300
+const TRANSITION_MS = 360
 
 type Phase = 'idle' | 'exiting' | 'entering'
 
@@ -135,8 +135,8 @@ export function Testimonials() {
   const transitionClasses =
     phase === 'entering'
       ? ''
-      : `transition-[opacity,translate] duration-(--duration-medium) ${
-          phase === 'exiting' ? 'ease-exit' : 'ease-out-expo'
+      : `transition-[opacity,translate] duration-(--motion-duration-emphasized) ${
+          phase === 'exiting' ? 'ease-exit' : 'ease-emphasized'
         }`
 
   return (

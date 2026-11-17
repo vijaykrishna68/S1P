@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { usePrefersReducedMotion } from '../ui/usePrefersReducedMotion'
 
 interface CountUpOptions {
-  /** Count duration. Defaults to the 1.1s counter duration (--duration-count; the S1P token set has no equivalent). */
+  /** Count duration. Defaults to the 1.1s counter duration (the S1P token set has no equivalent). */
   durationMs?: number
   /** Wait this long after the element scrolls into view before counting, so
    * neighbouring stats start in sequence rather than all at once. */

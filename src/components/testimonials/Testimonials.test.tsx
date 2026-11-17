@@ -7,7 +7,7 @@ import { Testimonials } from './Testimonials'
 import { TESTIMONIALS } from './testimonialsData'
 
 const AUTOPLAY_MS = 7000
-const SWAP_MS = 300
+const SWAP_MS = 360
 
 function setup(options: { reducedMotion?: boolean } = {}) {
   const motion = mockReducedMotion(options.reducedMotion ?? false)
