@@ -26,12 +26,14 @@ and direct user instruction win — see the Decision Log.
 ## 2. Tech Stack
 
 - **Vite** — build tool / dev server.
-- **React 18 + TypeScript** — strict mode on. No `any` without a documented reason.
+- **React 19 + TypeScript** — strict mode on. No `any` without a documented reason.
 - **Tailwind CSS v4** — utility-first styling via `@tailwindcss/vite`.
 - **ESLint + Prettier** — enforced formatting and lint rules.
 - **`qrcode.react`** — the only UI dependency beyond icons/fonts; generates a
   real, correctly-encoded UPI QR code client-side.
-- **`@phosphor-icons/react`** — icon set.
+- **S1P design system** (`design-system/`, Phase 5) — tokens, Sora + Manrope
+  (self-hosted variable woff2), the inline-SVG icon set (`src/components/ui/Icon.tsx`)
+  and WebP illustrations. No icon or font package dependency.
 - No animation library, no state management library, no UI component library.
   The hero animation and all micro-interactions are CSS/SVG-driven. Added only if a
   genuine need appears (see Decision Log before adding anything new).
@@ -58,196 +60,97 @@ and direct user instruction win — see the Decision Log.
 - **Deployment: Vercel**, auto-detected as a Vite static build for the frontend, plus
   the `/api` serverless functions. See §13.
 
-## 3. Design Principles
+## 3. Design System (Phase 5)
+
+The visual layer is the S1P design system in `design-system/` (brand book, component
+rules, tokens, fonts, illustrations, a React reference bundle that is _ported_, never
+loaded). Real behaviour, data, copy and API contracts in this repo always win over
+anything the design docs assumed. Phase history: `Docs/PHASE5_REDESIGN_PLAN.md`.
+The Phase 4A–4D audits stay in `Docs/` as history only.
 
 ### Visual direction
 
-Warm, trustworthy, premium-without-luxurious, human rather than corporate,
-editorial rather than "componentized." One signature idea (the hero animation)
-carries the site's personality; everything else stays quiet and gets out of the way.
+A playful illustrated world on a geometric editorial structure: warm cream pages, flat
+colour-blocked people on a dark crust ground line, a pizza that is always missing one
+slice. Pizza is the palette's starting point; the subject is always people and
+generosity. The donation path is the calmest place on the site: expression drops,
+controls lead, every state is explicit. No gradients, no glassmorphism, no emoji in
+system UI, no fabricated figures, testimonials or beneficiaries.
 
-### Typography
+### Tokens
 
-Display: a distinctive geometric/humanist sans (not Inter-as-default) for headlines,
-weight 600–700, tight tracking, large responsive scale, short line lengths.
-Body: comfortable sans, weight 400–500, 1.6–1.8 line height, 16–18px base.
-No serif anywhere — this is not an editorial-luxury brief; a serif would be an
-unjustified reach per the design skill's serif-discipline rule.
+- `design-system/tokens/tokens.json` is the single source. `npm run tokens`
+  regenerates `src/styles/tokens.css` (committed, never hand-edited);
+  `npm run tokens:check` runs in CI and fails when it is stale.
+- CSS variables keep the token names (`--color-action-primary`, `--space-6`,
+  `--radius-card`, `--motion-duration-entrance`, `--font-display`). Light theme on
+  `:root`; `[data-theme="dark"]` is fully defined but **not shipped** (light only at
+  launch); components use semantic tokens only, so dark would work without edits.
+- `src/styles/index.css` exposes them to Tailwind with `@theme inline`:
+  `bg-canvas / surface / elevated / story / inverse`, `text-ink / ink-2 / ink-brand /
+ink-inverse / ink-on-primary`, `bg-action(-hover/-pressed)`, `border-line /
+line-strong / line-ink`, `success / warning / error / info (+ -soft)`,
+  `rounded-ticket / input / chip / card / slab`, `shadow-offset(-sm) / float / focus`,
+  `ease-standard / exit / emphasized / spring`, `font-display / text / mono`. Type
+  styles are classes named after their tokens (`display-hero`, `heading-1`, `body`,
+  `label` ...); display sizes are fluid (`clamp()` in `index.css`).
 
-### Colors
+### Colour
 
-| Purpose                   | Hex                                                      |
-| ------------------------- | -------------------------------------------------------- |
-| Primary accent (non-text) | `#E63946` (warm tomato red)                              |
-| CTA resting fill          | `#C92C3A` (`--color-red-deep`)                           |
-| CTA hover                 | `#C92C3A` (unchanged fill; lift + red shadow)            |
-| CTA pressed (`:active`)   | `#9F232E` (`--color-red-darkest`)                        |
-| Background base           | `#FFF8F2` (soft cream, solid — no gradient)              |
-| Headline text             | `#1D1D1F`                                                |
-| Secondary accent: green   | `#2D7A4D` (`--color-green-deep`) + tint `#E6F1E8`        |
-| Secondary accent: yellow  | `#F2B632` (`--color-yellow`, fill only) + tint `#FBEFC8` |
-| Success fills only        | `#2ECC71` (never text or icons; 2.0:1 on cream)          |
-| Soft surface              | `#FDEDE3`                                                |
-| Secondary text            | `#6B6B6B`                                                |
+Mozzarella cream (page), crust brown (text and line), tomato (identity and action),
+golden cheese (warmth, never text on light grounds), basil (growth, success), soft
+rose (storytelling ground). Roughly 70% cream/neutral, 15% crust, 10% tomato, 5% gold
+and basil. Pages alternate bands: canvas, rose story, canvas, ...; never two tinted
+bands in a row; the footer and closing call to action are the inverse crust band
+(`s1-inverse` makes focus rings gold there). `color-action-primary` (tomato-600) is the
+only fill for the contribution action, one per view. Tomato-500 is for shapes and
+display type 24px+ only (4.3:1 with white). Contrast was re-computed for every pair in
+use in Phase 5E; the closest is tomato-600 text on the rose band at 4.35:1, so tomato
+text is not used there.
 
-One accent color (red) used consistently for all primary actions. Green and yellow
-(Phase 4A) are restrained supporting accents with specific meanings (green:
-growth/outcomes; yellow: warmth, surfaces and fills only, never text) and are never
-used interchangeably with red. Orange was removed. Minimum 4.5:1 contrast for body
-text everywhere.
+### Type, shape, surfaces
 
-### Spacing
+Sora (display) for headings and figures, Manrope 500 (650-800 for labels) for text,
+mono only for admin ids. Each radius means something (ticket, input, chip, card, slab,
+pill). Depth is flat colour and the hard `shadow-offset` (a graphic device on stickers,
+at most two per viewport); `shadow-float` only for things that float. Icons: 24px grid,
+2px stroke, `currentColor`; brand motifs are expression and never replace icons.
+Logo: a type-only wordmark stand-in until a real logo is supplied.
 
-8px base unit. Section spacing 80–120px desktop, 60–80px mobile. Max content width
-~1200px. Generous whitespace is a primary design tool — not a placeholder for
-content we haven't written yet.
+### Motion
 
-### Motion philosophy
+"Motion has a beginning and an end": scenes rise in once, figures settle, then
+everything is still. Tokens (`--motion-*` in `tokens.css`): durations 80/140/220/360/
+560/900/1400ms, four easings, staggers 40/80/160ms, distances 8/24/64px. Animate
+`transform` and `opacity` only (documented exception: `grid-template-rows` 0fr to 1fr
+for the FAQ and the mobile menu). The hero scene, section scenes and reveals run once
+and never replay. Nothing loops except a pending-state indicator (spinner, loading
+skeleton: class `motion-pending`).
 
-"Motion should reward attention, not demand it." The hero animation is the _only_
-continuous ambient motion on the page. Everything else animates in response to a
-user action (hover, focus, scroll-into-view, form state) and animates once or on
-demand — never loops indefinitely outside the hero, with one exception: a
-**pending-state indicator** (a spinner, or the gallery's loading skeleton) may loop
-for exactly as long as the operation it represents is pending (see the Phase 4B
-motion system below). Animate `transform` and `opacity` only; never
-`top`/`left`/`width`/`height` (documented exception: `grid-template-rows` 0fr→1fr
-for the FAQ and the mobile menu, the only known-good CSS technique for animating to
-an unknown height). No decorative eyebrows, pills, dots, or badges added purely to
-"feel dynamic" — every visual element must serve a UX or storytelling purpose.
+**Reduced motion** (single, global, in `index.css`): transitions and animations collapse
+to an instant change and smooth scrolling is off, with the pending-spinner exception
+turning slowly. `usePrefersReducedMotion()` is the one JS-side check; `Illustration` is
+never armed under it. The Tailwind v4 gotcha still holds: `translate-*`, `scale-*` and
+`rotate-*` set standalone properties, so list `translate`/`scale` explicitly in a
+`transition-[...]` (or use `transition-transform`).
 
-### Motion system (Phase 4B)
+### Illustrations
 
-Docs: `Docs/PHASE4B_INTERACTION_AUDIT.md`. For every interaction the test is: does
-it communicate state, hierarchy, affordance, or feedback? If not, it isn't added.
-
-**Tokens** (defined once in `src/styles/index.css`; a literal duration or easing in
-a component needs a written reason):
-
-| Token                                              | Value                                                    | Use                                                |
-| -------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------- |
-| `--duration-fast`                                  | 150ms                                                    | press feedback, icon crossfades, exits             |
-| `--duration-base`                                  | 200ms                                                    | hover colour/transform, underline, dots            |
-| `--duration-medium`                                | 300ms                                                    | crossfades, disclosure, dialog/menu open, steps    |
-| `--duration-slow`                                  | 500ms                                                    | lead-block reveals                                 |
-| `--duration-count`                                 | 1100ms                                                   | stat counters only                                 |
-| `--ease-out-expo` / `--ease-state` / `--ease-exit` | `cubic-bezier(.16,1,.3,1)` / `(0,0,.2,1)` / `(.4,0,1,1)` | entrances and disclosure / hover and state / exits |
-| `--shift-sm` / `-md` / `-lg`                       | 4 / 8 / 12px                                             | arrow nudge / step and crossfade / reveal          |
-
-The hero's own 700ms entrance and loop are locked and don't use these. Other fixed
-values: Button lift −2px, press scale .98 (compact controls .97), gallery zoom
-1.03, dialog scale .97→1, stagger 60ms per step (max 3; counters 80ms).
-
-**Reveals** apply to a section's _lead block only_ (heading + intro): the hook
-`useScrollReveal` puts `.reveal` on a wrapper, elements carrying `.reveal-item`
-(optionally `style={revealStep(n)}`) fade and rise 12px over 500ms once. Supporting
-content appears with its section, with no entrance of its own.
-
-**Reduced-motion policy** (single, global): one block at the end of
-`styles/index.css` collapses every transition and animation to an instant change and
-turns smooth scrolling off; transform-based hover/press effects are also gated with
-`motion-safe:` where authored; `usePrefersReducedMotion()` is the one JS-side check
-(never call `matchMedia` directly). **Exception — pending-state indicators:** a
-spinner or loading skeleton that shows an operation is in progress may keep
-animating; mark it with the `motion-pending` class. Nothing that isn't showing a
-pending state may use that class or loop.
-
-**Tailwind v4 gotcha:** `translate-*`, `scale-*` and `rotate-*` utilities set the
-standalone CSS properties `translate`, `scale` and `rotate`, not `transform`. A
-transition list such as `transition-[opacity,transform]` therefore does _not_
-animate them (they snap). Use `transition-transform` (covers all four) or name the
-property you actually change: `transition-[opacity,translate]`,
-`transition-[scale,...]`. Check with `element.getAnimations()` after triggering the
-state.
-
-**Shared pieces:** `pressable` utility (compact-control press feedback), `Button`'s
-`busy` prop (pending spinner + `aria-busy`), `.dialog-motion` (native `<dialog>`
-fade + scale via `@starting-style`, with page-scroll lock), `.skeleton-pulse`,
-`.fade-in`, `.step-enter`.
-
-### Hero animation philosophy — "The Gathering Point" + "Absorbed Facet"
-
-Base concept: a solid center mark (one contribution) surrounded by a handful of
-faint, asymmetrically placed outline marks (other potential donors). Roughly every
-4 seconds, exactly one outline mark slowly travels toward the center and merges,
-while the center gives a barely-perceptible scale pulse as if receiving it. Only one
-element moves at a time; the rest of the composition stays still.
-
-**Refinement ("Absorbed Facet", added after the first visual pass):** instead of
-simply vanishing at the center, a merging dot leaves a short, understated arc on the
-core's rim at the exact angle it arrived from. Over one ~20s cycle the rim gathers
-up to five faint facets, holds briefly once all five have arrived, then the whole
-rim fades out together (a "breath," not a reset) before the cycle repeats. This
-directly completes the metaphor — individual contribution becomes part of the
-collective — rather than adding an unrelated decorative flourish, which is why it
-was chosen over two other explored directions:
-
-- _Bloom Ring_ (an outward ripple from the core on each merge) — rejected for
-  reading too close to a generic UI "click ripple," despite being restrained.
-- _Inner Spark_ (a small rotating glyph building up inside the core) — rejected as
-  harder to read causally; it doesn't tie a specific arriving dot to a specific
-  visible change the way a rim facet at that dot's own angle does.
-
-**Visual hierarchy is enforced almost entirely through opacity**, and is load-bearing
-for keeping this from reading as a progress meter: core (fully opaque) > dot (0.45
-resting opacity) > rim facet (0.32 resting opacity, thin stroke). Facets are short,
-irregular arc fragments at irregular angles — never a filling ring, never five equal
-"slots," never anything a viewer could count and think "3 of 5 done."
-
-**Timing is intentionally reused, not duplicated:** the core's existing 4s pulse
-already peaks at the exact instant each dot merges (both derive from the same 4s
-cadence), so the "tactile" response to a contribution arriving needed no new
-animation — just confirming the existing one stays in sync.
-
-**Facets do NOT reuse the dots' negative-`animation-delay` stagger trick — this was
-tried first and shipped a real bug.** A negative delay makes an animation act as
-though it had already been running before the page loaded, which is harmless for
-the dots (their resting pose looks identical at any phase of the cycle) but wrong
-for facets, whose only _hidden_ window is the first 8% of the cycle: any nonzero
-phase offset lands most facets in the already-revealed 92% majority, so on first
-paint 4 of 5 facets were visible before their dot had ever moved — caught by the
-user watching the actual rendered page, not by any timing math. The fix: every
-facet runs the same un-shifted 20s clock (no delay at all) and gets its own
-hardcoded keyframe (`facet-reveal-0` … `facet-reveal-4` in `gatheringPoint.css`)
-timed to the real moment its dot merges — computed directly from
-`gathering-travel`'s existing 20s cycle, 4s stagger, and 8% merge point, so dot
-timing stays the single source of truth rather than a second system. Because none
-of the five have an independent phase anymore, they also all reset to hidden in
-the same instant, which matters for the next part:
-
-The rim's group fade ("breath") runs on its own un-shifted 20s clock specifically
-so all facets exit together regardless of when each individually appeared;
-per-facet fade-outs were considered and rejected because phase-shifting the exit
-the same way as the (original, buggy) entrance produces a staggered
-vanishing-one-by-one effect instead of one shared "breath."
-
-**Verification note:** the timing was first checked only by driving each
-`Animation`'s `currentTime` directly via the Web Animations API — which confirmed
-the mechanics but completely missed the initial-state bug above, because that
-technique never observes the untouched, natural render. The bug was only found by
-inspecting the actual rendered page. Both checks are now used together: natural
-`getComputedStyle` at real load time to verify the authored/initial state (all 5
-facets at `opacity: 0` before anything runs), and `currentTime` scrubbing only as a
-supplementary check of in-between frames. The `currentTime` method is a
-supplement, never a substitute, for checking what the browser actually renders on
-load.
-
-**Reduced motion** freezes to a hand-chosen static state (facets at indices 0, 2, 4
-visible, 1 and 3 hidden) rather than an arbitrary frozen frame, so it reads as
-"ongoing collective effort," not empty or finished.
-
-Explicitly rejected throughout: gradients, blobs, particle systems, mesh/aurora
-effects, 3D tilt, cursor-following elements, canvas. All motion is SVG transform +
-opacity (+ the facets' arc geometry), driven by CSS keyframes — no JS animation
-loop, no `requestAnimationFrame`.
+`<Illustration name>` (`src/components/ui/Illustration.tsx`) shows the approved WebP
+scenes (`src/assets/illustrations/s1p/`): `srcSet` 1x/2x, intrinsic size, lazy except
+`priority` (the home hero only, with the square scene below 900px), a cream plate
+(always on in dark theme), a one-time 35%-visible entrance. Placement: 001/002 hero,
+003 Mission, 004 beside the donation flow (lg+ only), 006 About origin, 008 success
+step (only after the API confirms), 009/010 gallery and admin empty/error states.
+005 (people strip), 007 (volunteering), 011 (search) and 012 (404) are not used. Photos
+and illustrations never share a frame.
 
 ### Accessibility expectations
 
-Semantic HTML and correct heading order throughout. Every interactive element
-keyboard-reachable with a visible focus ring. Minimum 44px interactive target size.
-`prefers-reduced-motion: reduce` freezes the hero animation to its resting state
-(not just slows it) and removes non-essential transitions elsewhere. Form errors are
-inline, associated to their field via `aria-describedby`, and never color-only.
+WCAG 2.2 AA. `focus-ring` on every interactive element (global `:focus-visible`), 44px
+touch targets, visible labels with Required/Optional as words, errors linked by
+`aria-describedby` with an icon, live regions for status, native `<dialog>` for trap and
+return of focus, semantic headings. See §8.
 
 ## 4. UX Rules — Donation Flow
 
@@ -1088,11 +991,46 @@ jsdom` comment instead of paying jsdom's setup cost on every test file,
   the old preview immediately also makes more sense conceptually: it's stale
   the instant a new file is chosen, not 500ms later when the new one finishes.
 
+- **Phase 5: the S1P design system replaces the Phase 4A-4D visual layer.** Applied
+  in five phases (foundations, components, illustrations, pages, QA), one branch each,
+  merged through a long-lived `redesign` branch. No API, schema, reducer, limit or
+  upload logic changed. Rationale and conflicts: `Docs/PHASE5_REDESIGN_PLAN.md`.
+- **Tokens are generated, not hand-copied** (`scripts/build-tokens.ts`, checked in CI):
+  `tokens.json` stays the single source and the committed `tokens.css` cannot drift.
+- **Fonts: Outfit + Plus Jakarta Sans replaced by Sora + Manrope** (self-hosted variable
+  woff2 with their OFL licences); the two `@fontsource` packages and
+  `@phosphor-icons/react` were removed. The supplied fonts are Latin-only, so the rupee
+  sign falls back to the system font (open item in the README checklist).
+- **The "Gathering Point" hero animation was retired** (approved by the owner) in favour
+  of the shared-table scene with a one-time entrance. This supersedes the Phase 1
+  "locked hero" decision and the Absorbed Facet entries above, which remain as history.
+- **No amount chips.** The design docs assumed preset amounts; this site's donation
+  amount is user-entered by deliberate decision (see §4), so `AmountStep` is a styled
+  field, not a radio group. ₹300 stays an encouraged amount, never a minimum.
+- **No ContributionSummary / card-payment UI**: the flow is a UPI QR plus screenshot
+  reviewed by a human; nothing is charged by the site.
+- **The FAQ stays a button accordion** (`aria-expanded`, `inert` closed panels) rather
+  than native `details`/`summary`: same semantics and keyboard behaviour, keeps the
+  animated height and the existing tests. Restyled with the gold x.
+- **Impact figures are not part of the count-up claim**: `₹29L+` and `55+` are rounded
+  values; see the Phase 5 plan (C6) for the open question of whether they should stop
+  counting.
+- **Skeleton blocks are in the DOM at once but fade in after 300ms** (CSS delay), so a
+  fast load never flashes them and the loading status is still announced immediately.
+- **The first donation step no longer takes focus on mount.** `useAutoFocus` on
+  `AmountStep` scrolled every visitor from the top of the page to the donate section on
+  load; later steps still move focus to their heading when they replace a step.
+- **Testimonial swap timer is tied to the exit transition**: the Phase 5 token set made
+  `--motion-duration-emphasized` 360ms, so the timer constant moved from 300 to 360.
+- **Footer social links were removed** (dead `href="#"` placeholders); the admin
+  review status uses a Badge (pending, reviewed, rejected) rather than publish states,
+  because those are the states the system actually has.
+
 ## 7. Performance Rules
 
-- Hero animation: `transform` + `opacity` only, CSS keyframes (no `requestAnimationFrame`,
-  no scroll listeners, no JS animation loop). Small, fixed number of animated SVG
-  nodes (single digits), not a generated/looped particle set.
+- Illustration and reveal entrances: `transform` + `opacity` only, once, via
+  `IntersectionObserver` (no scroll listeners, no JS animation loop). The only image
+  loaded eagerly is the home hero (`priority`); every other scene is lazy.
 - No `backdrop-filter`/heavy blur, no continuous box-shadow animation.
 - Images (once added in later phases) must be sized/optimized and not block LCP.
 - Target: smooth on mid-range mobile. If the hero ever visibly affects scroll or
@@ -1126,8 +1064,8 @@ jsdom` comment instead of paying jsdom's setup cost on every test file,
   every donation-flow button, the screenshot uploader's replace/remove controls,
   the FAQ accordion triggers, and the testimonial dots (a 44px button wraps
   each dot's small visual pill, rather than the pill itself being the target).
-- `prefers-reduced-motion: reduce` freezes the hero to a static resting frame —
-  not just a slower version of the same loop. Same treatment extended to the
+- `prefers-reduced-motion: reduce` shows every scene and figure in its final state
+  immediately, with no travel or scaling (Phase 5). Same treatment extended to the
   testimonial crossfade (jumps directly, no phase choreography, no autoplay) and
   the FAQ accordion. Since Phase 4B a single global policy covers everything
   else: all transitions/animations become instant and smooth scrolling is off,
@@ -1175,6 +1113,8 @@ npm run dev       # start Vite dev server
 npm run build     # type-check + production build
 npm run lint      # ESLint
 npm run format    # Prettier write
+npm run tokens    # regenerate src/styles/tokens.css from design-system/tokens/tokens.json
+npm run tokens:check  # fail if it is stale (also run in CI)
 npm run preview   # preview the production build locally
 ```
 
@@ -1461,6 +1401,20 @@ dev`), desktop and mobile. **Before:** desktop Performance 100 /
   ghost circle at the image edge, not the band edge. Slots stay hidden below
   `md`; no motion; Origin objects, stat markers and quote anchor unchanged.
 
+- **Phase 5 — S1P design-system redesign: implemented on the `redesign` branch (5A
+  to 5E).** 5A foundations (generated tokens, Sora + Manrope, Tailwind `@theme inline`,
+  focus ring, motion aliases); 5B components (Icon, Button, fields, Alert, Badge,
+  Dialog, ImpactStat, FAQ, Testimonials, Header, Footer, Gallery, AdminTable and
+  status badge, Skeleton, EmptyState); 5C the `Illustration` component and scene
+  assets; 5D page composition and retirement of the old hero, Phase 4C art, TwoTrack,
+  IllustrationSlot and SectionDivider; 5E QA and cleanup (legacy theme, Phase 4B
+  aliases and font/icon packages removed, docs). Verified: `tsc -b`, `eslint`,
+  `prettier`, `tokens:check`, 164 unit tests, production build, contrast computed for
+  every colour pair in use, mobile menu and focus ring checked in a browser. **Not
+  verified:** integration tests (no database here), Lighthouse, a full responsive
+  sweep of every page and a full screen-reader pass. See `Docs/PHASE5_REDESIGN_PLAN.md`
+  and the Decision Log.
+
 ## 11. Portfolio Case-Study Highlights
 
 The strongest engineering/design decisions in this project, for when it's
@@ -1542,8 +1496,8 @@ Honest, current, non-exhaustive:
   exists — never a payment-processing or payment-gateway system, and neither this
   file nor the README should describe it as one.
 - **Placeholder content still in place** (updated in Phase 4D): the phone number
-  (`donation/config.ts`, overridable via `VITE_PHONE_NUMBER`) and the social
-  media links (`Footer.tsx`). The UPI ID, testimonials and Home/About impact
+  (`donation/config.ts`, overridable via `VITE_PHONE_NUMBER`); the footer's social links
+  were removed in Phase 5 until real profiles exist. The UPI ID, testimonials and Home/About impact
   figures are now real, client-supplied content; a `VITE_UPI_ID` set in Vercel
   overrides the built-in UPI ID, so check it is unset or correct. See the README's
   Content Checklist.

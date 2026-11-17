@@ -85,7 +85,8 @@ when the backend was built.
 ## Tech Stack
 
 **Frontend:** Vite, React 19 + TypeScript (strict), Tailwind CSS v4,
-`qrcode.react` (real UPI QR encoding), `@phosphor-icons/react`. No
+`qrcode.react` (real UPI QR encoding), the S1P design system (Sora +
+Manrope, inline SVG icons, WebP illustrations). No
 animation library, no state management library, no router, no UI component
 library.
 
@@ -212,3 +213,21 @@ verification, no CAPTCHA, placeholder content still in place, etc.).
 | [`Docs/INTERVIEW_PREP.md`](Docs/INTERVIEW_PREP.md)                  | Interview Q&A grounded in this specific implementation                                  |
 | [`Docs/CASE_STUDY.md`](Docs/CASE_STUDY.md)                          | Portfolio-style narrative case study (frontend-focused; predates the backend)           |
 | [`Docs/PRD.md`](Docs/PRD.md) / [`Docs/02UI_UX.md`](Docs/02UI_UX.md) | Original product/design spec (partially superseded — see `CLAUDE.md`'s Decision Log)    |
+
+## Content checklist
+
+Content that is still missing or standing in for the real thing (nothing here is
+invented; each item is a visible gap, not a fabricated value):
+
+- **Contact phone number** for donations above the UPI limit: unset, so the
+  message offers the contact email instead (`VITE_PHONE_NUMBER`).
+- **Social profile links**: removed from the footer in Phase 5 (they were dead
+  `href="#"` placeholders). Add them back when real profiles exist.
+- **Logo**: the header and footer use a type-only wordmark stand-in ("S1P" pill +
+  "Sacrifice One Pizza", `src/components/ui/Wordmark.tsx`). Replace it with the real
+  logo file when supplied; do not redraw it.
+- **Rupee sign (₹)**: the Sora and Manrope files supplied with the design system are
+  Latin-only, so ₹ renders in the system font. Add a Latin-Extended / currency subset
+  of each (both are OFL) to render it in the brand faces.
+- **Impact figures** carry no period or source beyond their labels; add them if S1P
+  wants each figure's source shown.
